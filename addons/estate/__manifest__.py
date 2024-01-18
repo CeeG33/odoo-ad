@@ -9,6 +9,8 @@ Managing your real estate hasn't been that easy !
     'depends': ['base'],
     'data': [
         'security/ir.model.access.csv',
+        'security/estate_property_views.xml',
+        'views/estate_menus.xml',
     ],
     'application': True
 }
