@@ -7,5 +7,8 @@
 Managing your real estate hasn't been that easy !
 """,
     'depends': ['base'],
+    'data': [
+        'security/ir.model.access.csv',
+    ],
     'application': True
 }
