@@ -18,10 +18,11 @@
                         <div class="oe_title">
                             <h1><field name="name"/></h1>
                         </div>
-                        
+                        <field name="tag_ids" widget="many2many_tags"/>
                         <separator/>
 
                             <group>
+                                <field name="property_type_id"/>
                                 <field name="postcode"/>
                                 <field name="date_availability" string="Available From"/>
                             </group>
@@ -44,6 +45,19 @@
                                     <field name="garden_orientation"/>
                                 </group>
                             </page>
+
+                            <page string="Other Info">
+                                <group>
+                                    <field name="salesperson_id"/>
+                                    <field name="buyer_id"/>
+                                </group>
+                            </page>
+
+                            <page string="Offers">
+                                
+                                <field nolabel="1" name="offer_ids"/>
+                                
+                            </page>
                         </notebook>
 
                     </group>
@@ -64,6 +78,8 @@
                 <field name="expected_price"/>
                 <field name="selling_price"/>
                 <field name="date_availability" string="Available From"/>
+                <field name="property_type_id"/>
+                <field name="tag_ids" widget="many2many_tags"/>
             </tree>
         </field>
     </record>
@@ -79,6 +95,7 @@
                 <field name="bedrooms"/>
                 <field name="living_area" string="Living Area (sqm)"/>
                 <field name="facades"/>
+                <field name="property_type_id"/>
                 <filter string="Available Properties" name="available" domain="['|', ('state', '=', 'N'), ('state', '=', 'OR')]"/>
                 <group expand="1" string="Group By">
                     <filter string="Postcode" name="postcode" context="{'group_by':'postcode'}"/>
