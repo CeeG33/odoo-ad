@@ -19,7 +19,7 @@ class PropertyOffer(models.Model):
     def _compute_date_deadline(self):
         for record in self:
             if not record.create_date:
-                record.create_date = fields.Datetime.now().date
+                record.create_date = fields.Datetime.now()
                 
             record.date_deadline = record.create_date + relativedelta.relativedelta(days=(record.validity))
     
