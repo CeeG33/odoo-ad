@@ -5,6 +5,7 @@ from dateutil import relativedelta
 class Property(models.Model):
     _name = "estate.property"
     _description = "Representation of a property in the Estate module"
+    _inherit = ["mail.thread"]
     
     name = fields.Char(required=True)
     description = fields.Text()
@@ -59,3 +60,8 @@ class Property(models.Model):
         else:
             self.garden_area = ""
             self.garden_orientation = ""
+    
+    
+    # def action_sold_property(self):
+    #     for record in self:
+            

@@ -6,7 +6,7 @@
     'description': """
 Managing your real estate hasn't been that easy !
 """,
-    'depends': ['base'],
+    'depends': ['base', 'mail'],
     'data': [
         'security/ir.model.access.csv',
         'security/estate_property_views.xml',

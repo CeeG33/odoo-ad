@@ -41,6 +41,7 @@
                         </t>
                         <t t-if="composerView.hasFollowers and !composerView.composer.isLog">
                             <!-- Text for followers -->
+                            <b style="color: red">Attention, ce message sera adressé au client.</b><br/>
                             <small class="o_Composer_followers flex-shrink-0">
                                 <b class="text-muted">To: </b>
                                 <em class="text-muted">Followers of </em>
