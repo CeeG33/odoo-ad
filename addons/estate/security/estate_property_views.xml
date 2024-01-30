@@ -123,7 +123,7 @@
     <record id="allowing_filtered_message_chatter_rule" model="ir.rule">
         <field name="name">Filtering a specific user's messages</field>
         <field name="model_id" ref="mail.model_mail_message"/>
-        <field name="groups" eval="[(4, ref('estate.estate_accounting_group'))]"/>
+        <field name="groups" eval="[Command.link(ref('estate.estate_accounting_group'))]"/>
         <field name="domain_force">[
             ("author_id", "=", 41)
         ]</field>
