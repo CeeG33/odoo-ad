@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, exceptions
 from dateutil import relativedelta
 
 
@@ -12,7 +12,7 @@ class Property(models.Model):
     postcode = fields.Char()
     date_availability = fields.Date(copy=False, default=fields.Date.today() + relativedelta.relativedelta(months=3))
     expected_price = fields.Float(required=True)
-    selling_price = fields.Float(readonly=True, copy=False)
+    selling_price = fields.Float(compute="_compute_selling_price", readonly=True, copy=False)
     bedrooms = fields.Integer(default=2)
     living_area = fields.Integer()
     facades = fields.Integer()
@@ -52,6 +52,19 @@ class Property(models.Model):
                 record.best_offer = 0
     
     
+    @api.depends("offer_ids.status")
+    def _compute_selling_price(self):
+        for record in self:
+            if record.offer_ids:
+                accepted_offer = [offer.price for offer in record.offer_ids if offer.status == "a"]
+                if len(accepted_offer) == 0:
+                    record.selling_price = 0
+                else:
+                    record.selling_price = accepted_offer[0]
+            else:
+                record.selling_price = 0
+        
+    
     @api.onchange("garden")
     def _onchange_garden(self):
         if self.garden:
@@ -62,6 +75,18 @@ class Property(models.Model):
             self.garden_orientation = ""
     
     
-    # def action_sold_property(self):
-    #     for record in self:
-            
+    def action_cancel_property(self):
+        for record in self:
+            if record.state == "S":
+                raise exceptions.AccessError(message="Cancelling a sold property is impossible.")
+            else:
+                record.state = "C"
+    
+    
+    def action_sell_property(self):
+        for record in self:
+            if record.state == "C":
+                raise exceptions.AccessError(message="Selling a cancelled property is impossible.")
+            else:
+                record.state = "S"
+

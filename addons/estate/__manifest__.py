@@ -16,5 +16,5 @@ Managing your real estate hasn't been that easy !
         'security/estate_security.xml',
         'views/estate_menus.xml',
     ],
-    'application': True
+    'application': True,
 }

@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, exceptions
 from dateutil import relativedelta
 
 
@@ -28,3 +28,20 @@ class PropertyOffer(models.Model):
         for record in self:
             record.validity = (fields.Datetime.to_datetime(record.date_deadline) - record.create_date).days + 1
     
+    
+    def action_reject_offer(self):
+        for record in self:
+            if record.status == "a":
+                raise exceptions.AccessError(message="You cannot reject an accepted offer.")
+            else:
+                record.status = "r"
+    
+    
+    def action_accept_offer(self):
+        for record in self:
+            if record.status == "r":
+                raise exceptions.AccessError(message="You cannot accept a rejected offer.")
+            elif len(record.property_id.offer_ids) > 0:
+                raise exceptions.AccessError(message="You cannot accept multiple offers.")
+            else:
+                record.status = "a"

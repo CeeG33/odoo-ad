@@ -11,6 +11,10 @@
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <form string="Property Form">
+                <header>
+                    <button name="action_cancel_property" type="object" string="Cancel"/>
+                    <button name="action_sell_property" type="object" string="Sold"/>
+                </header>
                 <sheet>
                     
                     <group>
@@ -22,6 +26,7 @@
                         <separator/>
 
                             <group>
+                                <field name="state"/>
                                 <field name="property_type_id"/>
                                 <field name="postcode"/>
                                 <field name="date_availability" string="Available From"/>
