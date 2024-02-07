@@ -6,6 +6,7 @@ from dateutil import relativedelta
 class Property(models.Model):
     _name = "estate.property"
     _description = "Representation of a property in the Estate module"
+    _order = "id desc"
     _inherit = ["mail.thread"]
     _sql_constraints = [
         ("check_expected_price", "CHECK(expected_price > 0)", "The property's expected price should be strictly positive."),
