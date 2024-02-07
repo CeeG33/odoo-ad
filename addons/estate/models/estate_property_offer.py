@@ -5,6 +5,9 @@ from dateutil import relativedelta
 class PropertyOffer(models.Model):
     _name = "estate.property.offer"
     _description = "Offer made against a property."
+    _sql_constraints = [
+        ("check_price", "CHECK(price > 0)", "An offer should be strictly positive.")
+    ]
     
     price = fields.Float()
     status = fields.Selection(copy=False, selection=[
@@ -39,9 +42,11 @@ class PropertyOffer(models.Model):
     
     def action_accept_offer(self):
         for record in self:
+            accepted_offer = [offer for offer in record.property_id.offer_ids if offer.status == "a"]
+            
             if record.status == "r":
                 raise exceptions.AccessError(message="You cannot accept a rejected offer.")
-            elif len(record.property_id.offer_ids) > 0:
+            elif len(accepted_offer) > 0:
                 raise exceptions.AccessError(message="You cannot accept multiple offers.")
             else:
                 record.status = "a"

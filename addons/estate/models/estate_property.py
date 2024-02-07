@@ -1,4 +1,5 @@
 from odoo import api, fields, models, exceptions
+from odoo.tools.float_utils import float_compare, float_is_zero
 from dateutil import relativedelta
 
 
@@ -6,13 +7,17 @@ class Property(models.Model):
     _name = "estate.property"
     _description = "Representation of a property in the Estate module"
     _inherit = ["mail.thread"]
+    _sql_constraints = [
+        ("check_expected_price", "CHECK(expected_price > 0)", "The property's expected price should be strictly positive."),
+        ("check_selling_price", "CHECK(selling_price >= 0)", "The property's selling price should be strictly positive.")
+    ]
     
     name = fields.Char(required=True)
     description = fields.Text()
     postcode = fields.Char()
     date_availability = fields.Date(copy=False, default=fields.Date.today() + relativedelta.relativedelta(months=3))
     expected_price = fields.Float(required=True)
-    selling_price = fields.Float(compute="_compute_selling_price", readonly=True, copy=False)
+    selling_price = fields.Float(compute="_compute_selling_price", readonly=True, copy=False, store=True)
     bedrooms = fields.Integer(default=2)
     living_area = fields.Integer()
     facades = fields.Integer()
@@ -73,6 +78,17 @@ class Property(models.Model):
         else:
             self.garden_area = ""
             self.garden_orientation = ""
+    
+    
+    @api.constrains("selling_price", "expected_price")
+    def _check_selling_price(self):
+        for record in self:
+            if float_is_zero(record.selling_price, 0):
+                break
+            elif not float_is_zero(record.selling_price, 0):
+                if record.selling_price < (record.expected_price * 0.9):
+                # if float_compare(record.selling_price, (record.expected_price * 0.9)) == -1:
+                    raise exceptions.ValidationError("The selling price cannot be lower than 90% of the selling price.")
     
     
     def action_cancel_property(self):
