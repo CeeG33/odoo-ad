@@ -1,10 +1,11 @@
 <?xml version="1.0"?>
 <odoo>
-    <!-- <record id="estate_property_offer" model="ir.actions.act_window">
+    <record id="action_property_offers" model="ir.actions.act_window">
         <field name="name">Offers</field>
         <field name="res_model">estate.property.offer</field>
-        <field name="view_mode">tree,form</field>
-    </record> -->
+        <field name="view_mode">tree</field>
+        <field name="domain">[('property_type_id', '=', 'active_id')]</field>
+    </record>
 
     <record id="estate_property_offer_view_form" model="ir.ui.view">
         <field name="name">estate.property.offer.form</field>
@@ -46,6 +47,7 @@
                 <field name="status" optional="hidden"/>
                 <button name="action_accept_offer" type="object" title="Accept" icon="fa-check" attrs="{'invisible': ['|', ('status', '=', 'a'), ('status', '=', 'r')]}"/>
                 <button name="action_reject_offer" type="object" title="Reject" icon="fa-times" attrs="{'invisible': ['|', ('status', '=', 'a'), ('status', '=', 'r')]}"/>
+                <field name="property_type_id"/>
             </tree>
         </field>
     </record>
