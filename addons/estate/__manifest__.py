@@ -14,6 +14,7 @@ Managing your real estate hasn't been that easy !
         'security/estate_property_tag_views.xml',
         'security/estate_property_offer_views.xml',
         'security/estate_security.xml',
+        'security/inherited_res_user_views.xml',
         'views/estate_menus.xml',
     ],
     'application': True,

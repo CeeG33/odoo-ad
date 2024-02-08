@@ -52,3 +52,15 @@ class PropertyOffer(models.Model):
                 raise exceptions.AccessError(message="You cannot accept multiple offers.")
             else:
                 record.status = "a"
+    
+
+    @api.model
+    def create(self, vals):
+        linked_property = self.env["estate.property"].browse(vals["property_id"])
+        linked_property.state = "OR"
+        
+        if vals["price"] < linked_property.best_offer:
+            raise exceptions.ValidationError(f"The offer must be higher than {linked_property.best_offer}.")
+        else:
+            return super().create(vals)
+    

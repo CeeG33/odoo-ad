@@ -107,3 +107,10 @@ class Property(models.Model):
             else:
                 record.state = "S"
 
+    
+    @api.ondelete(at_uninstall=False)
+    def custom_delete_property(self):
+        for record in self:
+            if record.state not in ["N", "C"]:
+                raise exceptions.ValidationError("You can only delete a new or cancelled property.")
+    
