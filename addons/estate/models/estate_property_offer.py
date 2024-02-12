@@ -52,6 +52,7 @@ class PropertyOffer(models.Model):
                 raise exceptions.AccessError(message="You cannot accept multiple offers.")
             else:
                 record.status = "a"
+                record.property_id.state = "OA"
     
 
     @api.model
