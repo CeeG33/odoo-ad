@@ -22,5 +22,5 @@ class PaymentSchedule(models.Model):
 
     #=== FIELDS ===#
 
-    related_quotation_id = fields.Many2one("sale.order", string="Devis afférent", copy=False)
+    related_quotation_id = fields.Many2one("sale.ordera", string="Devis afférent", copy=False)
     
