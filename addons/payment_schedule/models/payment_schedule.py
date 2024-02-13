@@ -24,15 +24,3 @@ class PaymentSchedule(models.Model):
 
     related_quotation_id = fields.Many2one("sale.order", string="Devis afférent", copy=False)
     
-    # Payment fields
-    transaction_ids = fields.Many2many(
-        comodel_name='payment.transaction',
-        relation='sale_order_transaction_payment_schedule_rel', column1='sale_order_id', column2='transaction_id',
-        string="Transactions",
-        copy=False, readonly=True)
-
-    # Followup ?
-    tag_ids = fields.Many2many(
-        comodel_name='crm.tag',
-        relation='sale_order_tag_payment_schedule_rel', column1='order_id', column2='tag_id',
-        string="Tags")
