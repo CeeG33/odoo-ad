@@ -8,20 +8,15 @@
     'category': 'Payment Schedule',
     'summary': 'Payment Schedule tool integrated to Quotations.',
     'description': """
-This module enables the creation of Payment Schedules against a given quotation.
+This module enables the creation of Payment Schedules for a construction project.
     """,
     'depends': [
-        'base', 'sale_management',
+        'base', 'sale_management', 'project',
     ],
     'data': [
         'security/ir.model.access.csv',
-        # Define sale order views before their references
-        
-        'views/payment_schedule_views.xml',
-        'views/sale_onboarding_views.xml',
-        'views/sale_order_line_views.xml',
-        
-        'views/sale_menus.xml',
+        'views/inherited_project_views.xml',
+        'views/inherited_sale_order_views.xml',
     ],
     'installable': True,
     'application': True,

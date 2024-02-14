@@ -12,14 +12,9 @@ from odoo.tools import float_is_zero, float_compare, float_round
 
 
 class PaymentScheduleLine(models.Model):
-    _name = 'payment.schedule.line'
     _inherit = 'sale.order.line'
     _description = "Payment Schedule Line Item."
 
     # Analytic & Invoicing fields
-
-    invoice_lines = fields.Many2many(
-        comodel_name='account.move.line',
-        relation='sale_order_line_invoice_payment_schedule_rel', column1='order_line_id', column2='invoice_line_id',
-        string="Invoice Lines",
-        copy=False)
+    
+    payment_schedule_id = fields.Many2one("sale.order", string="ID Échéancier", copy=False)
