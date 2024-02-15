@@ -15,7 +15,8 @@ from odoo.tools.sql import create_index
 from odoo.addons.payment import utils as payment_utils
 
 
-class SaleOrder(models.Model):
+class PaymentSchedule(models.Model):
+    _name = 'payment.schedule'
     _inherit = 'sale.order'
     _description = "Payment Schedule"
 
