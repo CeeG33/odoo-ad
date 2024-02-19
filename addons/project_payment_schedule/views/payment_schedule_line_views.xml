@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="payment_schedule_line" model="ir.actions.act_window">
+        <field name="name">Payment Schedule Lines</field>
+        <field name="res_model">payment.schedule.line</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'search_default_available': True}</field>
+    </record>
+
+    <record id="payment_schedule_line_tree_view" model="ir.ui.view">
+        <field name="name">payment.schedule.line.tree</field>
+        <field name="model">payment.schedule.line</field>
+        <field name="arch" type="xml">
+            <tree string="Payment Schedule Lines" editable="bottom" edit="1">
+                <field name="payment_schedule_id"/>
+                <field name="description"/>
+                <field name="trade_total"/>
+                <field name="previous_progress"/>
+                <field name="total_progress"/>
+                <field name="current_progress"/>
+                <field name="line_total"/>
+            </tree>
+        </field>
+    </record>
+
+</odoo>

@@ -23,6 +23,6 @@ class Project(models.Model):
             'type': 'ir.actions.act_window',
             'name': 'Payment Schedule',
             'view_mode': 'form',
-            'res_model': 'sale.order',
+            'res_model': 'payment.schedule',
             'domain': [('analytic_account_id', '=', self.analytic_account_id)]
         }
