@@ -22,7 +22,11 @@ class Project(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'name': 'Payment Schedule',
-            'view_mode': 'form',
+            'view_mode': 'form, tree, kanban',
             'res_model': 'payment.schedule',
-            'domain': [('analytic_account_id', '=', self.analytic_account_id)]
+            'views': [
+                (self.env.ref('project_payment_schedule.payment_schedule_view_tree').id, 'tree'),
+                (self.env.ref('project_payment_schedule.payment_schedule_view_kanban').id, 'kanban'),
+                (self.env.ref('project_payment_schedule.payment_schedule_view_form').id, 'form')
+            ],
         }

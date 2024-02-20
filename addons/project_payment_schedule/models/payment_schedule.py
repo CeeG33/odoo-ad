@@ -19,28 +19,31 @@ class PaymentSchedule(models.Model):
 
     #=== FIELDS ===#
 
-    order_id = fields.Many2one("sale.order", string="Devis afférent", copy=False)
+    related_order_id = fields.Many2one("sale.order", string="Devis afférent", copy=False)
     line_ids = fields.One2many(
-        "payment.schedule.line",
+        "payment.schedule.line.item",
         "payment_schedule_id",
         compute="_compute_line_items",
         store=True
     )
 
     
-    @api.depends("order_id")
+    @api.depends("related_order_id")
     def _compute_line_items(self):
         for record in self:
-            if record.order_id:
+            if record.related_order_id:
                 lines = []
-                for line in record.order_id.order_line:
+                for line in record.related_order_id.order_line:
                     new_line = {
+                        # 'payment_schedule_id': record.id,
                         'description': line.name,
                         'trade_total': line.price_unit,
+                        # 'previous_progress': 0,
+                        # 'total_progress': 0,
+                        # 'current_progress': 0,
+                        # 'line_total': 0,
                     }
                     lines.append((0, 0, new_line))
-                
+                print(f"Lines : {lines}")
                 record.line_ids = lines
             
-            else:
-                record.line_ids = False
