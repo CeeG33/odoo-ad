@@ -24,26 +24,62 @@ class PaymentSchedule(models.Model):
         "payment.schedule.line.item",
         "payment_schedule_id",
         compute="_compute_line_items",
-        store=True
+        store=True,
+        precompute=True
     )
+    lines_description = fields.Text(compute="_compute_lines_description", store=True)
+    lines_total = fields.Monetary(compute="_lines_total_amount", store=True)
+    currency_id = fields.Many2one("res.currency", default=lambda self: self.env.company.currency_id, readonly= True)
 
     
     @api.depends("related_order_id")
     def _compute_line_items(self):
+        """Copies the related sale order's line items in the payment schedule."""
         for record in self:
-            if record.related_order_id:
+            print(len(record.line_ids))
+            if record.related_order_id and len(record.line_ids) == 0:
                 lines = []
                 for line in record.related_order_id.order_line:
-                    new_line = {
-                        # 'payment_schedule_id': record.id,
-                        'description': line.name,
-                        'trade_total': line.price_unit,
-                        # 'previous_progress': 0,
-                        # 'total_progress': 0,
-                        # 'current_progress': 0,
-                        # 'line_total': 0,
-                    }
-                    lines.append((0, 0, new_line))
-                print(f"Lines : {lines}")
+                    existing_line = record.line_ids.filtered(lambda x: x.description == line.name)
+                    if existing_line:
+                        existing_line.write({'trade_total': line.price_unit})
+                    else:
+                        new_line = {
+                            'description': line.name,
+                            'trade_total': line.price_unit,
+                        }
+                        lines.append((0, 0, new_line))
                 record.line_ids = lines
+                print(f"Payment Schedule Lines : {record.line_ids}")
             
+            
+    @api.depends("line_ids")
+    def _compute_lines_description(self):
+        """Shows line item's main information on the Kanban view."""
+        for record in self:
+            if record.line_ids:
+                lines = []
+                for line in record.line_ids:
+                    new_line = f"{line.description} {line.current_progress} {line.line_total}"
+                    lines.append(new_line)
+                record.lines_description = "\n".join(lines)
+    
+    
+    # @api.depends("line_ids")
+    # def _lines_total_amount(self):
+    #     for record in self:
+    #         if record.line_ids:
+    #             temporary_sum = 0
+    #             for line in record.line_ids:
+    #                 temporary_sum += line.line_total
+    #             record.lines_total = temporary_sum
+    
+    
+    @api.depends("line_ids")
+    def _lines_total_amount(self):
+        for record in self:
+            if record.line_ids:
+                lines_total = sum(record.line_ids.mapped("line_total"))
+            
+                record.lines_total = lines_total
+

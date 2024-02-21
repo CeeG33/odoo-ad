@@ -16,6 +16,9 @@
                         <field name="related_order_id"/>
                     </group>
                     <field name="line_ids" nolabel="1"/>
+                    <group class="oe_subtotal_footer oe_right" name="lines_total">
+                        <field name="lines_total" string="Total"/>
+                    </group>
                 </sheet>
                 
             </form>
@@ -32,6 +35,7 @@
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click oe_kanban_content">
+                            <field name="lines_total" widget="monetary"/>
                             <div>
                                 <strong class="o_kanban_record_title">
                                     <field name="related_order_id"/>
@@ -40,13 +44,8 @@
                             </div>
                             <div>
                                 <!-- <field name="line_ids" widget="many2many_tags"/> -->
-                                <t t-foreach="record.line_ids.raw_value" t-as="line">
-                                    <div>
-                                    <t t-esc="line.description"/>
-                                    <t t-esc="line.trade_total"/>
-                                    </div>
-                                </t>
-
+                                <field name="lines_description" widget="text"/>
+                                <!-- <t t-esc="record.lines_description.raw_value"/> -->
                             </div>
                             
                         </div>                        
