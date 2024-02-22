@@ -3,21 +3,37 @@
     <record id="payment_schedule_line_item" model="ir.actions.act_window">
         <field name="name">Payment Schedule Line Items</field>
         <field name="res_model">payment.schedule.line.item</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="payment_schedule_line_item_form_view" model="ir.ui.view">
+        <field name="name">payment.schedule.line.item.form</field>
+        <field name="model">payment.schedule.line.item</field>
+        <field name="arch" type="xml">
+            <tree string="Payment Schedule Line Item Form">
+                <field name="payment_schedule_id"/>
+                <field name="description"/>
+                <field name="trade_total" widget="monetary"/>
+                <field name="previous_progress" widget="percentage"/>
+                <field name="total_progress" widget="percentage"/>
+                <field name="current_progress" widget="percentage"/>
+                <field name="line_total" widget="monetary"/>
+            </tree>
+        </field>
     </record>
 
     <record id="payment_schedule_line_item_tree_view" model="ir.ui.view">
         <field name="name">payment.schedule.line.item.tree</field>
         <field name="model">payment.schedule.line.item</field>
         <field name="arch" type="xml">
-            <tree string="Channel" editable="bottom">
+            <tree string="Channel">
                 <field name="payment_schedule_id"/>
                 <field name="description"/>
                 <field name="trade_total" widget="monetary"/>
                 <field name="previous_progress" widget="percentage"/>
                 <field name="total_progress" widget="percentage"/>
-                <field name="current_progress" widget="percentage" force_save="1"/>
-                <field name="line_total" widget="monetary" force_save="1"/>
+                <field name="current_progress" widget="percentage"/>
+                <field name="line_total" widget="monetary"/>
             </tree>
         </field>
     </record>

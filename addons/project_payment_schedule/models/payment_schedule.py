@@ -20,6 +20,7 @@ class PaymentSchedule(models.Model):
     #=== FIELDS ===#
 
     related_order_id = fields.Many2one("sale.order", string="Devis afférent", copy=False)
+    related_project_id = fields.Many2one("project.project", compute="_compute_related_project_id", string="Projet", copy=False)
     line_ids = fields.One2many(
         "payment.schedule.line.item",
         "payment_schedule_id",
@@ -27,17 +28,17 @@ class PaymentSchedule(models.Model):
         store=True,
         precompute=True
     )
-    lines_description = fields.Text(compute="_compute_lines_description", store=True)
+    lines_description = fields.Text(compute="_compute_lines_description")
     lines_total = fields.Monetary(compute="_lines_total_amount", store=True)
     currency_id = fields.Many2one("res.currency", default=lambda self: self.env.company.currency_id, readonly= True)
+
 
     
     @api.depends("related_order_id")
     def _compute_line_items(self):
         """Copies the related sale order's line items in the payment schedule."""
         for record in self:
-            print(len(record.line_ids))
-            if record.related_order_id and len(record.line_ids) == 0:
+            if record.related_order_id:
                 lines = []
                 for line in record.related_order_id.order_line:
                     existing_line = record.line_ids.filtered(lambda x: x.description == line.name)
@@ -60,8 +61,9 @@ class PaymentSchedule(models.Model):
             if record.line_ids:
                 lines = []
                 for line in record.line_ids:
-                    new_line = f"{line.description} {line.current_progress} {line.line_total}"
-                    lines.append(new_line)
+                    if line.description:
+                        new_line = f"{line.description} - {round(line.current_progress * 100)}% - {line.line_total} € HT"
+                        lines.append(new_line)
                 record.lines_description = "\n".join(lines)
     
     
@@ -82,4 +84,15 @@ class PaymentSchedule(models.Model):
                 lines_total = sum(record.line_ids.mapped("line_total"))
             
                 record.lines_total = lines_total
+    
+    
+    def _compute_related_project_id(self):
+        for record in self:
+            record.related_project_id = record.env.context.get("project_id")
 
+
+    @api.model
+    def create(self, vals):
+        self.related_project_id = self.env.context.get("project_id")
+        
+        return super().create(vals)

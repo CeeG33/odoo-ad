@@ -18,9 +18,9 @@ class PaymentScheduleLineItem(models.Model):
     payment_schedule_id = fields.Many2one("payment.schedule", string="ID Échéancier")
     description = fields.Text(string="Description")
     trade_total = fields.Float(string="Montant du lot (€)")
-    previous_progress = fields.Float(string="% M-1", copy=False, store=True)
-    total_progress = fields.Float(string="% Cumulé", copy=False, store=True)
-    current_progress = fields.Float(string="% Cumul du mois", copy=False, store=True)
+    previous_progress = fields.Float(string="% M-1")
+    total_progress = fields.Float(string="% Cumulé")
+    current_progress = fields.Float(string="% Cumul du mois")
     line_total = fields.Float(string="Total HT (€)", compute="_compute_line_total", store=True)
     
     @api.depends("trade_total", "current_progress")
@@ -28,5 +28,5 @@ class PaymentScheduleLineItem(models.Model):
         """Calculates the line total amount."""
         for record in self:
             if record.trade_total and record.current_progress:
-                record.line_total = record.trade_total * (record.current_progress / 100)
+                record.line_total = record.trade_total * record.current_progress
                 print(f"Payment Schedule Line Total : {record.line_total}")

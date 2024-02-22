@@ -14,8 +14,9 @@
                 <sheet>
                     <group>
                         <field name="related_order_id"/>
+                        <field name="related_project_id"/>
                     </group>
-                    <field name="line_ids" nolabel="1"/>
+                    <field name="line_ids" nolabel="1" force_save="1"/>
                     <group class="oe_subtotal_footer oe_right" name="lines_total">
                         <field name="lines_total" string="Total"/>
                     </group>
@@ -30,7 +31,7 @@
         <field name="name">payment.schedule.kanban</field>
         <field name="model">payment.schedule</field>
         <field name="arch" type="xml">
-            <kanban quick_create="True">
+            <kanban default_group_by="" quick_create="True">
                 <field name="line_ids"/>
                 <templates>
                     <t t-name="kanban-box">
@@ -43,9 +44,7 @@
                                 
                             </div>
                             <div>
-                                <!-- <field name="line_ids" widget="many2many_tags"/> -->
                                 <field name="lines_description" widget="text"/>
-                                <!-- <t t-esc="record.lines_description.raw_value"/> -->
                             </div>
                             
                         </div>                        
