@@ -20,7 +20,7 @@ class PaymentSchedule(models.Model):
     #=== FIELDS ===#
 
     related_order_id = fields.Many2one("sale.order", string="Devis afférent", copy=False)
-    related_project_id = fields.Many2one("project.project", compute="_compute_related_project_id", string="Projet", copy=False)
+    related_project_id = fields.Many2one("project.project", string="Projet", store=True, default= lambda self: self.env.context['active_id'])
     line_ids = fields.One2many(
         "payment.schedule.line.item",
         "payment_schedule_id",
@@ -31,7 +31,7 @@ class PaymentSchedule(models.Model):
     lines_description = fields.Text(compute="_compute_lines_description")
     lines_total = fields.Monetary(compute="_lines_total_amount", store=True)
     currency_id = fields.Many2one("res.currency", default=lambda self: self.env.company.currency_id, readonly= True)
-
+    date = fields.Date(string="Date de l'échéance")
 
     
     @api.depends("related_order_id")
@@ -64,7 +64,10 @@ class PaymentSchedule(models.Model):
                     if line.description:
                         new_line = f"{line.description} - {round(line.current_progress * 100)}% - {line.line_total} € HT"
                         lines.append(new_line)
-                record.lines_description = "\n".join(lines)
+                if len(lines) > 0:
+                    record.lines_description = "\n".join(lines)
+                else:
+                    record.lines_description = "Vide"
     
     
     # @api.depends("line_ids")
@@ -86,13 +89,33 @@ class PaymentSchedule(models.Model):
                 record.lines_total = lines_total
     
     
-    def _compute_related_project_id(self):
-        for record in self:
-            record.related_project_id = record.env.context.get("project_id")
-
-
+    # @api.depends("related_order_id")
+    # def _compute_project_id(self):
+    #     for record in self:
+    #         record.related_project_id = self.env.context['active_id']
+    
+    
     @api.model
     def create(self, vals):
-        self.related_project_id = self.env.context.get("project_id")
+        new_payment_schedule = super().create(vals)
+        vals["related_project_id"] = self.env.context['active_id']
         
-        return super().create(vals)
+        previous_payment_schedule = self.env['payment.schedule'].search([("related_order_id", "=", vals.get("related_order_id"))], order="date desc", limit=1)
+        
+        if previous_payment_schedule:
+            new_payment_schedule.write({
+                
+            })
+        
+        return new_payment_schedule
+    
+    
+    def _check_previous_payment_schedule(self):
+        previous_payment_schedules = self.env['payment.schedule'].search_count([('related_project_id', '=', self.env.context['active_id'])])
+        print(f"Previous Payment Schedules : {previous_payment_schedules}")
+        
+        if previous_payment_schedules == 0:
+            print("No previous payment schedule.")
+        else:
+            previous_payment_schedules = self.env['payment.schedule'].search([('related_project_id', '=', self.env.context['active_id'])])
+            print(f"Last Payment Schedule : {previous_payment_schedules[-1]}")

@@ -4,6 +4,7 @@
         <field name="name">Payment Schedule</field>
         <field name="res_model">payment.schedule</field>
         <field name="view_mode">kanban,form,tree</field>
+        <field name="domain">[('related_project_id', '=', 'active_id')]</field>
     </record>
 
     <record id="payment_schedule_view_form" model="ir.ui.view">
@@ -14,7 +15,8 @@
                 <sheet>
                     <group>
                         <field name="related_order_id"/>
-                        <field name="related_project_id"/>
+                        <field name="related_project_id" context="{'related_project_id': active_id}" readonly="1"/>
+                        <field name="date"/>
                     </group>
                     <field name="line_ids" nolabel="1" force_save="1"/>
                     <group class="oe_subtotal_footer oe_right" name="lines_total">
@@ -31,20 +33,30 @@
         <field name="name">payment.schedule.kanban</field>
         <field name="model">payment.schedule</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="" quick_create="True">
+            <kanban default_group_by="date" quick_create="True">
                 <field name="line_ids"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click oe_kanban_content">
-                            <field name="lines_total" widget="monetary"/>
-                            <div>
-                                <strong class="o_kanban_record_title">
-                                    <field name="related_order_id"/>
-                                </strong>
+                            
+                            <div class="row row-cols-auto justify-content-between">
+                                <div class="col">
+                                    <div class="btn rounded-pill btn-dark">
+                                        <field name="date"/>
+                                    </div>
+                                </div>
+                                
+                                <div class="col">
+                                    <div class="btn rounded-pill btn-primary">
+                                        <field name="lines_total" widget="monetary"/><span> € HT</span>
+                                    </div>
+                                    
+                                </div>
                                 
                             </div>
+                            <div class="border-bottom my-4"/>
                             <div>
-                                <field name="lines_description" widget="text"/>
+                                <field class="lh-lg" name="lines_description" widget="text"/>
                             </div>
                             
                         </div>                        
@@ -64,6 +76,7 @@
         <field name="arch" type="xml">
             <tree editable="bottom">
                 <field name="related_order_id"/>
+                <field name="date"/>
                 <field name="line_ids"/>
                 
             </tree>
