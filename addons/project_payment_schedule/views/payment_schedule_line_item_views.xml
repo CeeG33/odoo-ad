@@ -10,12 +10,12 @@
         <field name="name">payment.schedule.line.item.form</field>
         <field name="model">payment.schedule.line.item</field>
         <field name="arch" type="xml">
-            <tree string="Payment Schedule Line Item Form">
+            <tree string="Payment Schedule Line Item Form" editable="bottom" create="0">
                 <field name="payment_schedule_id"/>
                 <field name="description"/>
                 <field name="trade_total" widget="monetary"/>
-                <field name="previous_progress" widget="percentage"/>
-                <field name="total_progress" widget="percentage"/>
+                <field name="previous_progress" widget="percentage" optional="show"/>
+                <field name="total_progress" widget="percentage" optional="show"/>
                 <field name="current_progress" widget="percentage"/>
                 <field name="line_total" widget="monetary"/>
                 <button name="unlink" title="Remove" icon="fa-trash" type="object"/>
@@ -27,7 +27,7 @@
         <field name="name">payment.schedule.line.item.tree</field>
         <field name="model">payment.schedule.line.item</field>
         <field name="arch" type="xml">
-            <tree string="Channel">
+            <tree string="Channel" editable="bottom">
                 <field name="payment_schedule_id"/>
                 <field name="description"/>
                 <field name="trade_total" widget="monetary"/>

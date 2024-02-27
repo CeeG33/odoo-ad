@@ -4,3 +4,4 @@
 from . import payment_schedule
 from . import payment_schedule_line_item
 from . import project
+from . import sale_order

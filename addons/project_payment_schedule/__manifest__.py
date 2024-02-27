@@ -16,6 +16,7 @@ This module enables the creation of Payment Schedules for a construction project
     'data': [
         'security/ir.model.access.csv',
         'views/inherited_project_views.xml',
+        'views/inherited_sale_order_views.xml',
         'views/payment_schedule_views.xml',
         'views/payment_schedule_line_item_views.xml',
         

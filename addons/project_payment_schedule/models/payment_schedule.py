@@ -26,7 +26,8 @@ class PaymentSchedule(models.Model):
         "payment_schedule_id",
         compute="_compute_line_items",
         store=True,
-        precompute=True
+        precompute=True,
+        readonly=False
     )
     lines_description = fields.Text(compute="_compute_lines_description")
     lines_total = fields.Monetary(compute="_lines_total_amount", store=True)
@@ -51,7 +52,6 @@ class PaymentSchedule(models.Model):
                         }
                         lines.append((0, 0, new_line))
                 record.line_ids = lines
-                print(f"Payment Schedule Lines : {record.line_ids}")
             
             
     @api.depends("line_ids")
@@ -100,12 +100,16 @@ class PaymentSchedule(models.Model):
         new_payment_schedule = super().create(vals)
         vals["related_project_id"] = self.env.context['active_id']
         
-        previous_payment_schedule = self.env['payment.schedule'].search([("related_order_id", "=", vals.get("related_order_id"))], order="date desc", limit=1)
+        project_sales = self.env["sale.order"].search([("project_id", "=", vals.get("related_project_id"))])
         
-        if previous_payment_schedule:
-            new_payment_schedule.write({
+        print(project_sales)
+        
+        # previous_payment_schedule = self.env['payment.schedule'].search([("related_order_id", "=", vals.get("related_order_id"))], order="date desc", limit=1)
+        
+        # if previous_payment_schedule:
+        #     new_payment_schedule.write({
                 
-            })
+        #     })
         
         return new_payment_schedule
     
