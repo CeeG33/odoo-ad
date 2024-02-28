@@ -17,6 +17,7 @@ class SaleOrder(models.Model):
     _inherit = 'sale.order'
     
     project_id = fields.Many2one("project.project", "Project", required=True)
+    payment_schedule_id = fields.Many2one("payment.schedule", "Payment Schedule")
     
     @api.onchange("partner_id")
     def onchange_partner_id(self):

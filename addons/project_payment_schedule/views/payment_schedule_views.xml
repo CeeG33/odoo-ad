@@ -14,7 +14,7 @@
             <form string="Payment Schedule Form">
                 <sheet>
                     <group>
-                        <field name="related_order_id"/>
+                        <field name="related_order_ids"/>
                         <field name="related_project_id" context="{'related_project_id': active_id}" readonly="1"/>
                         <field name="date"/>
                     </group>
@@ -41,16 +41,15 @@
                             
                             <div class="row row-cols-auto justify-content-between">
                                 <div class="col">
-                                    <div class="btn rounded-pill btn-dark">
+                                    <a class="btn rounded-pill btn-dark" role="button">
                                         <field name="date"/>
-                                    </div>
+                                    </a>
                                 </div>
                                 
                                 <div class="col">
-                                    <div class="btn rounded-pill btn-primary">
+                                    <a class="btn rounded-pill btn-primary" role="button">
                                         <field name="lines_total" widget="monetary"/><span> € HT</span>
-                                    </div>
-                                    
+                                    </a>
                                 </div>
                                 
                             </div>
@@ -75,7 +74,7 @@
         <field name="model">payment.schedule</field>
         <field name="arch" type="xml">
             <tree editable="bottom">
-                <field name="related_order_id"/>
+                <field name="related_order_ids"/>
                 <field name="date"/>
                 <field name="line_ids"/>
                 
