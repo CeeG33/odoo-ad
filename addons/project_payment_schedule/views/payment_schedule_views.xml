@@ -14,9 +14,10 @@
             <form string="Payment Schedule Form">
                 <sheet>
                     <group>
-                        <field name="related_order_ids"/>
-                        <field name="related_project_id" context="{'related_project_id': active_id}" readonly="1"/>
+                        <field name="related_order_ids" invisible="1"/>
+                        <field name="related_project_id" context="{'related_project_id': active_id}" readonly="1" invisible="1"/>
                         <field name="date"/>
+                        <field name="global_progress" widget="percentage"/>
                     </group>
                     <field name="line_ids" nolabel="1" force_save="1"/>
                     <group class="oe_subtotal_footer oe_right" name="lines_total">

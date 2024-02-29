@@ -15,13 +15,13 @@ class PaymentScheduleLineItem(models.Model):
     _name = 'payment.schedule.line.item'
     _description = "Payment Schedule Line Item."
     
-    payment_schedule_id = fields.Many2one("payment.schedule", string="ID Échéancier")
-    description = fields.Text(string="Description")
-    trade_total = fields.Float(string="Montant du lot (€)")
-    previous_progress = fields.Float(string="Avancement précédent (%)")
-    total_progress = fields.Float(string="Cumul (%)", compute="_compute_total_progress", store=True)
-    current_progress = fields.Float(string="Avancement du mois (%)")
-    line_total = fields.Float(string="Total HT (€)", compute="_compute_line_total", store=True)
+    payment_schedule_id = fields.Many2one("payment.schedule", string="ID Échéancier", readonly=True)
+    description = fields.Text(string="Description", readonly=True)
+    trade_total = fields.Float(string="Montant du lot (€)", readonly=True)
+    previous_progress = fields.Float(string="Avancement précédent (%)", readonly=True)
+    total_progress = fields.Float(string="Cumul (%)", compute="_compute_total_progress", store=True, precompute=True)
+    current_progress = fields.Float(string="Avancement du mois (%)", compute="_compute_current_progress", store=True, precompute=True, readonly=False)
+    line_total = fields.Float(string="Total HT (€)", compute="_compute_line_total", store=True, precompute=True)
     
     @api.depends("trade_total", "current_progress")
     def _compute_line_total(self):
@@ -36,3 +36,11 @@ class PaymentScheduleLineItem(models.Model):
         """Calculates the line's total progress."""
         for record in self:
             record.total_progress = record.previous_progress + record.current_progress
+    
+    
+    @api.depends("payment_schedule_id.global_progress")
+    def _compute_current_progress(self):
+        """Calculates the line's current progress."""
+        for record in self:
+            if record.payment_schedule_id.global_progress:
+                record.current_progress = record.payment_schedule_id.global_progress
