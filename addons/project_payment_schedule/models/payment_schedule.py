@@ -45,9 +45,12 @@ class PaymentSchedule(models.Model):
     @api.depends("related_order_ids")
     def _compute_line_items(self):
         """Copies the related sale orders line items in the payment schedule."""
+        print("_compute_line_items")
         for record in self:
             if record.related_order_ids:
                 lines = []
+                
+                previous_payment_schedule = record._get_previous_payment_schedule()
                 
                 for order in record.related_order_ids:
     
@@ -56,21 +59,31 @@ class PaymentSchedule(models.Model):
                         existing_line = record.line_ids.filtered(lambda x: x.description == line.name)
                         
                         if existing_line:
-                            existing_line.write({'trade_total': line.price_unit})
+                            existing_line.write({
+                                'trade_total': line.price_unit,
+                                })
                             
                         else:
-                            new_line = {
-                                    'description': line.name,
-                                    'trade_total': line.price_unit,
-                                }
-                            lines.append((0, 0, new_line))
-                
-                record.line_ids = lines
+                            new_line = record.env["payment.schedule.line.item"].create({
+                                'payment_schedule_id': record.id,
+                                'description': line.name,
+                                'trade_total': line.price_unit,
+                                })
+                            lines.append(new_line.id)
+                            
+                            if previous_payment_schedule:
+                                matching_line = previous_payment_schedule.line_ids.filtered(lambda x: x.description == line.name)
+                                
+                                if matching_line:
+                                    new_line.write({'previous_progress': matching_line.total_progress})
+                            
+                record.line_ids = [(6, 0, lines)]
     
     
     @api.depends("related_project_id")
     def _compute_related_orders(self):
         """Selects the orders related to the project."""
+        print("_compute_related_orders")
         for record in self:
             if record.related_project_id:
                 record.related_order_ids = self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc")
@@ -79,18 +92,19 @@ class PaymentSchedule(models.Model):
     @api.depends("line_ids")
     def _compute_lines_description(self):
         """Shows line item's main information on the Kanban view."""
+        print("_compute_lines_description")
         for record in self:
             if record.line_ids:
-                lines = []
+                description_lines = []
                 
                 for line in record.line_ids:
                     
                     if line.description:
                         new_line = f"{line.description} - {round(line.current_progress * 100)}% - {'{:,.2f}'.format(line.line_total)} € HT"
-                        lines.append(new_line)
+                        description_lines.append(new_line)
                         
-                if len(lines) > 0:
-                    record.lines_description = "\n".join(lines)
+                if len(description_lines) > 0:
+                    record.lines_description = "\n".join(description_lines)
                     
                 else:
                     record.lines_description = "Vide"
@@ -106,14 +120,15 @@ class PaymentSchedule(models.Model):
     #             record.lines_total = temporary_sum
     
     
-    @api.depends("line_ids", "global_progress")
+    @api.depends("line_ids", "global_progress", "related_order_ids")
     def _lines_total_amount(self):
         """Computes the total value of payment schedule's line items."""
+        print("_lines_total_amount")
         for record in self:
             if record.line_ids:
-                lines_total = sum(record.line_ids.mapped("line_total"))
+                lines_sum = sum(record.line_ids.mapped("line_total"))
             
-                record.lines_total = lines_total
+                record.write({'lines_total': lines_sum})
     
     
     @api.model
@@ -123,8 +138,14 @@ class PaymentSchedule(models.Model):
         - Computes the current month's previous progress column based on last month's total progress
         if the lines descriptions match.
         """
+        
+        # print(f"related_order_ids : {vals['related_order_ids']}")
+        # print(f"related_project_id : {vals['related_project_id']}")
+        # print(f"line_ids : {vals['line_ids']}")
+        
         new_payment_schedule = super().create(vals)
         vals["related_project_id"] = self.env.context['active_id']
+        
         # previous_payment_schedule = self._get_previous_payment_schedule()
         
         # if previous_payment_schedule:
@@ -136,37 +157,44 @@ class PaymentSchedule(models.Model):
         #         if matching_lines:
         #             for matching_line in matching_lines:
         #                 matching_line.write({
+        #                     'description': line.description,
         #                     'previous_progress': line.total_progress
         #                 })
         
-        # project_sales = self.env["sale.order"].search([("project_id", "=", vals.get("related_project_id"))])
         
+        # project_sales = self.env["sale.order"].search([("project_id", "=", vals.get("related_project_id"))])
+        # print(f"Project sales : {project_sales}")
         # if len(project_sales) > 0:
-        #     lines = []      
+        #     sales_lines = []      
             
         #     for sale in project_sales:
         #         for line in sale.order_line:
+        #             # METTRE MATCHING LINES ICI ?????
         #             new_line = {
         #                     'description': line.name,
         #                     'trade_total': line.price_unit,
         #                 }
-        #             lines.append((0, 0, new_line))
+        #             print(new_line)
+        #             sales_lines.append((0, 0, new_line))
+        #     new_payment_schedule.line_ids = sales_lines
             
-        #     new_payment_schedule.line_ids = lines
+        #     for line in new_payment_schedule.line_ids:
+        #         print(f"{line.description} - {line.line_total} ")
         
-        # previous_payment_schedule = self.env['payment.schedule'].search([("related_order_id", "=", vals.get("related_order_id"))], order="date desc", limit=1)
+        
         
         return new_payment_schedule
     
     
     def _get_previous_payment_schedule(self):
         """Returns the previous payment schedule on the project."""
+        print("_get_previous_payment_schedule")
         previous_payment_schedules = self.env['payment.schedule'].search_count([('related_project_id', '=', self.env.context['active_id'])])
         print(f"Previous Payment Schedules : {previous_payment_schedules}")
         
-        if previous_payment_schedules == 1:
+        if previous_payment_schedules == 0:
             print("No previous payment schedule.")
-            previous_payment_schedule = False
+            previous_payment_schedule = None
             
         # elif previous_payment_schedules == 1:
         #     previous_payment_schedules = self.env['payment.schedule'].search([('related_project_id', '=', self.env.context['active_id'])])
@@ -179,11 +207,12 @@ class PaymentSchedule(models.Model):
         #         print(f"{line.description} - {line.total_progress}")
             
         else:
+            print("On rentre dans le else !!")
             previous_payment_schedules = self.env['payment.schedule'].search([('related_project_id', '=', self.env.context['active_id'])])
             # print(f"Last Payment Schedule : {previous_payment_schedules[-2]}")
             # print(f"Last Payment Schedule's Line IDs : {previous_payment_schedules[-2].line_ids}")
             # print(f"Current Payment Schedule's Line IDs : {self.line_ids}")
-            previous_payment_schedule = previous_payment_schedules[-2]
+            previous_payment_schedule = previous_payment_schedules[-1]
             
             for line in previous_payment_schedule.line_ids:
                 print(f"{line.description} - {line.total_progress}")
@@ -191,17 +220,42 @@ class PaymentSchedule(models.Model):
         return previous_payment_schedule
     
     
-    @api.onchange('line_ids', 'related_project_id')
-    def _onchange_previous_progress(self):
+    def _update_previous_progress(self):
         """Automatically computes the previous progress based on the last month's total progress."""
-        previous_payment_schedule = self.env['payment.schedule'].search([('related_project_id', '=', self.env.context['active_id'])])[-1]
+        print("_update_previous_progress")
+
+        previous_payment_schedule = self._get_previous_payment_schedule()
 
         if previous_payment_schedule:
-            
-            for line in previous_payment_schedule.line_ids:
-                matching_lines = self.line_ids.filtered(lambda x: x.description == line.description)
-                
+            for line in self.line_ids:
+                matching_lines = previous_payment_schedule.line_ids.filtered(
+                    lambda x: x.description == line.description
+                )
+
                 if matching_lines:
-                    
                     for matching_line in matching_lines:
-                        matching_line.previous_progress = line.total_progress
+                        line.write({"previous_progress": matching_line.total_progress})
+    
+    
+    # @api.onchange('line_ids', 'related_project_id', 'related_order_ids')
+    # def _onchange_previous_progress(self):
+    #     """Automatically computes the previous progress based on the last month's total progress."""
+    #     print("_onchange_previous_progress")
+
+    #     # Il est probablement inutile de boucler sur self, car cette fonction est déjà un décorateur onchange
+    #     # qui sera appelé pour chaque enregistrement individuellement.
+
+    #     previous_payment_schedules = self.env['payment.schedule'].search([
+    #         ('related_project_id', '=', self.env.context.get('active_id'))
+    #     ], order='date desc', limit=1)
+
+    #     if previous_payment_schedules:
+    #         previous_payment_schedule = previous_payment_schedules[0]
+    #         print("Previous payment schedule trouvé !")
+    #         for line in previous_payment_schedule.line_ids:
+    #             matching_lines = self.line_ids.filtered(lambda x: x.description == line.description)
+    #             print(f"Matching lines : {matching_lines}")
+
+    #             if matching_lines:
+    #                 for matching_line in matching_lines:
+    #                     matching_line.write({"previous_progress": line.total_progress})

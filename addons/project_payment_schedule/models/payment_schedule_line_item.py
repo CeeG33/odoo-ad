@@ -18,7 +18,7 @@ class PaymentScheduleLineItem(models.Model):
     payment_schedule_id = fields.Many2one("payment.schedule", string="ID Échéancier", readonly=True)
     description = fields.Text(string="Description", readonly=True)
     trade_total = fields.Float(string="Montant du lot (€)", readonly=True)
-    previous_progress = fields.Float(string="Avancement précédent (%)", readonly=True)
+    previous_progress = fields.Float(string="Avancement précédent (%)")
     total_progress = fields.Float(string="Cumul (%)", compute="_compute_total_progress", store=True, precompute=True)
     current_progress = fields.Float(string="Avancement du mois (%)", compute="_compute_current_progress", store=True, precompute=True, readonly=False)
     line_total = fields.Float(string="Total HT (€)", compute="_compute_line_total", store=True, precompute=True)
@@ -27,7 +27,11 @@ class PaymentScheduleLineItem(models.Model):
     def _compute_line_total(self):
         """Calculates the line total amount."""
         for record in self:
-            if record.trade_total and record.current_progress:
+            if record.payment_schedule_id.global_progress == 0 or record.current_progress == 0:
+                record.line_total = record.trade_total * 0
+            elif record.trade_total and record.payment_schedule_id.global_progress and record.current_progress == record.payment_schedule_id.global_progress:
+                record.line_total = record.trade_total * record.payment_schedule_id.global_progress
+            else:
                 record.line_total = record.trade_total * record.current_progress
     
     
@@ -35,12 +39,16 @@ class PaymentScheduleLineItem(models.Model):
     def _compute_total_progress(self):
         """Calculates the line's total progress."""
         for record in self:
-            record.total_progress = record.previous_progress + record.current_progress
+            record.total_progress = record.previous_progress + record.current_progress    
     
     
     @api.depends("payment_schedule_id.global_progress")
     def _compute_current_progress(self):
         """Calculates the line's current progress."""
         for record in self:
-            if record.payment_schedule_id.global_progress:
+            if record.payment_schedule_id.global_progress == 0:
+                record.current_progress = 0
+            
+            elif record.payment_schedule_id.global_progress:
                 record.current_progress = record.payment_schedule_id.global_progress
+            
