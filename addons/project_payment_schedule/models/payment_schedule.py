@@ -26,7 +26,7 @@ class PaymentSchedule(models.Model):
         store=True,
         precompute=True
     )
-    related_project_id = fields.Many2one("project.project", string="Projet", store=True, default= lambda self: self.env.context['active_id'])
+    related_project_id = fields.Many2one("project.project", string="Projet", store=True, readonly=True, default= lambda self: self.env.context['active_id'])
     line_ids = fields.One2many(
         "payment.schedule.line.item",
         "payment_schedule_id",
@@ -36,7 +36,7 @@ class PaymentSchedule(models.Model):
         readonly=False
     )
     lines_description = fields.Text(compute="_compute_lines_description")
-    lines_total = fields.Monetary(compute="_lines_total_amount", store=True, precompute=True)
+    lines_total = fields.Monetary(compute="_lines_total_amount", store=True, precompute=True, readonly=False)
     currency_id = fields.Many2one("res.currency", default=lambda self: self.env.company.currency_id, readonly=True)
     date = fields.Date(string="Date de l'échéance")
     global_progress = fields.Float(string="Avancement global")
@@ -120,15 +120,17 @@ class PaymentSchedule(models.Model):
     #             record.lines_total = temporary_sum
     
     
-    @api.depends("line_ids", "global_progress", "related_order_ids")
+    @api.depends("line_ids", "global_progress")
     def _lines_total_amount(self):
         """Computes the total value of payment schedule's line items."""
         print("_lines_total_amount")
         for record in self:
             if record.line_ids:
                 lines_sum = sum(record.line_ids.mapped("line_total"))
-            
+                
                 record.write({'lines_total': lines_sum})
+                print(f"Lines sum : {lines_sum}")
+                print(f"Record Lines total : {record.lines_total}")
     
     
     @api.model
@@ -182,7 +184,7 @@ class PaymentSchedule(models.Model):
         #         print(f"{line.description} - {line.line_total} ")
         
         
-        
+        print(new_payment_schedule.lines_total)
         return new_payment_schedule
     
     
