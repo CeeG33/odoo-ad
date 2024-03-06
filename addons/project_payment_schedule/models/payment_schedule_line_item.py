@@ -27,7 +27,7 @@ class PaymentScheduleLineItem(models.Model):
     def _compute_line_total(self):
         """Calculates the line total amount."""
         for record in self:
-            if record.payment_schedule_id.global_progress == 0 or record.current_progress == 0:
+            if record.payment_schedule_id.global_progress == 0 and record.current_progress == 0:
                 record.line_total = record.trade_total * 0
             elif record.trade_total and record.payment_schedule_id.global_progress and record.current_progress == record.payment_schedule_id.global_progress:
                 record.line_total = record.trade_total * record.payment_schedule_id.global_progress
@@ -46,9 +46,7 @@ class PaymentScheduleLineItem(models.Model):
     def _compute_current_progress(self):
         """Calculates the line's current progress."""
         for record in self:
-            if record.payment_schedule_id.global_progress == 0:
-                record.current_progress = 0
-            
-            elif record.payment_schedule_id.global_progress:
+            if record.payment_schedule_id.global_progress or record.payment_schedule_id.global_progress == 0:
                 record.current_progress = record.payment_schedule_id.global_progress
+            
             
