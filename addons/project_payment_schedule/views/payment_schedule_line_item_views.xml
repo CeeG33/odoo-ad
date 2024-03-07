@@ -18,7 +18,6 @@
                 <field name="total_progress" widget="percentage" optional="show"/>
                 <field name="current_progress" widget="percentage"/>
                 <field name="line_total" widget="monetary"/>
-                <button name="unlink" title="Remove" icon="fa-trash" type="object"/>
             </tree>
         </field>
     </record>

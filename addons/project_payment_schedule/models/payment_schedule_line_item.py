@@ -46,7 +46,15 @@ class PaymentScheduleLineItem(models.Model):
     def _compute_current_progress(self):
         """Calculates the line's current progress."""
         for record in self:
-            if record.payment_schedule_id.global_progress or record.payment_schedule_id.global_progress == 0:
+            # if record.payment_schedule_id.global_progress or record.payment_schedule_id.global_progress == 0:
+            #     record.current_progress = record.payment_schedule_id.global_progress
+            
+            if record.payment_schedule_id.global_progress:
                 record.current_progress = record.payment_schedule_id.global_progress
             
+            elif record.payment_schedule_id.global_progress == 0 and record.current_progress != 0:
+                pass
+            
+            elif record.payment_schedule_id.global_progress == 0:
+                record.current_progress = record.payment_schedule_id.global_progress
             
