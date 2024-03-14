@@ -18,10 +18,13 @@
                         <field name="related_project_id" context="{'related_project_id': active_id}" invisible="0"/>
                         <field name="date"/>
                         <field name="global_progress" widget="percentage"/>
+                        <field name="down_payment" widget="percentage"/>
                     </group>
                     <field name="line_ids" nolabel="1" force_save="1"/>
                     <group class="oe_subtotal_footer oe_right" name="lines_total">
-                        <field name="lines_total" string="Total"/>
+                        <field name="lines_total" string="Sous-total"/>
+                        <field name="down_payment_total" string="Remboursement sur acompte"/>
+                        <field name="grand_total" string="Total"/>
                     </group>
                 </sheet>
                 
@@ -49,7 +52,7 @@
                                 
                                 <div class="col">
                                     <a class="btn rounded-pill btn-primary" role="button">
-                                        <field name="lines_total" widget="monetary"/><span> € HT</span>
+                                        <field name="grand_total" widget="monetary"/><span> € HT</span>
                                     </a>
                                 </div>
                                 

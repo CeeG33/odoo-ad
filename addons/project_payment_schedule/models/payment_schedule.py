@@ -40,12 +40,16 @@ class PaymentSchedule(models.Model):
     currency_id = fields.Many2one("res.currency", default=lambda self: self.env.company.currency_id, readonly=True)
     date = fields.Date(string="Date de l'échéance")
     global_progress = fields.Float(string="Avancement global")
+    down_payment = fields.Float(string="Acompte")
+    down_payment_total = fields.Monetary(compute="_compute_down_payment_total", store=True, precompute=True, readonly=False)
+    grand_total = fields.Monetary(compute="_compute_grand_total", store=True, precompute=True, readonly=False)
+    
 
 
     @api.depends("related_order_ids")
     def _compute_line_items(self):
         """Copies the related sale orders line items in the payment schedule."""
-        print("_compute_line_items")
+        # print("_compute_line_items")
         for record in self:
             if record.related_order_ids:
                 lines = []
@@ -83,7 +87,7 @@ class PaymentSchedule(models.Model):
     @api.depends("related_project_id")
     def _compute_related_orders(self):
         """Selects the orders related to the project."""
-        print("_compute_related_orders")
+        # print("_compute_related_orders")
         for record in self:
             if record.related_project_id:
                 record.related_order_ids = self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc")
@@ -92,7 +96,7 @@ class PaymentSchedule(models.Model):
     @api.depends("line_ids")
     def _compute_lines_description(self):
         """Shows line item's main information on the Kanban view."""
-        print("_compute_lines_description")
+        # print("_compute_lines_description")
         for record in self:
             if record.line_ids:
                 description_lines = []
@@ -103,6 +107,10 @@ class PaymentSchedule(models.Model):
                         new_line = f"{line.description} - {round(line.current_progress * 100)}% - {'{:,.2f}'.format(line.line_total)} € HT"
                         description_lines.append(new_line)
                         
+                if record.down_payment_total:
+                    down_payment = f"Acompte ({round(record.down_payment * 100)}%) : {'{:,.2f}'.format(record.down_payment_total)} € HT"
+                    description_lines.append(down_payment)
+                    
                 if len(description_lines) > 0:
                     record.lines_description = "\n".join(description_lines)
                     
@@ -123,14 +131,14 @@ class PaymentSchedule(models.Model):
     @api.depends("line_ids", "global_progress")
     def _lines_total_amount(self):
         """Computes the total value of payment schedule's line items."""
-        print("_lines_total_amount")
+        # print("_lines_total_amount")
         for record in self:
             if record.line_ids:
                 lines_sum = sum(record.line_ids.mapped("line_total"))
                 
                 record.write({'lines_total': lines_sum})
-                print(f"Lines sum : {lines_sum}")
-                print(f"Record Lines total : {record.lines_total}")
+                # print(f"Lines sum : {lines_sum}")
+                # print(f"Record Lines total : {record.lines_total}")
     
     
     @api.model
@@ -184,18 +192,18 @@ class PaymentSchedule(models.Model):
         #         print(f"{line.description} - {line.line_total} ")
         
         
-        print(new_payment_schedule.lines_total)
+        # print(new_payment_schedule.lines_total)
         return new_payment_schedule
     
     
     def _get_previous_payment_schedule(self):
         """Returns the previous payment schedule on the project."""
-        print("_get_previous_payment_schedule")
+        # print("_get_previous_payment_schedule")
         previous_payment_schedules = self.env['payment.schedule'].search_count([('related_project_id', '=', self.env.context['active_id'])])
-        print(f"Previous Payment Schedules : {previous_payment_schedules}")
+        # print(f"Previous Payment Schedules : {previous_payment_schedules}")
         
         if previous_payment_schedules == 0:
-            print("No previous payment schedule.")
+            # print("No previous payment schedule.")
             previous_payment_schedule = None
             
         # elif previous_payment_schedules == 1:
@@ -209,22 +217,22 @@ class PaymentSchedule(models.Model):
         #         print(f"{line.description} - {line.total_progress}")
             
         else:
-            print("On rentre dans le else !!")
+            # print("On rentre dans le else !!")
             previous_payment_schedules = self.env['payment.schedule'].search([('related_project_id', '=', self.env.context['active_id'])])
             # print(f"Last Payment Schedule : {previous_payment_schedules[-2]}")
             # print(f"Last Payment Schedule's Line IDs : {previous_payment_schedules[-2].line_ids}")
             # print(f"Current Payment Schedule's Line IDs : {self.line_ids}")
             previous_payment_schedule = previous_payment_schedules[-1]
             
-            for line in previous_payment_schedule.line_ids:
-                print(f"{line.description} - {line.total_progress}")
+            # for line in previous_payment_schedule.line_ids:
+            #     print(f"{line.description} - {line.total_progress}")
                 
         return previous_payment_schedule
     
     
     def _update_previous_progress(self):
         """Automatically computes the previous progress based on the last month's total progress."""
-        print("_update_previous_progress")
+        # print("_update_previous_progress")
 
         previous_payment_schedule = self._get_previous_payment_schedule()
 
@@ -261,3 +269,36 @@ class PaymentSchedule(models.Model):
     #             if matching_lines:
     #                 for matching_line in matching_lines:
     #                     matching_line.write({"previous_progress": line.total_progress})
+    
+    
+    @api.depends("line_ids", "down_payment", "lines_total")
+    def _compute_down_payment_total(self):
+        """Computes the value of the down payment based on the down payment percentage."""
+        for record in self:
+            if record.line_ids and record.down_payment != 0 and record.lines_total:
+                down_payment_amount = record.down_payment * -(record.lines_total)
+                
+                record.write({'down_payment_total': down_payment_amount})
+            
+            elif record.down_payment == 0:
+                down_payment_amount = 0
+                
+                record.write({'down_payment_total': down_payment_amount})
+    
+    
+    @api.depends("line_ids", "down_payment", "down_payment_total", "lines_total")
+    def _compute_grand_total(self):
+        """Computes the value of the grand total of the payment schedule by substracting the down payment
+        reimbursement from the lines total value.
+        """
+        for record in self:
+            if record.line_ids and record.down_payment_total and record.lines_total and record.down_payment != 0:
+                grand_total_amount = record.down_payment_total + record.lines_total
+                
+                record.write({'grand_total': grand_total_amount})
+            
+            elif record.down_payment == 0:
+                grand_total_amount = record.lines_total
+                
+                record.write({'grand_total': grand_total_amount})
+
