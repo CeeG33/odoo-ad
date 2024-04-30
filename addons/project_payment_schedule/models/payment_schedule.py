@@ -43,7 +43,11 @@ class PaymentSchedule(models.Model):
     down_payment = fields.Float(string="Acompte")
     down_payment_total = fields.Monetary(compute="_compute_down_payment_total", store=True, precompute=True, readonly=False)
     grand_total = fields.Monetary(compute="_compute_grand_total", store=True, precompute=True, readonly=False)
-    
+    schedule_state = fields.Selection(selection=[
+        ("C", "Invoice Created"),
+        ("I", "Invoice Issued"),
+        ("P", "Paid")
+    ], string="Statut de l'échéancier", copy=False)
 
 
     @api.depends("related_order_ids")
@@ -330,5 +334,24 @@ class PaymentSchedule(models.Model):
         
         new_invoice = self.env["account.move"].create(values)
         
+        self.schedule_state = "C"
+        
         return new_invoice
+    
+    
+    @api.constrains("date")
+    def _check_schedule_date(self):
+        print("_check_schedule_date")
+        
+        
+        for record in self:
+            previous_payment_schedule = self._get_previous_payment_schedule(record.id)
+            print(f"Previous payment schedule: {previous_payment_schedule}")
+                        
+            if previous_payment_schedule:
+                print(f"Record date : {record.date}")
+                print(f"Previous payment schedule date : {previous_payment_schedule.date}")
+                if record.date < previous_payment_schedule.date:
+                    raise ValidationError("La date de cette échéance ne peut pas être antérieure à la dernière échéance facturée sur le projet.")
+
 

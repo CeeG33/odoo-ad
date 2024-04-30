@@ -4,7 +4,7 @@
 from collections import defaultdict
 from datetime import timedelta
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, exceptions
 from odoo.exceptions import UserError
 from odoo.fields import Command
 from odoo.osv import expression
@@ -23,6 +23,7 @@ class PaymentScheduleLineItem(models.Model):
     current_progress = fields.Float(string="Avancement du mois (%)", compute="_compute_current_progress", store=True, precompute=True, readonly=False)
     line_total = fields.Float(string="Total HT (€)", compute="_compute_line_total", store=True, precompute=True)
     
+    
     @api.depends("trade_total", "current_progress")
     def _compute_line_total(self):
         """Calculates the line total amount."""
@@ -39,7 +40,7 @@ class PaymentScheduleLineItem(models.Model):
     def _compute_total_progress(self):
         """Calculates the line's total progress."""
         for record in self:
-            record.total_progress = record.previous_progress + record.current_progress    
+            record.total_progress = record.previous_progress + record.current_progress 
     
     
     @api.depends("payment_schedule_id.global_progress")
@@ -57,4 +58,11 @@ class PaymentScheduleLineItem(models.Model):
             
             elif record.payment_schedule_id.global_progress == 0:
                 record.current_progress = record.payment_schedule_id.global_progress
+    
+    
+    @api.constrains("total_progress")
+    def _check_total_progress(self):
+        for record in self:
+            if record.total_progress > 1:
+                raise exceptions.ValidationError("Vous ne pouvez pas avoir un cumul dépassant 100'%' d'avancement.")
             
