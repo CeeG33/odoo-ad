@@ -301,4 +301,34 @@ class PaymentSchedule(models.Model):
                 grand_total_amount = record.lines_total
                 
                 record.write({'grand_total': grand_total_amount})
+    
+    
+    def action_create_invoice(self):
+        journal = self.env["account.journal"].search([("type", "=", "sale")], limit=1)
+        
+        payment_schedule_lines = []
+        
+        for line in self.line_ids:
+            payment_schedule_lines.append(Command.create({
+                "name": line.description,
+                "quantity": 1,
+                "price_unit": line.line_total
+            }))
+        
+        payment_schedule_lines.append(Command.create({
+                "name": "Remboursement sur acompte",
+                "quantity": 1,
+                "price_unit": self.down_payment_total
+            }))
+        
+        values = {
+            "partner_id": self.related_project_id.partner_id.id,
+            "move_type": "out_invoice",
+            "journal_id": journal.id,
+            "invoice_line_ids": payment_schedule_lines
+        }
+        
+        new_invoice = self.env["account.move"].create(values)
+        
+        return new_invoice
 

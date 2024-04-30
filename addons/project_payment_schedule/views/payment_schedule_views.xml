@@ -12,6 +12,9 @@
         <field name="model">payment.schedule</field>
         <field name="arch" type="xml">
             <form string="Payment Schedule Form">
+                <header>
+                    <button name="action_create_invoice" type="object" string="Créer la facture"/>
+                </header>
                 <sheet>
                     <group>
                         <field name="related_order_ids" invisible="0"/>

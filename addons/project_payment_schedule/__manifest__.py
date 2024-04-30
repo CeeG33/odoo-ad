@@ -11,7 +11,7 @@
 This module enables the creation of Payment Schedules for a construction project.
     """,
     'depends': [
-        'base', 'sale_management', 'project',
+        'base', 'sale_management', 'project'
     ],
     'data': [
         'security/ir.model.access.csv',
