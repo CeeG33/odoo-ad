@@ -36,7 +36,7 @@ class PaymentSchedule(models.Model):
         readonly=False
     )
     lines_description = fields.Text(compute="_compute_lines_description")
-    lines_total = fields.Monetary(compute="_lines_total_amount", store=True, precompute=True, readonly=False)
+    lines_total = fields.Monetary(compute="_compute_lines_total_amount", store=True, precompute=True, readonly=False)
     currency_id = fields.Many2one("res.currency", default=lambda self: self.env.company.currency_id, readonly=True)
     date = fields.Date(string="Date de l'échéance", required=True)
     global_progress = fields.Float(string="Avancement global")
@@ -119,8 +119,8 @@ class PaymentSchedule(models.Model):
                     record.lines_description = "Vide"
     
     
-    @api.depends("line_ids", "global_progress")
-    def _lines_total_amount(self):
+    @api.depends("line_ids", "global_progress", "line_ids.current_progress")
+    def _compute_lines_total_amount(self):
         """Computes the total value of payment schedule's line items."""
         for record in self:
             if record.line_ids:
@@ -178,13 +178,13 @@ class PaymentSchedule(models.Model):
     def _compute_down_payment_total(self):
         """Computes the value of the down payment based on the down payment percentage."""
         for record in self:
-            if record.line_ids and record.down_payment != 0 and record.lines_total:
+            if record.line_ids and record.down_payment != 0 and record.lines_total != 0:
                 down_payment_amount = record.down_payment * -(record.lines_total)
                 
                 record.write({'down_payment_total': down_payment_amount})
             
-            elif record.down_payment == 0:
-                down_payment_amount = 0
+            else:
+                down_payment_amount = record.down_payment * -(record.lines_total)
                 
                 record.write({'down_payment_total': down_payment_amount})
     
@@ -204,9 +204,15 @@ class PaymentSchedule(models.Model):
                 grand_total_amount = record.lines_total
                 
                 record.write({'grand_total': grand_total_amount})
+            
+            else:
+                grand_total_amount = 0
+                
+                record.write({'grand_total': grand_total_amount})
     
     
     def action_create_invoice(self):
+        """Creates the associated invoice."""
         journal = self.env["account.journal"].search([("type", "=", "sale")], limit=1)
         
         payment_schedule_lines = []
@@ -261,5 +267,7 @@ class PaymentSchedule(models.Model):
             
             if previous_payment_schedule and record.date.month == previous_payment_schedule.date.month:
                 raise ValidationError("Vous ne pouvez pas avoir deux échéances sur le même mois. Veuillez supprimer la précédente et réessayer.")
+            
+
 
 

@@ -18,7 +18,7 @@ class PaymentScheduleLineItem(models.Model):
     payment_schedule_id = fields.Many2one("payment.schedule", string="ID Échéancier", readonly=True)
     description = fields.Text(string="Description", readonly=True)
     trade_total = fields.Float(string="Montant du lot (€)", readonly=True)
-    previous_progress = fields.Float(string="Avancement précédent (%)")
+    previous_progress = fields.Float(string="Avancement précédent (%)", readonly=True)
     total_progress = fields.Float(string="Cumul (%)", compute="_compute_total_progress", store=True, precompute=True)
     current_progress = fields.Float(string="Avancement du mois (%)", compute="_compute_current_progress", store=True, precompute=True, readonly=False)
     line_total = fields.Float(string="Total HT (€)", compute="_compute_line_total", store=True, precompute=True)
@@ -50,7 +50,7 @@ class PaymentScheduleLineItem(models.Model):
             # if record.payment_schedule_id.global_progress or record.payment_schedule_id.global_progress == 0:
             #     record.current_progress = record.payment_schedule_id.global_progress
             
-            if record.payment_schedule_id.global_progress:
+            if record.payment_schedule_id.global_progress and record.payment_schedule_id.global_progress != 0:
                 record.current_progress = record.payment_schedule_id.global_progress
             
             elif record.payment_schedule_id.global_progress == 0 and record.current_progress != 0:
