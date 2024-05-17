@@ -262,12 +262,18 @@ class PaymentSchedule(models.Model):
         """
         for record in self:
             previous_payment_schedule = self._get_previous_payment_schedule()
-            print(f"previous_payment_schedule : {previous_payment_schedule}")
-            
             
             if previous_payment_schedule and record.date.month == previous_payment_schedule.date.month:
                 raise ValidationError("Vous ne pouvez pas avoir deux échéances sur le même mois. Veuillez supprimer la précédente et réessayer.")
-            
+    
+    
+    @api.constrains("global_progress")
+    def _check_global_progress(self):
+        """Verifies that the global progress is between a range of -100 to 100."""
+        for record in self:
+            if record.global_progress not in range(-100, 100):
+                raise ValidationError("L'avancement global doit être compris entre -100% et 100%.")
+
 
 
 
