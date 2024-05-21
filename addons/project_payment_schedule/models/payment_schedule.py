@@ -4,6 +4,7 @@
 from datetime import timedelta
 from itertools import groupby
 from markupsafe import Markup
+from statistics import mean
 
 from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.exceptions import AccessError, UserError, ValidationError
@@ -11,6 +12,14 @@ from odoo.fields import Command
 from odoo.osv import expression
 from odoo.tools import float_is_zero, format_amount, format_date, html_keep_url, is_html_empty
 from odoo.tools.sql import create_index
+
+
+STATUS_COLOR = {
+    'P': 20,  # green / success
+    'I': 2,  # orange
+    'IC': 4,  # light blue
+    'SC': 0,
+}
 
 
 class PaymentSchedule(models.Model):
@@ -40,14 +49,18 @@ class PaymentSchedule(models.Model):
     currency_id = fields.Many2one("res.currency", default=lambda self: self.env.company.currency_id, readonly=True)
     date = fields.Date(string="Date de l'échéance", required=True)
     global_progress = fields.Float(string="Avancement global")
+    maximum_progress = fields.Float(string="Avancement maximum", compute="_compute_maximum_progress", readonly=True)
+    current_progress = fields.Float(string="Cumul", compute="_compute_current_progress")
     down_payment = fields.Float(string="Acompte")
     down_payment_total = fields.Monetary(compute="_compute_down_payment_total", store=True, precompute=True, readonly=False)
     grand_total = fields.Monetary(compute="_compute_grand_total", store=True, precompute=True, readonly=False)
     schedule_state = fields.Selection(selection=[
-        ("C", "Invoice Created"),
+        ("SC", "Schedule Created"),
+        ("IC", "Invoice Created"),
         ("I", "Invoice Issued"),
         ("P", "Paid")
     ], string="Statut de l'échéancier", copy=False)
+    # schedule_state_color = fields.Integer(compute="_compute_schedule_state_color")
 
 
     @api.depends("related_order_ids")
@@ -274,6 +287,30 @@ class PaymentSchedule(models.Model):
             if not -1 <= record.global_progress <= 1:
                 raise ValidationError("L'avancement global doit être compris entre -100% et 100%.")
 
+
+    @api.depends("line_ids")
+    def _compute_current_progress(self):
+        """Computes the cumulative progress for a given month."""
+        for record in self:
+            if record.line_ids:
+                cumulative_progress = mean(record.line_ids.mapped("total_progress")) * 100
+                
+                record.write({'current_progress': cumulative_progress})
+    
+    
+    api.depends("line_ids")
+    def _compute_maximum_progress(self):
+        """Computes the maximum progress. Useful to determine the maximum value of the gauge."""
+        for record in self:
+            record.write({'maximum_progress': 100})
+    
+    
+    # api.depends("schedule_state")
+    # def _compute_schedule_state_color(self):
+    #     """Computes the maximum progress. Useful to determine the maximum value of the gauge."""
+    #     for record in self:
+    #         record.schedule_state_color = STATUS_COLOR[record.schedule_state]
+    #         # record.write({'schedule_state_color': STATUS_COLOR[record.schedule_state]})
 
 
 

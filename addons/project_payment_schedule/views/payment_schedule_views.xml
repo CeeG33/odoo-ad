@@ -43,31 +43,56 @@
         <field name="arch" type="xml">
             <kanban default_group_by="date" quick_create="True">
                 <field name="line_ids"/>
+                <field name="global_progress"/>
+                <field name="maximum_progress"/>
+                <field name="current_progress"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click oe_kanban_content">
+                            <!-- <field name="current_progress" widget="gauge" options="{'max_field': 'maximum_progress'}"></field> -->
+
+                            <!-- <field name="current_progress" widget="progressbar" ></field> -->
+
                             
-                            <div class="row row-cols-auto justify-content-between">
-                                <div class="col">
+
+                            <div class="row justify-content-between">
+                                <div class="col-4">
                                     <a class="btn rounded-pill btn-dark" role="button">
                                         <field name="date"/>
                                     </a>
                                 </div>
-                                
-                                <div class="col">
+
+                                <div class="col-8 me-0 text-end">
                                     <a class="btn rounded-pill btn-primary" role="button">
                                         <field name="grand_total" widget="monetary"/><span> € HT</span>
                                     </a>
                                 </div>
+
+                                
+                                
+
+                            </div>
+                            <div class="row justify-content-end mt-4">
+                                
+                                <field name="schedule_state" widget="project_state_selection"></field>
+
+                                <div class="col-4">
+                                    <field name="current_progress" widget="percentpie" options="{'max_field': 'maximum_progress'}"></field>
+                                </div>
+                                
                                 
                             </div>
+
                             <div class="border-bottom my-4"/>
+
                             <div>
                                 <field class="lh-lg" name="lines_description" widget="text"/>
                             </div>
-                            
-                        </div>                        
+
+                        </div>
+                        
                     </t>
+                    
                     
                 </templates>
                 
