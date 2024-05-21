@@ -271,7 +271,7 @@ class PaymentSchedule(models.Model):
     def _check_global_progress(self):
         """Verifies that the global progress is between a range of -100 to 100."""
         for record in self:
-            if record.global_progress not in range(-100, 100):
+            if not -1 <= record.global_progress <= 1:
                 raise ValidationError("L'avancement global doit être compris entre -100% et 100%.")
 
 

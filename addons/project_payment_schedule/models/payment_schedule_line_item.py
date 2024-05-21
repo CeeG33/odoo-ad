@@ -63,6 +63,6 @@ class PaymentScheduleLineItem(models.Model):
     @api.constrains("total_progress")
     def _check_total_progress(self):
         for record in self:
-            if record.total_progress > 1:
+            if not -1 <= record.total_progress <= 1:
                 raise exceptions.ValidationError("Vous ne pouvez pas avoir un cumul dépassant 100% d'avancement.")
             
