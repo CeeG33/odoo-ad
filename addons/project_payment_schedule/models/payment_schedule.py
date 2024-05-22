@@ -54,12 +54,13 @@ class PaymentSchedule(models.Model):
     down_payment = fields.Float(string="Acompte")
     down_payment_total = fields.Monetary(compute="_compute_down_payment_total", store=True, precompute=True, readonly=False)
     grand_total = fields.Monetary(compute="_compute_grand_total", store=True, precompute=True, readonly=False)
-    schedule_state = fields.Selection(selection=[
-        ("SC", "Schedule Created"),
-        ("IC", "Invoice Created"),
-        ("I", "Invoice Issued"),
-        ("P", "Paid")
-    ], string="Statut de l'échéancier", copy=False)
+    schedule_state_ids = fields.Many2many("payment.schedule.state", string="Statut de l'échéancier")
+    # schedule_state = fields.Selection(selection=[
+    #     ("SC", "Schedule Created"),
+    #     ("IC", "Invoice Created"),
+    #     ("I", "Invoice Issued"),
+    #     ("P", "Paid")
+    # ], string="Statut de l'échéancier", default="SC", store=True, readonly=False, required=True)
     # schedule_state_color = fields.Integer(compute="_compute_schedule_state_color")
 
 
@@ -307,10 +308,12 @@ class PaymentSchedule(models.Model):
     
     # api.depends("schedule_state")
     # def _compute_schedule_state_color(self):
-    #     """Computes the maximum progress. Useful to determine the maximum value of the gauge."""
+    #     """Affects color to schedule state."""
     #     for record in self:
     #         record.schedule_state_color = STATUS_COLOR[record.schedule_state]
-    #         # record.write({'schedule_state_color': STATUS_COLOR[record.schedule_state]})
+            # record.write({'schedule_state_color': STATUS_COLOR[record.schedule_state]})
+    
+    
 
 
 

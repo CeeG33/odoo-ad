@@ -13,7 +13,8 @@
         <field name="arch" type="xml">
             <form string="Payment Schedule Form">
                 <header>
-                    <button name="action_create_invoice" type="object" string="Créer la facture" attrs="{'invisible': ['|', ('schedule_state', '=', 'C'), '|', ('schedule_state', '=', 'I'), ('schedule_state', '=', 'P')]}"/>
+                    <!-- <button name="action_create_invoice" type="object" string="Créer la facture" attrs="{'invisible': ['|', ('schedule_state', '=', 'C'), '|', ('schedule_state', '=', 'I'), ('schedule_state', '=', 'P')]}"/> -->
+                    <button name="action_create_invoice" type="object" string="Créer la facture"/>
                 </header>
                 <sheet>
                     <group>
@@ -22,7 +23,7 @@
                         <field name="date"/>
                         <field name="global_progress" widget="percentage"/>
                         <field name="down_payment" widget="percentage"/>
-                        <field name="schedule_state"/>
+                        <field name="schedule_state_ids" widget="many2many_tags" options="{'color_field': 'color'}"></field>
                     </group>
                     <field name="line_ids" nolabel="1" force_save="1"/>
                     <group class="oe_subtotal_footer oe_right" name="lines_total">
@@ -55,7 +56,7 @@
 
                             
 
-                            <div class="row justify-content-between">
+                            <div class="row justify-content-between align-items-center">
                                 <div class="col-4">
                                     <a class="btn rounded-pill btn-dark" role="button">
                                         <field name="date"/>
@@ -67,19 +68,17 @@
                                         <field name="grand_total" widget="monetary"/><span> € HT</span>
                                     </a>
                                 </div>
-
-                                
-                                
-
                             </div>
-                            <div class="row justify-content-end mt-4">
-                                
-                                <field name="schedule_state" widget="project_state_selection"></field>
 
+                            <div class="row justify-content-between align-items-center mt-4">
+                                <div class="col-5">
+                                    <!-- <field name="schedule_state" widget="project_state_selection"></field> -->
+                                    <field name="schedule_state_ids" widget="many2many_tags" options="{'color_field': 'color'}"></field>
+                                </div>
+                                
                                 <div class="col-4">
                                     <field name="current_progress" widget="percentpie" options="{'max_field': 'maximum_progress'}"></field>
                                 </div>
-                                
                                 
                             </div>
 
