@@ -253,7 +253,7 @@ class PaymentSchedule(models.Model):
         
         new_invoice = self.env["account.move"].create(values)
         
-        self.schedule_state = "C"
+        # self.schedule_state = "C"
         
         return new_invoice
     
@@ -294,11 +294,13 @@ class PaymentSchedule(models.Model):
         """Computes the cumulative progress for a given month."""
         for record in self:
             if record.line_ids:
-                cumulative_progress = mean(record.line_ids.mapped("total_progress")) * 100
-                
+                total_invoiced_to_date = sum(record.related_project_id.payment_schedule_ids.mapped("grand_total"))
+                total_project_cost = sum(self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc").mapped("amount_untaxed"))
+                cumulative_progress = (total_invoiced_to_date / total_project_cost) * 100
+                # cumulative_progress = 20
                 record.write({'current_progress': cumulative_progress})
-    
-    
+
+
     api.depends("line_ids")
     def _compute_maximum_progress(self):
         """Computes the maximum progress. Useful to determine the maximum value of the gauge."""
@@ -312,6 +314,7 @@ class PaymentSchedule(models.Model):
     #     for record in self:
     #         record.schedule_state_color = STATUS_COLOR[record.schedule_state]
             # record.write({'schedule_state_color': STATUS_COLOR[record.schedule_state]})
+    
     
     
 

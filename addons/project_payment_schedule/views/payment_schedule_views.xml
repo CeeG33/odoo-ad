@@ -14,6 +14,7 @@
             <form string="Payment Schedule Form">
                 <header>
                     <!-- <button name="action_create_invoice" type="object" string="Créer la facture" attrs="{'invisible': ['|', ('schedule_state', '=', 'C'), '|', ('schedule_state', '=', 'I'), ('schedule_state', '=', 'P')]}"/> -->
+                    <!-- <button name="action_create_invoice" type="object" string="Créer la facture" attrs="{'invisible': ['|', ('schedule_state_ids.name', '=', 'Invoice Created'), '|', ('schedule_state_ids.name', '=', 'Invoice Issued'), ('schedule_state_ids.name', '=', 'Paid')]}"/> -->
                     <button name="action_create_invoice" type="object" string="Créer la facture"/>
                 </header>
                 <sheet>
@@ -47,14 +48,17 @@
                 <field name="global_progress"/>
                 <field name="maximum_progress"/>
                 <field name="current_progress"/>
+                <field name="related_project_id"/>
                 <templates>
+                    <header>
+                        <field name="related_project_id"/>
+                    </header>
                     <t t-name="kanban-box">
+                        
                         <div class="oe_kanban_global_click oe_kanban_content">
                             <!-- <field name="current_progress" widget="gauge" options="{'max_field': 'maximum_progress'}"></field> -->
 
                             <!-- <field name="current_progress" widget="progressbar" ></field> -->
-
-                            
 
                             <div class="row justify-content-between align-items-center">
                                 <div class="col-4">
