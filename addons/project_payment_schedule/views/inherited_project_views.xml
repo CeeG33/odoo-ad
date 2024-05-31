@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="edit_project" model="ir.ui.view">
+        <field name="name">project.project.form</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <!-- Smart button 'Échéancier' added -->
+            <xpath expr="//div[@name='button_box']/button[@class='oe_stat_button']" position="after">
+                <button class="oe_stat_button" name="get_payment_schedule" type="object" icon="fa-eur">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">
+                            Échéancier
+                        </span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+    
+</odoo>
