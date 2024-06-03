@@ -13,9 +13,8 @@
         <field name="arch" type="xml">
             <form string="Payment Schedule Form">
                 <header>
-                    <!-- <button name="action_create_invoice" type="object" string="Créer la facture" attrs="{'invisible': ['|', ('schedule_state', '=', 'C'), '|', ('schedule_state', '=', 'I'), ('schedule_state', '=', 'P')]}"/> -->
-                    <!-- <button name="action_create_invoice" type="object" string="Créer la facture" attrs="{'invisible': ['|', ('schedule_state_ids.name', '=', 'Invoice Created'), '|', ('schedule_state_ids.name', '=', 'Invoice Issued'), ('schedule_state_ids.name', '=', 'Paid')]}"/> -->
-                    <button name="action_create_invoice" type="object" string="Créer la facture"/>
+                    <button name="action_create_invoice" type="object" string="Créer la facture" invisible="schedule_state != 'SC'"/>
+                    <!-- <button name="action_create_invoice" type="object" string="Créer la facture"/> -->
                 </header>
                 <sheet>
                     <group>
@@ -24,7 +23,7 @@
                         <field name="date"/>
                         <field name="global_progress" widget="percentage"/>
                         <field name="down_payment" widget="percentage"/>
-                        <field name="schedule_state_ids" widget="many2many_tags" options="{'color_field': 'color'}"></field>
+                        <field name="schedule_state"></field>
                     </group>
                     <field name="line_ids" nolabel="1" force_save="1"/>
                     <group class="oe_subtotal_footer oe_right" name="lines_total">
@@ -45,9 +44,9 @@
         <field name="arch" type="xml">
             <kanban default_group_by="date" quick_create="True">
                 <field name="line_ids"/>
-                <field name="global_progress"/>
+                <field name="cumulative_progress"/>
                 <field name="maximum_progress"/>
-                <field name="current_progress"/>
+                <field name="monthly_progress"/>
                 <field name="related_project_id"/>
                 <templates>
                     <header>
@@ -56,9 +55,9 @@
                     <t t-name="kanban-box">
                         
                         <div class="oe_kanban_global_click oe_kanban_content">
-                            <!-- <field name="current_progress" widget="gauge" options="{'max_field': 'maximum_progress'}"></field> -->
+                            <!-- <field name="monthly_progress" widget="gauge" options="{'max_field': 'maximum_progress'}"></field> -->
 
-                            <!-- <field name="current_progress" widget="progressbar" ></field> -->
+                            <!-- <field name="monthly_progress" widget="progressbar" ></field> -->
 
                             <div class="row justify-content-between align-items-center">
                                 <div class="col-4">
@@ -76,12 +75,17 @@
 
                             <div class="row justify-content-between align-items-center mt-4">
                                 <div class="col-5">
-                                    <!-- <field name="schedule_state" widget="project_state_selection"></field> -->
-                                    <field name="schedule_state_ids" widget="many2many_tags" options="{'color_field': 'color'}"></field>
+                                    <field name="schedule_state" widget="label_selection" options="{
+                                        'classes': {
+                                            'SC': 'default',
+                                            'IC': 'primary',
+                                            'I': 'warning',
+                                            'P': 'success'}
+                                        }"></field>
                                 </div>
                                 
                                 <div class="col-4">
-                                    <field name="current_progress" widget="percentpie" options="{'max_field': 'maximum_progress'}"></field>
+                                    <field name="monthly_progress" widget="percentpie" options="{'max_field': 'maximum_progress'}" string=""></field>
                                 </div>
                                 
                             </div>

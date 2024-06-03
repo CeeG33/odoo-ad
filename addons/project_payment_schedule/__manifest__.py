@@ -4,7 +4,7 @@
 
 {
     'name': 'Payment Schedule',
-    'version': '1',
+    'version': '17.0',
     'category': 'Payment Schedule',
     'summary': 'Payment Schedule tool integrated to Quotations.',
     'description': """

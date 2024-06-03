@@ -49,18 +49,19 @@ class PaymentSchedule(models.Model):
     currency_id = fields.Many2one("res.currency", default=lambda self: self.env.company.currency_id, readonly=True)
     date = fields.Date(string="Date de l'échéance", required=True)
     global_progress = fields.Float(string="Avancement global")
+    cumulative_progress = fields.Float(string="Avancement cumulé", compute="_compute_cumulative_progress")
     maximum_progress = fields.Float(string="Avancement maximum", compute="_compute_maximum_progress", readonly=True)
-    current_progress = fields.Float(string="Cumul", compute="_compute_current_progress")
+    monthly_progress = fields.Float(compute="_compute_monthly_progress")
     down_payment = fields.Float(string="Acompte")
     down_payment_total = fields.Monetary(compute="_compute_down_payment_total", store=True, precompute=True, readonly=False)
     grand_total = fields.Monetary(compute="_compute_grand_total", store=True, precompute=True, readonly=False)
     schedule_state_ids = fields.Many2many("payment.schedule.state", string="Statut de l'échéancier")
-    # schedule_state = fields.Selection(selection=[
-    #     ("SC", "Schedule Created"),
-    #     ("IC", "Invoice Created"),
-    #     ("I", "Invoice Issued"),
-    #     ("P", "Paid")
-    # ], string="Statut de l'échéancier", default="SC", store=True, readonly=False, required=True)
+    schedule_state = fields.Selection(selection=[
+        ("SC", "Schedule Created"),
+        ("IC", "Invoice Created"),
+        ("I", "Invoice Issued"),
+        ("P", "Paid")
+    ], string="Statut de l'échéancier", default="SC", store=True, readonly=False, required=True)
     # schedule_state_color = fields.Integer(compute="_compute_schedule_state_color")
 
 
@@ -253,7 +254,7 @@ class PaymentSchedule(models.Model):
         
         new_invoice = self.env["account.move"].create(values)
         
-        # self.schedule_state = "C"
+        self.schedule_state = "IC"
         
         return new_invoice
     
@@ -290,15 +291,15 @@ class PaymentSchedule(models.Model):
 
 
     @api.depends("line_ids")
-    def _compute_current_progress(self):
-        """Computes the cumulative progress for a given month."""
+    def _compute_cumulative_progress(self):
+        """Computes the cumulative progress of a project."""
         for record in self:
             if record.line_ids:
                 total_invoiced_to_date = sum(record.related_project_id.payment_schedule_ids.mapped("grand_total"))
                 total_project_cost = sum(self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc").mapped("amount_untaxed"))
                 cumulative_progress = (total_invoiced_to_date / total_project_cost) * 100
-                # cumulative_progress = 20
-                record.write({'current_progress': cumulative_progress})
+                
+                record.write({'cumulative_progress': cumulative_progress})
 
 
     api.depends("line_ids")
@@ -306,8 +307,18 @@ class PaymentSchedule(models.Model):
         """Computes the maximum progress. Useful to determine the maximum value of the gauge."""
         for record in self:
             record.write({'maximum_progress': 100})
-    
-    
+
+
+    @api.depends("line_ids")
+    def _compute_monthly_progress(self):
+        """Computes the monthly progress of a project."""
+        for record in self:
+            if record.line_ids:
+                average_progress = mean(record.line_ids.mapped("total_progress")) * 100
+                
+                record.write({'monthly_progress': average_progress})
+
+
     # api.depends("schedule_state")
     # def _compute_schedule_state_color(self):
     #     """Affects color to schedule state."""
