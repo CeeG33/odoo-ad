@@ -77,27 +77,27 @@ class PaymentSchedule(models.Model):
                 for order in record.related_order_ids:
     
                     for line in order.order_line:
-                        
-                        existing_line = record.line_ids.filtered(lambda x: x.description == line.name)
-                        
-                        if existing_line:
-                            existing_line.write({
-                                'trade_total': line.price_unit,
-                                })
+                        if not line.is_downpayment:
+                            existing_line = record.line_ids.filtered(lambda x: x.description == line.name)
                             
-                        else:
-                            new_line = record.env["payment.schedule.line.item"].create({
-                                'payment_schedule_id': record.id,
-                                'description': line.name,
-                                'trade_total': line.price_unit,
-                                })
-                            lines.append(new_line.id)
-                            
-                            if previous_payment_schedule:
-                                matching_line = previous_payment_schedule.line_ids.filtered(lambda x: x.description == line.name)
+                            if existing_line:
+                                existing_line.write({
+                                    'trade_total': line.price_unit,
+                                    })
                                 
-                                if matching_line:
-                                    new_line.write({'previous_progress': matching_line.total_progress})
+                            else:
+                                new_line = record.env["payment.schedule.line.item"].create({
+                                    'payment_schedule_id': record.id,
+                                    'description': line.name,
+                                    'trade_total': line.price_unit,
+                                    })
+                                lines.append(new_line.id)
+                                
+                                if previous_payment_schedule:
+                                    matching_line = previous_payment_schedule.line_ids.filtered(lambda x: x.description == line.name)
+                                    
+                                    if matching_line:
+                                        new_line.write({'previous_progress': matching_line.total_progress})
                             
                 record.line_ids = [(6, 0, lines)]
     
@@ -245,18 +245,55 @@ class PaymentSchedule(models.Model):
                 "price_unit": self.down_payment_total
             }))
         
-        values = {
+        invoice_values = {
             "partner_id": self.related_project_id.partner_id.id,
             "move_type": "out_invoice",
             "journal_id": journal.id,
             "invoice_line_ids": payment_schedule_lines
         }
         
-        new_invoice = self.env["account.move"].create(values)
+        new_invoice = self.env["account.move"].create(invoice_values)
         
         self.schedule_state = "IC"
         
+        self.action_update_sale_order_quantities()
+        
         return new_invoice
+    
+    
+    def action_update_sale_order_quantities(self):
+        """Updates the associated sale order delivered and invoiced quantities."""
+        for record in self:
+            if record.related_order_ids:
+                for order in record.related_order_ids:
+                    for line in order.order_line:
+                        if not line.is_downpayment:
+                            existing_line = record.line_ids.filtered(lambda x: x.description == line.name)
+                            
+                            line.qty_delivered = existing_line.current_progress
+                            line.qty_invoiced = existing_line.current_progress
+                            
+                        
+                        else:
+                            continue
+                    
+                    
+                    DOWN_PAYMENT_PRODUCT_ID = self.env["product.template"].search([("name", "=", "Reprise sur acompte")], limit=1)
+                    
+                    print(f"Down payment product id : {DOWN_PAYMENT_PRODUCT_ID}")
+                    
+                    down_payment_line = {
+                        'order_id': order.id,
+                        # 'is_downpayment': True,
+                        'name': f"Situation du {record.date}",
+                        'product_uom_qty': 0,
+                        'qty_invoiced': 1.0,
+                        'price_unit': record.down_payment_total,
+                        # 'customer_lead': 30,
+                        'product_id': DOWN_PAYMENT_PRODUCT_ID.id,
+                        }
+                
+                    self.env['sale.order.line'].create(down_payment_line)
     
     
     @api.constrains("date")
