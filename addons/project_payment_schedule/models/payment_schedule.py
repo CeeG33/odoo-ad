@@ -278,19 +278,22 @@ class PaymentSchedule(models.Model):
                             continue
                     
                     
-                    DOWN_PAYMENT_PRODUCT_ID = self.env["product.template"].search([("name", "=", "Reprise sur acompte")], limit=1)
+                    DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search([("name", "=", "Reprise sur acompte")], limit=1)
                     
-                    print(f"Down payment product id : {DOWN_PAYMENT_PRODUCT_ID}")
+                    print(f"Down payment product : {DOWN_PAYMENT_PRODUCT_ID}")
+                    print(f"Down payment product id : {DOWN_PAYMENT_PRODUCT_ID.id}")
+                    print(f"Down payment product name : {DOWN_PAYMENT_PRODUCT_ID.name}")
+                    print(f"Down payment product name sale : {DOWN_PAYMENT_PRODUCT_ID.description_sale}")
                     
                     down_payment_line = {
                         'order_id': order.id,
-                        # 'is_downpayment': True,
+                        'is_downpayment': True,
                         'name': f"Situation du {record.date}",
-                        'product_uom_qty': 0,
-                        'qty_invoiced': 1.0,
+                        'product_uom_qty': 1,
+                        'qty_invoiced': 1,
                         'price_unit': record.down_payment_total,
-                        # 'customer_lead': 30,
-                        'product_id': DOWN_PAYMENT_PRODUCT_ID.id,
+                        'customer_lead': 30,
+                        'product_id': DOWN_PAYMENT_PRODUCT_ID.id
                         }
                 
                     self.env['sale.order.line'].create(down_payment_line)
@@ -353,7 +356,7 @@ class PaymentSchedule(models.Model):
             if record.line_ids:
                 average_progress = mean(record.line_ids.mapped("total_progress")) * 100
                 
-                record.write({'monthly_progress': average_progress})
+                record.write({'monthly_progress': int(average_progress)})
 
 
     # api.depends("schedule_state")
