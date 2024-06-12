@@ -254,6 +254,12 @@ class PaymentSchedule(models.Model):
         
         new_invoice = self.env["account.move"].create(invoice_values)
         
+        for order in self.related_order_ids:
+            order.write({
+                'invoice_ids': [(4, new_invoice.id)],
+                'invoice_count': len(order.invoice_ids) + 1
+            })
+        
         self.schedule_state = "IC"
         
         self.action_update_sale_order_quantities()
@@ -270,33 +276,30 @@ class PaymentSchedule(models.Model):
                         if not line.is_downpayment:
                             existing_line = record.line_ids.filtered(lambda x: x.description == line.name)
                             
-                            line.qty_delivered = existing_line.current_progress
-                            line.qty_invoiced = existing_line.current_progress
-                            
-                        
-                        else:
-                            continue
+                            line.qty_delivered = existing_line.total_progress
+                            line.qty_invoiced = existing_line.total_progress
                     
-                    
-                    DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search([("name", "=", "Reprise sur acompte")], limit=1)
-                    
-                    print(f"Down payment product : {DOWN_PAYMENT_PRODUCT_ID}")
-                    print(f"Down payment product id : {DOWN_PAYMENT_PRODUCT_ID.id}")
-                    print(f"Down payment product name : {DOWN_PAYMENT_PRODUCT_ID.name}")
-                    print(f"Down payment product name sale : {DOWN_PAYMENT_PRODUCT_ID.description_sale}")
-                    
-                    down_payment_line = {
-                        'order_id': order.id,
-                        'is_downpayment': True,
-                        'name': f"Situation du {record.date}",
-                        'product_uom_qty': 1,
-                        'qty_invoiced': 1,
-                        'price_unit': record.down_payment_total,
-                        'customer_lead': 30,
-                        'product_id': DOWN_PAYMENT_PRODUCT_ID.id
-                        }
+                #SUR SERV DE PRODUCTION : DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search([("name", "=", "Downpayment")], limit=1)
                 
-                    self.env['sale.order.line'].create(down_payment_line)
+                DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search([("name", "=", "Reprise sur acompte")], limit=1)
+                
+                print(f"record.related_order_ids : {record.related_order_ids}")
+                print(f"record.related_order_ids[0].id : {record.related_order_ids[-1].id}")
+                
+                down_payment_line = self.env['sale.order.line'].create({
+                    'order_id': record.related_order_ids[-1].id,
+                    'is_downpayment': True,
+                    'name': f"Situation du {record.date}",
+                    'product_uom_qty': 0.0,
+                    'price_unit': record.down_payment_total,
+                    'product_id': DOWN_PAYMENT_PRODUCT_ID.id,
+                    'sequence': record.related_order_ids[-1].order_line and record.related_order_ids[-1].order_line[-1].sequence + 1 or 10,
+                    })
+                
+                down_payment_line.qty_invoiced = 1.0
+    
+    
+    
     
     
     @api.constrains("date")
@@ -368,6 +371,4 @@ class PaymentSchedule(models.Model):
     
     
     
-
-
 
