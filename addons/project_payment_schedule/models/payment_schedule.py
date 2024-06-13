@@ -226,6 +226,47 @@ class PaymentSchedule(models.Model):
                 record.write({'grand_total': grand_total_amount})
     
     
+    # def action_create_invoice(self):
+    #     """Creates the associated invoice."""
+    #     journal = self.env["account.journal"].search([("type", "=", "sale")], limit=1)
+        
+    #     payment_schedule_lines = []
+        
+    #     for line in self.line_ids:
+    #         payment_schedule_lines.append(Command.create({
+    #             "name": line.description,
+    #             "quantity": 1,
+    #             "price_unit": line.line_total
+    #         }))
+        
+    #     payment_schedule_lines.append(Command.create({
+    #             "name": "Remboursement sur acompte",
+    #             "quantity": 1,
+    #             "price_unit": self.down_payment_total
+    #         }))
+        
+    #     invoice_values = {
+    #         "partner_id": self.related_project_id.partner_id.id,
+    #         "move_type": "out_invoice",
+    #         "journal_id": journal.id,
+    #         "invoice_line_ids": payment_schedule_lines,
+    #     }
+        
+    #     new_invoice = self.env["account.move"].create(invoice_values)
+        
+    #     for order in self.related_order_ids:
+    #         order.write({
+    #             'invoice_ids': [(4, new_invoice.id)],
+    #             'invoice_count': len(order.invoice_ids) + 1
+    #         })
+        
+    #     self.schedule_state = "IC"
+        
+    #     self.action_update_sale_order_quantities()
+        
+    #     return new_invoice
+    
+    
     def action_create_invoice(self):
         """Creates the associated invoice."""
         journal = self.env["account.journal"].search([("type", "=", "sale")], limit=1)
@@ -245,20 +286,17 @@ class PaymentSchedule(models.Model):
                 "price_unit": self.down_payment_total
             }))
         
-        invoice_values = {
-            "partner_id": self.related_project_id.partner_id.id,
-            "move_type": "out_invoice",
-            "journal_id": journal.id,
-            "invoice_line_ids": payment_schedule_lines
-        }
+        advance_payment_wizard = self.env["sale.advance.payment.inv"].create({
+            'advance_payment_method': 'delivered',
+            'sale_order_ids': [(6, 0, self.related_order_ids.ids)],
+            'consolidated_billing': True
+        })
         
-        new_invoice = self.env["account.move"].create(invoice_values)
+        new_invoice = advance_payment_wizard.create_invoices()
         
-        for order in self.related_order_ids:
-            order.write({
-                'invoice_ids': [(4, new_invoice.id)],
-                'invoice_count': len(order.invoice_ids) + 1
-            })
+        # new_invoice.invoice_line_ids = payment_schedule_lines
+        
+        print(new_invoice)
         
         self.schedule_state = "IC"
         
@@ -297,9 +335,6 @@ class PaymentSchedule(models.Model):
                     })
                 
                 down_payment_line.qty_invoiced = 1.0
-    
-    
-    
     
     
     @api.constrains("date")

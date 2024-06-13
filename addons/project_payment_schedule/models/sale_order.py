@@ -19,12 +19,14 @@ class SaleOrder(models.Model):
     project_id = fields.Many2one("project.project", "Project", required=True)
     payment_schedule_id = fields.Many2one("payment.schedule", "Payment Schedule")
     
+    
     @api.onchange("partner_id")
     def onchange_partner_id(self):
         for record in self:
             return {"domain":{
                 "project_id": [('partner_id', '=', record.partner_id.id)]
             }}
+    
     
     def get_payment_schedule(self):
         self.ensure_one()
