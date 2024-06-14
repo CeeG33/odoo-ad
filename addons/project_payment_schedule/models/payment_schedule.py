@@ -32,8 +32,6 @@ class PaymentSchedule(models.Model):
         "sale.order",
         "payment_schedule_id",
         compute="_compute_related_orders",
-        store=True,
-        precompute=True
     )
     related_project_id = fields.Many2one("project.project", string="Projet", store=True, readonly=True, default= lambda self: self.env.context['active_id'])
     line_ids = fields.One2many(
@@ -106,8 +104,7 @@ class PaymentSchedule(models.Model):
     def _compute_related_orders(self):
         """Selects the orders related to the project."""
         for record in self:
-            if record.related_project_id:
-                record.related_order_ids = self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc")
+            record.related_order_ids = self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc")
             
             
     @api.depends("line_ids")
@@ -225,7 +222,7 @@ class PaymentSchedule(models.Model):
                 
                 record.write({'grand_total': grand_total_amount})
     
-    
+    # Première version du code pour créer les factures
     # def action_create_invoice(self):
     #     """Creates the associated invoice."""
     #     journal = self.env["account.journal"].search([("type", "=", "sale")], limit=1)
@@ -268,24 +265,7 @@ class PaymentSchedule(models.Model):
     
     
     def action_create_invoice(self):
-        """Creates the associated invoice."""
-        journal = self.env["account.journal"].search([("type", "=", "sale")], limit=1)
-        
-        payment_schedule_lines = []
-        
-        for line in self.line_ids:
-            payment_schedule_lines.append(Command.create({
-                "name": line.description,
-                "quantity": 1,
-                "price_unit": line.line_total
-            }))
-        
-        payment_schedule_lines.append(Command.create({
-                "name": "Remboursement sur acompte",
-                "quantity": 1,
-                "price_unit": self.down_payment_total
-            }))
-        
+        """Creates the associated invoice."""        
         advance_payment_wizard = self.env["sale.advance.payment.inv"].create({
             'advance_payment_method': 'delivered',
             'sale_order_ids': [(6, 0, self.related_order_ids.ids)],
@@ -294,15 +274,78 @@ class PaymentSchedule(models.Model):
         
         new_invoice = advance_payment_wizard.create_invoices()
         
-        # new_invoice.invoice_line_ids = payment_schedule_lines
-        
-        print(new_invoice)
-        
         self.schedule_state = "IC"
         
         self.action_update_sale_order_quantities()
         
+        self._copy_payment_schedule_lines_to_latest_invoice()
+        
         return new_invoice
+    
+    
+    def _copy_payment_schedule_lines_to_latest_invoice(self):
+        """Copies the payment schedule lines to the latest invoice."""        
+        
+        
+        latest_invoice = self.env["account.move"].search([("partner_id", "=", self.related_project_id.partner_id.id)], order="create_date desc", limit=1)
+        
+        if not latest_invoice:
+            raise UserError("No invoice found for the related project.")
+        
+        payment_schedule_lines = self.line_ids
+        invoice_lines = latest_invoice.invoice_line_ids
+        
+        payment_schedule_dict = {line.description: line.line_total for line in payment_schedule_lines}
+        
+        for invoice_line in invoice_lines:
+            if invoice_line.product_id.id in [55, 57]: # À mettre à jour selon ID du repo
+                invoice_line.unlink()
+            elif invoice_line.name in payment_schedule_dict:
+                invoice_line.quantity = 1
+                invoice_line.price_unit = payment_schedule_dict[invoice_line.name]
+        
+        self.env["account.move.line"].create({
+            "move_id": latest_invoice.id,
+            "name": "Remboursement sur acompte",
+            "quantity": 1,
+            "price_unit": self.down_payment_total
+        })
+        
+        return latest_invoice
+    
+    
+    # def _copy_payment_schedule_lines_to_latest_invoice(self):
+    #     """Copies the payment schedule lines to the latest invoice."""
+    #     latest_invoice = self.env["account.move"].search([("partner_id", "=", self.related_project_id.partner_id.id)], order="create_date desc", limit=1)
+        
+    #     if not latest_invoice:
+    #         raise UserError("No invoice found for the related project.")
+        
+    #     invoice_lines = latest_invoice.invoice_line_ids
+        
+    #     # payment_schedule_dict = {line.description: line.line_total for line in payment_schedule_lines}
+        
+    #     invoice_lines.unlink()
+            
+    #     payment_schedule_lines = []
+        
+    #     for line in self.line_ids:
+    #         payment_schedule_lines.append(Command.create({
+    #             "name": line.description,
+    #             "quantity": 1,
+    #             "price_unit": line.line_total
+    #         }))
+        
+    #     latest_invoice.write({"invoice_line_ids": payment_schedule_lines})
+        
+    #     self.env["account.move.line"].create({
+    #         "move_id": latest_invoice.id,
+    #         "name": "Remboursement sur acompte",
+    #         "quantity": 1,
+    #         "price_unit": self.down_payment_total
+    #     })
+        
+    #     return latest_invoice
     
     
     def action_update_sale_order_quantities(self):
@@ -320,9 +363,6 @@ class PaymentSchedule(models.Model):
                 #SUR SERV DE PRODUCTION : DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search([("name", "=", "Downpayment")], limit=1)
                 
                 DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search([("name", "=", "Reprise sur acompte")], limit=1)
-                
-                print(f"record.related_order_ids : {record.related_order_ids}")
-                print(f"record.related_order_ids[0].id : {record.related_order_ids[-1].id}")
                 
                 down_payment_line = self.env['sale.order.line'].create({
                     'order_id': record.related_order_ids[-1].id,
