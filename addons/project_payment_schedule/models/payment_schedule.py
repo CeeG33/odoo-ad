@@ -276,42 +276,77 @@ class PaymentSchedule(models.Model):
         
         self.schedule_state = "IC"
         
-        self.action_update_sale_order_quantities()
+        latest_invoice = self.env["account.move"].search([("partner_id", "=", self.related_project_id.partner_id.id)], order="create_date desc", limit=1)
         
-        self._copy_payment_schedule_lines_to_latest_invoice()
+        latest_invoice.move_type = "out_invoice"
+        
+        self._copy_payment_schedule_lines_to_latest_invoice(latest_invoice)
+        
+        self.action_update_sale_order_quantities()
         
         return new_invoice
     
     
-    def _copy_payment_schedule_lines_to_latest_invoice(self):
-        """Copies the payment schedule lines to the latest invoice."""        
-        
-        
-        latest_invoice = self.env["account.move"].search([("partner_id", "=", self.related_project_id.partner_id.id)], order="create_date desc", limit=1)
-        
-        if not latest_invoice:
+    def _copy_payment_schedule_lines_to_latest_invoice(self, invoice):
+        """Copies the payment schedule lines to the latest invoice."""
+        if not invoice:
             raise UserError("No invoice found for the related project.")
         
         payment_schedule_lines = self.line_ids
-        invoice_lines = latest_invoice.invoice_line_ids
+        invoice_lines = invoice.invoice_line_ids
         
-        payment_schedule_dict = {line.description: line.line_total for line in payment_schedule_lines}
+        # Associe un montant total à la description de la ligne dans l'échéancier.
+        payment_schedule_dict = {line.description: line.line_total for line in payment_schedule_lines if line.description != "Remboursement sur acompte"}
         
         for invoice_line in invoice_lines:
-            if invoice_line.product_id.id in [55, 57]: # À mettre à jour selon ID du repo
-                invoice_line.unlink()
-            elif invoice_line.name in payment_schedule_dict:
+            if invoice_line.name in payment_schedule_dict:
+                # Renseigne les montants totaux des avancements (au lieu de prendre le montant total du lot).
                 invoice_line.quantity = 1
                 invoice_line.price_unit = payment_schedule_dict[invoice_line.name]
+            else:
+                # Met à zéro les lignes de down payment précédents.
+                invoice_line.quantity = 0
+                
         
-        self.env["account.move.line"].create({
-            "move_id": latest_invoice.id,
-            "name": "Remboursement sur acompte",
-            "quantity": 1,
-            "price_unit": self.down_payment_total
-        })
+        # Crée la ligne de remboursement sur acompte du mois en cours.
+        if self.down_payment_total > 0:
+            self.env["account.move.line"].create({
+                "move_id": invoice.id,
+                "name": "Remboursement sur acompte",
+                "quantity": 1,
+                "price_unit": self.down_payment_total
+            })
         
-        return latest_invoice
+        return invoice
+    
+    
+    # def _copy_payment_schedule_lines_to_latest_invoice(self):
+    #     """Copies the payment schedule lines to the latest invoice."""        
+    #     latest_invoice = self.env["account.move"].search([("partner_id", "=", self.related_project_id.partner_id.id)], order="create_date desc", limit=1)
+        
+    #     if not latest_invoice:
+    #         raise UserError("No invoice found for the related project.")
+        
+    #     payment_schedule_lines = self.line_ids
+    #     invoice_lines = latest_invoice.invoice_line_ids
+        
+    #     payment_schedule_dict = {line.description: line.line_total for line in payment_schedule_lines}
+        
+    #     for invoice_line in invoice_lines:
+    #         # if invoice_line.product_id.id in [55]: # Supprime les lignes de down payment. À mettre à jour selon ID du repo
+    #         #     invoice_line.unlink()
+    #         if invoice_line.name in payment_schedule_dict:
+    #             invoice_line.quantity = 1
+    #             invoice_line.price_unit = payment_schedule_dict[invoice_line.name]
+        
+    #     self.env["account.move.line"].create({
+    #         "move_id": latest_invoice.id,
+    #         "name": "Remboursement sur acompte",
+    #         "quantity": 1,
+    #         "price_unit": self.down_payment_total
+    #     })
+        
+    #     return latest_invoice
     
     
     # def _copy_payment_schedule_lines_to_latest_invoice(self):
@@ -356,7 +391,6 @@ class PaymentSchedule(models.Model):
                     for line in order.order_line:
                         if not line.is_downpayment:
                             existing_line = record.line_ids.filtered(lambda x: x.description == line.name)
-                            
                             line.qty_delivered = existing_line.total_progress
                             line.qty_invoiced = existing_line.total_progress
                     
@@ -364,17 +398,23 @@ class PaymentSchedule(models.Model):
                 
                 DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search([("name", "=", "Reprise sur acompte")], limit=1)
                 
-                down_payment_line = self.env['sale.order.line'].create({
-                    'order_id': record.related_order_ids[-1].id,
-                    'is_downpayment': True,
-                    'name': f"Situation du {record.date}",
-                    'product_uom_qty': 0.0,
-                    'price_unit': record.down_payment_total,
-                    'product_id': DOWN_PAYMENT_PRODUCT_ID.id,
-                    'sequence': record.related_order_ids[-1].order_line and record.related_order_ids[-1].order_line[-1].sequence + 1 or 10,
-                    })
-                
-                down_payment_line.qty_invoiced = 1.0
+                if record.down_payment_total > 0:
+                    down_payment_line = self.env['sale.order.line'].create({
+                        'order_id': record.related_order_ids[0].id,
+                        'is_downpayment': True,
+                        'name': f"Situation du {record.date}",
+                        'product_uom_qty': 0.0,
+                        'price_unit': record.down_payment_total,
+                        'product_id': DOWN_PAYMENT_PRODUCT_ID.id,
+                        'sequence': record.related_order_ids[0].order_line and record.related_order_ids[0].order_line[-1].sequence + 1 or 10,
+                        })
+                    
+                    new_downpayment_lines = self.env['sale.order.line'].search([("product_id", "=", DOWN_PAYMENT_PRODUCT_ID.id)])
+                    
+                    print(new_downpayment_lines)
+                    
+                    for new_downpayment_line in new_downpayment_lines:
+                        new_downpayment_line.qty_invoiced = 1.0 
     
     
     @api.constrains("date")
