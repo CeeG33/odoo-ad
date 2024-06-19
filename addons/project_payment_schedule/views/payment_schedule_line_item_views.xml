@@ -12,6 +12,7 @@
         <field name="arch" type="xml">
             <tree string="Payment Schedule Line Item Form" editable="bottom" create="0">
                 <field name="payment_schedule_id" invisible="1"/>
+                <field name="related_order_id"/>
                 <field name="description"/>
                 <field name="trade_total" widget="monetary"/>
                 <field name="previous_progress" widget="percentage" optional="show"/>
@@ -28,6 +29,7 @@
         <field name="arch" type="xml">
             <tree string="Channel" editable="bottom">
                 <field name="payment_schedule_id"/>
+                <field name="related_order_id"/>
                 <field name="description"/>
                 <field name="trade_total" widget="monetary"/>
                 <field name="previous_progress" widget="percentage"/>

@@ -16,6 +16,7 @@ class PaymentScheduleLineItem(models.Model):
     _description = "Payment Schedule Line Item."
     
     payment_schedule_id = fields.Many2one("payment.schedule", string="ID Échéancier", readonly=True)
+    related_order_id = fields.Many2one("sale.order", string="Devis afférent", readonly=True)
     description = fields.Text(string="Description", readonly=True)
     trade_total = fields.Float(string="Montant du lot (€)", readonly=True)
     previous_progress = fields.Float(string="Avancement précédent (%)", readonly=True)
