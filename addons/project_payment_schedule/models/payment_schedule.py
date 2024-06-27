@@ -39,7 +39,7 @@ class PaymentSchedule(models.Model):
         "payment_schedule_id",
         compute="_compute_line_items",
         store=True,
-        # precompute=True,
+        precompute=True,
         readonly=False
     )
     lines_description = fields.Text(compute="_compute_lines_description")
@@ -51,7 +51,7 @@ class PaymentSchedule(models.Model):
     maximum_progress = fields.Float(string="Avancement maximum", compute="_compute_maximum_progress", readonly=True)
     monthly_progress = fields.Float(compute="_compute_monthly_progress")
     down_payment = fields.Float(string="Acompte")
-    down_payment_total = fields.Monetary(compute="_compute_down_payment_total", readonly=False)
+    down_payment_total = fields.Monetary(compute="_compute_down_payment_total", store=True, precompute=True, readonly=False)
     grand_total = fields.Monetary(compute="_compute_grand_total", store=True, precompute=True, readonly=False)
     schedule_state_ids = fields.Many2many("payment.schedule.state", string="Statut de l'échéancier")
     schedule_state = fields.Selection(selection=[
@@ -192,13 +192,12 @@ class PaymentSchedule(models.Model):
     def _compute_down_payment_total(self):
         """Computes the value of the down payment based on the down payment percentage."""
         for record in self:
-            base_order_id = record.related_order_ids[0].id
+            base_order_id = record._get_base_order()
             base_order_lines = record.line_ids.filtered(lambda x: x.related_order_id.id == base_order_id)
-            print(f"base_order_lines : {base_order_lines}")
             base_order_lines_sum = sum(base_order_lines.mapped("line_total"))
-            print(f"base_order_lines_sum : {base_order_lines_sum}")
+            
             down_payment_amount = record.down_payment * -(base_order_lines_sum)
-            print(f"down_payment_amount : {down_payment_amount}")
+            
             record.write({'down_payment_total': down_payment_amount})
     
     
@@ -487,6 +486,13 @@ class PaymentSchedule(models.Model):
     
     
     def action_refresh_line_items(self):
+        """Refreshes the line items of the payment schedule."""
         self.line_ids.unlink()
         self._compute_line_items()
+    
+    
+    def _get_base_order(self):
+        """Returns the first sale order of the project."""
+        for record in self:
+            return self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc", limit=1).id
 
