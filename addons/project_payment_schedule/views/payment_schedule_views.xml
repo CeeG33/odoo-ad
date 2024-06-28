@@ -28,6 +28,7 @@
                     </group>
                     <field name="line_ids" nolabel="1" force_save="1"/>
                     <group class="oe_subtotal_footer oe_right" name="lines_total">
+                        <field name="base_order_lines_sum" string="Sous-total marché de base"/>
                         <field name="lines_total" string="Sous-total"/>
                         <field name="down_payment_total" string="Remboursement sur acompte"/>
                         <field name="grand_total" string="Total"/>

@@ -61,6 +61,7 @@ class PaymentSchedule(models.Model):
         ("P", "Paid")
     ], string="Statut de l'échéancier", default="SC", store=True, readonly=False, required=True)
     # schedule_state_color = fields.Integer(compute="_compute_schedule_state_color")
+    base_order_lines_sum = fields.Float(compute="_compute_base_order_lines_sum", readonly=False)
 
 
     @api.depends("related_order_ids")
@@ -85,7 +86,7 @@ class PaymentSchedule(models.Model):
                                 
                             else:
                                 new_line = record.env["payment.schedule.line.item"].create({
-                                    'payment_schedule_id': record.id,
+                                    'payment_schedule_id': self.id,
                                     'related_order_id': order.id,
                                     'description': line.name,
                                     'trade_total': line.price_unit,
@@ -139,7 +140,7 @@ class PaymentSchedule(models.Model):
             if record.line_ids:
                 lines_sum = sum(record.line_ids.mapped("line_total"))
                 
-                record.write({'lines_total': lines_sum})
+                record.lines_total = lines_sum
     
     
     @api.model
@@ -192,13 +193,23 @@ class PaymentSchedule(models.Model):
     def _compute_down_payment_total(self):
         """Computes the value of the down payment based on the down payment percentage."""
         for record in self:
-            base_order_id = record._get_base_order()
-            base_order_lines = record.line_ids.filtered(lambda x: x.related_order_id.id == base_order_id)
+            base_order_id = f"NewId_{record._get_base_order().id}"
+            print(f"base_order_id: {base_order_id}")
+            
+            print(f"record.line_ids: {record.line_ids}")
+            
+            for order in record.line_ids:
+                print(f"order.id: {order.related_order_id.id}")
+            
+            base_order_lines = record.line_ids.filtered(lambda x: str(x.related_order_id.id) == base_order_id)
+            print(f"base_order_lines: {base_order_lines}")
             base_order_lines_sum = sum(base_order_lines.mapped("line_total"))
+            print(f"base_order_lines_sum: {base_order_lines_sum}")
             
             down_payment_amount = record.down_payment * -(base_order_lines_sum)
+            print(f"down_payment_amount: {down_payment_amount}")
             
-            record.write({'down_payment_total': down_payment_amount})
+            record.down_payment_total = down_payment_amount
     
     
     @api.depends("line_ids", "down_payment", "down_payment_total", "lines_total")
@@ -218,7 +229,7 @@ class PaymentSchedule(models.Model):
                 record.write({'grand_total': grand_total_amount})
             
             else:
-                grand_total_amount = 0
+                grand_total_amount = record.lines_total
                 
                 record.write({'grand_total': grand_total_amount})
     
@@ -494,5 +505,25 @@ class PaymentSchedule(models.Model):
     def _get_base_order(self):
         """Returns the first sale order of the project."""
         for record in self:
-            return self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc", limit=1).id
+            return self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc", limit=1) or None
+    
+    
+    @api.depends("line_ids", "line_ids.current_progress", "down_payment", "global_progress")
+    def _compute_base_order_lines_sum(self):
+        """Computes the base order lines sum."""
+        for record in self:
+            base_order = f"NewId_{record._get_base_order().id}"
+            
+            print(f"base_order: {base_order}")
+            
+            if base_order:
+                # base_order_lines = record.line_ids.filtered(lambda x: str(x.related_order_id.id) == base_order)
+                
+                lines_sum = sum(line.line_total for line in record.line_ids if line.related_order_id.id == base_order)
+                record.base_order_lines_sum = lines_sum
+                
+                sum_test = sum(record.line_ids.mapped("line_total"))
+                
+                record.base_order_lines_sum = sum_test
+                
 
