@@ -81,12 +81,14 @@ class PaymentSchedule(models.Model):
                             
                             if existing_line:
                                 existing_line.write({
+                                    'payment_schedule_id': record.id,
+                                    'related_order_id': order.id,
                                     'trade_total': line.price_unit,
                                     })
                                 
                             else:
                                 new_line = record.env["payment.schedule.line.item"].create({
-                                    'payment_schedule_id': self.id,
+                                    'payment_schedule_id': record.id,
                                     'related_order_id': order.id,
                                     'description': line.name,
                                     'trade_total': line.price_unit,
@@ -97,9 +99,13 @@ class PaymentSchedule(models.Model):
                                     matching_line = previous_payment_schedule.line_ids.filtered(lambda x: x.description == line.name)
                                     
                                     if matching_line:
-                                        new_line.write({'previous_progress': matching_line.total_progress})
+                                        new_line.write({
+                                            'previous_progress': matching_line.total_progress,
+                                            'payment_schedule_id': record.id,
+                                            'related_order_id': order.id,
+                                            })
                             
-                record.line_ids = [(6, 0, lines)]
+                record.line_ids = lines
     
     
     @api.depends("related_project_id")
@@ -193,7 +199,7 @@ class PaymentSchedule(models.Model):
     def _compute_down_payment_total(self):
         """Computes the value of the down payment based on the down payment percentage."""
         for record in self:
-            base_order_id = f"NewId_{record._get_base_order().id}"
+            base_order_id = record._get_base_order().id
             print(f"base_order_id: {base_order_id}")
             
             print(f"record.line_ids: {record.line_ids}")
@@ -201,7 +207,7 @@ class PaymentSchedule(models.Model):
             for order in record.line_ids:
                 print(f"order.id: {order.related_order_id.id}")
             
-            base_order_lines = record.line_ids.filtered(lambda x: str(x.related_order_id.id) == base_order_id)
+            base_order_lines = record.line_ids.filtered(lambda x: x.related_order_id.id == base_order_id)
             print(f"base_order_lines: {base_order_lines}")
             base_order_lines_sum = sum(base_order_lines.mapped("line_total"))
             print(f"base_order_lines_sum: {base_order_lines_sum}")
@@ -516,10 +522,29 @@ class PaymentSchedule(models.Model):
             
             print(f"base_order: {base_order}")
             
+            base_order2 = record._get_base_order().id
+            
+            print(f"base_order2: {base_order2}")
+            
             if base_order:
                 # base_order_lines = record.line_ids.filtered(lambda x: str(x.related_order_id.id) == base_order)
                 
-                lines_sum = sum(line.line_total for line in record.line_ids if line.related_order_id.id == base_order)
+                line_total_list = [line.line_total for line in record.line_ids if line.related_order_id.id == base_order]
+                print(f"line_total_list: {line_total_list}")
+                
+                line_total_list2 = [line.line_total for line in record.line_ids if line.related_order_id.id == base_order2]
+                print(f"line_total_list2: {line_total_list2}")
+                
+                lines_related_order_id = [line.related_order_id.id for line in record.line_ids]
+                print(f"lines_related_order_id: {lines_related_order_id}")
+                
+                # line_total_list = [line.line_total for line in record.line_ids if line.trade_total not in [7866.0, 13250.0]]
+                # print(f"line_total_list: {line_total_list}")
+                
+                # filtered_list = [line for line in line_total_list if line.related_order_id.id == base_order]
+                # print(f"filtered_list: {filtered_list}")
+                self.env["sale.order"].search([("id", "=", base_order2)])
+                lines_sum = sum(line.line_total for line in record.line_ids if line.trade_total == base_order)
                 record.base_order_lines_sum = lines_sum
                 
                 sum_test = sum(record.line_ids.mapped("line_total"))

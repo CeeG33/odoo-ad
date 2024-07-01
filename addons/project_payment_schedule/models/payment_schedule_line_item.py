@@ -17,6 +17,7 @@ class PaymentScheduleLineItem(models.Model):
     
     payment_schedule_id = fields.Many2one("payment.schedule", string="ID Échéancier", readonly=False)
     related_order_id = fields.Many2one("sale.order", string="Devis afférent", store=True, readonly=False)
+    is_additional_work = fields.Boolean(string="Travaux Supplémentaires", compute="_compute_is_additional_work", store=True, readonly=False)
     description = fields.Text(string="Description", readonly=True)
     trade_total = fields.Float(string="Montant du lot (€)", readonly=True)
     previous_progress = fields.Float(string="Avancement précédent (%)", readonly=True)
@@ -59,6 +60,22 @@ class PaymentScheduleLineItem(models.Model):
             
             elif record.payment_schedule_id.global_progress == 0:
                 record.current_progress = record.payment_schedule_id.global_progress
+    
+    
+    @api.depends("payment_schedule_id.line_ids")
+    def _compute_is_additional_work(self):
+        """Checks if the line is part of the base order."""
+        for record in self:
+            print(f"base_order_id: {record.payment_schedule_id._get_base_order().id}")
+            print(f"related_order_id: {record.related_order_id.id}")
+            base_order = f"NewId_{record.payment_schedule_id._get_base_order().id}"
+            print(f"base_order: {base_order}")
+            
+            # if record.payment_schedule_id._get_base_order().id == record.related_order_id.id:
+            if base_order == record.related_order_id.id:
+                record.is_additional_work = False
+            else:
+                record.is_additional_work = True
     
     
     @api.constrains("total_progress")
