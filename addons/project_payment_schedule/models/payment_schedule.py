@@ -38,11 +38,12 @@ class PaymentSchedule(models.Model):
         "payment.schedule.line.item",
         "payment_schedule_id",
         compute="_compute_line_items",
-        store=True,
-        precompute=True,
+        # store=True,
+        # precompute=True,
         readonly=False
     )
     lines_description = fields.Text(compute="_compute_lines_description")
+    base_order_lines_sum = fields.Monetary(compute="_compute_base_order_lines_sum", store=True, precompute=True, readonly=False)
     lines_total = fields.Monetary(compute="_compute_lines_total_amount", store=True, precompute=True, readonly=False)
     currency_id = fields.Many2one("res.currency", default=lambda self: self.env.company.currency_id, readonly=True)
     date = fields.Date(string="Date de l'échéance", required=True)
@@ -61,7 +62,6 @@ class PaymentSchedule(models.Model):
         ("P", "Paid")
     ], string="Statut de l'échéancier", default="SC", store=True, readonly=False, required=True)
     # schedule_state_color = fields.Integer(compute="_compute_schedule_state_color")
-    base_order_lines_sum = fields.Float(compute="_compute_base_order_lines_sum", readonly=False)
 
 
     @api.depends("related_order_ids")
@@ -81,8 +81,6 @@ class PaymentSchedule(models.Model):
                             
                             if existing_line:
                                 existing_line.write({
-                                    'payment_schedule_id': record.id,
-                                    'related_order_id': order.id,
                                     'trade_total': line.price_unit,
                                     })
                                 
@@ -101,10 +99,8 @@ class PaymentSchedule(models.Model):
                                     if matching_line:
                                         new_line.write({
                                             'previous_progress': matching_line.total_progress,
-                                            'payment_schedule_id': record.id,
-                                            'related_order_id': order.id,
                                             })
-                            
+                
                 record.line_ids = lines
     
     
@@ -195,25 +191,11 @@ class PaymentSchedule(models.Model):
                         line.write({"previous_progress": matching_line.total_progress})
     
     
-    @api.depends("line_ids", "down_payment", "lines_total")
+    @api.depends("down_payment", "base_order_lines_sum")
     def _compute_down_payment_total(self):
         """Computes the value of the down payment based on the down payment percentage."""
         for record in self:
-            base_order_id = record._get_base_order().id
-            print(f"base_order_id: {base_order_id}")
-            
-            print(f"record.line_ids: {record.line_ids}")
-            
-            for order in record.line_ids:
-                print(f"order.id: {order.related_order_id.id}")
-            
-            base_order_lines = record.line_ids.filtered(lambda x: x.related_order_id.id == base_order_id)
-            print(f"base_order_lines: {base_order_lines}")
-            base_order_lines_sum = sum(base_order_lines.mapped("line_total"))
-            print(f"base_order_lines_sum: {base_order_lines_sum}")
-            
-            down_payment_amount = record.down_payment * -(base_order_lines_sum)
-            print(f"down_payment_amount: {down_payment_amount}")
+            down_payment_amount = record.down_payment * -(record.base_order_lines_sum)
             
             record.down_payment_total = down_payment_amount
     
@@ -512,43 +494,16 @@ class PaymentSchedule(models.Model):
         """Returns the first sale order of the project."""
         for record in self:
             return self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc", limit=1) or None
-    
-    
-    @api.depends("line_ids", "line_ids.current_progress", "down_payment", "global_progress")
+
+
+    @api.depends("line_ids", "line_ids.current_progress", "global_progress")
     def _compute_base_order_lines_sum(self):
         """Computes the base order lines sum."""
         for record in self:
-            base_order = f"NewId_{record._get_base_order().id}"
-            
-            print(f"base_order: {base_order}")
-            
-            base_order2 = record._get_base_order().id
-            
-            print(f"base_order2: {base_order2}")
+            if record._get_base_order() != None:
+                base_order = f"NewId_{record._get_base_order().id}"
             
             if base_order:
-                # base_order_lines = record.line_ids.filtered(lambda x: str(x.related_order_id.id) == base_order)
+                lines_sum = sum(line.line_total for line in record.line_ids if not line.is_additional_work)
                 
-                line_total_list = [line.line_total for line in record.line_ids if line.related_order_id.id == base_order]
-                print(f"line_total_list: {line_total_list}")
-                
-                line_total_list2 = [line.line_total for line in record.line_ids if line.related_order_id.id == base_order2]
-                print(f"line_total_list2: {line_total_list2}")
-                
-                lines_related_order_id = [line.related_order_id.id for line in record.line_ids]
-                print(f"lines_related_order_id: {lines_related_order_id}")
-                
-                # line_total_list = [line.line_total for line in record.line_ids if line.trade_total not in [7866.0, 13250.0]]
-                # print(f"line_total_list: {line_total_list}")
-                
-                # filtered_list = [line for line in line_total_list if line.related_order_id.id == base_order]
-                # print(f"filtered_list: {filtered_list}")
-                self.env["sale.order"].search([("id", "=", base_order2)])
-                lines_sum = sum(line.line_total for line in record.line_ids if line.trade_total == base_order)
                 record.base_order_lines_sum = lines_sum
-                
-                sum_test = sum(record.line_ids.mapped("line_total"))
-                
-                record.base_order_lines_sum = sum_test
-                
-

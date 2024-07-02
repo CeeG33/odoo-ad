@@ -15,7 +15,7 @@ class PaymentScheduleLineItem(models.Model):
     _name = 'payment.schedule.line.item'
     _description = "Payment Schedule Line Item."
     
-    payment_schedule_id = fields.Many2one("payment.schedule", string="ID Échéancier", readonly=False)
+    payment_schedule_id = fields.Many2one("payment.schedule", string="ID Échéancier", store=True, readonly=False)
     related_order_id = fields.Many2one("sale.order", string="Devis afférent", store=True, readonly=False)
     is_additional_work = fields.Boolean(string="Travaux Supplémentaires", compute="_compute_is_additional_work", store=True, readonly=False)
     description = fields.Text(string="Description", readonly=True)
@@ -66,16 +66,14 @@ class PaymentScheduleLineItem(models.Model):
     def _compute_is_additional_work(self):
         """Checks if the line is part of the base order."""
         for record in self:
-            print(f"base_order_id: {record.payment_schedule_id._get_base_order().id}")
-            print(f"related_order_id: {record.related_order_id.id}")
-            base_order = f"NewId_{record.payment_schedule_id._get_base_order().id}"
-            print(f"base_order: {base_order}")
-            
-            # if record.payment_schedule_id._get_base_order().id == record.related_order_id.id:
-            if base_order == record.related_order_id.id:
-                record.is_additional_work = False
-            else:
-                record.is_additional_work = True
+            if record.payment_schedule_id._get_base_order() != None:
+                base_order_id = f"NewId_{record.payment_schedule_id._get_base_order().id}"
+                base_order_id_saved = f"{record.payment_schedule_id._get_base_order().id}"
+
+                if str(record.related_order_id.id) not in [base_order_id, base_order_id_saved]:
+                    record.is_additional_work = True
+                else:
+                    record.is_additional_work = False
     
     
     @api.constrains("total_progress")
@@ -83,4 +81,4 @@ class PaymentScheduleLineItem(models.Model):
         for record in self:
             if not -1 <= record.total_progress <= 1:
                 raise exceptions.ValidationError("Vous ne pouvez pas avoir un cumul dépassant 100% d'avancement.")
-            
+
