@@ -18,9 +18,18 @@ class Project(models.Model):
     
     payment_schedule_ids = fields.One2many("payment.schedule", "related_project_id")
 
+    def check_order_exists(self):
+        """Verifies that the project has at least one sale order."""
+        for record in self:
+            if not self.env["sale.order"].search([("project_id", "=", record.id)], order="create_date asc"):
+                raise ValidationError("Aucune commande n'a été trouvée pour ce projet.")
+    
     
     def get_payment_schedule(self):
+        """Returns the payment schedules of the project."""
         self.ensure_one()
+        self.check_order_exists()
+        
         return {
             'type': 'ir.actions.act_window',
             'name': 'Payment Schedule',

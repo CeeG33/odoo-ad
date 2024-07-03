@@ -25,21 +25,23 @@ STATUS_COLOR = {
 class PaymentSchedule(models.Model):
     _name = 'payment.schedule'
     _description = "Payment Schedule"
-
+    
     #=== FIELDS ===#
 
     related_order_ids = fields.One2many(
         "sale.order",
         "payment_schedule_id",
         compute="_compute_related_orders",
+        store=True,
+        precompute=True,
     )
     related_project_id = fields.Many2one("project.project", string="Projet", store=True, readonly=True, default= lambda self: self.env.context['active_id'])
     line_ids = fields.One2many(
         "payment.schedule.line.item",
         "payment_schedule_id",
         compute="_compute_line_items",
-        # store=True,
-        # precompute=True,
+        store=True,
+        precompute=True,
         readonly=False
     )
     lines_description = fields.Text(compute="_compute_lines_description")
@@ -80,10 +82,8 @@ class PaymentSchedule(models.Model):
                             existing_line = record.line_ids.filtered(lambda x: x.description == line.name)
                             
                             if existing_line:
-                                existing_line.write({
-                                    'trade_total': line.price_unit,
-                                    })
-                                
+                                existing_line.trade_total = line.price_unit
+                            
                             else:
                                 new_line = record.env["payment.schedule.line.item"].create({
                                     'payment_schedule_id': record.id,
@@ -97,9 +97,7 @@ class PaymentSchedule(models.Model):
                                     matching_line = previous_payment_schedule.line_ids.filtered(lambda x: x.description == line.name)
                                     
                                     if matching_line:
-                                        new_line.write({
-                                            'previous_progress': matching_line.total_progress,
-                                            })
+                                        new_line.previous_progress = matching_line.total_progress
                 
                 record.line_ids = lines
     
@@ -108,7 +106,7 @@ class PaymentSchedule(models.Model):
     def _compute_related_orders(self):
         """Selects the orders related to the project."""
         for record in self:
-            record.related_order_ids = self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc")
+            record.related_order_ids = self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc") or None
             
             
     @api.depends("line_ids")
@@ -133,6 +131,9 @@ class PaymentSchedule(models.Model):
                     
                 else:
                     record.lines_description = "Vide"
+            
+            else:
+                record.lines_description = "Vide"
     
     
     @api.depends("line_ids", "global_progress", "line_ids.current_progress")
@@ -160,18 +161,16 @@ class PaymentSchedule(models.Model):
     
     def _get_previous_payment_schedule(self):
         """Returns the previous payment schedule on the project."""
-        if self._origin.id:
-            previous_payment_schedule = self.env['payment.schedule'].search([
-                ('related_project_id', '=', self.related_project_id.id),
-                ('id', '!=', self.id),
-                ('date', '<', self.date)
-            ], order='date desc', limit=1)
+        search_domain = [('related_project_id', '=', self.related_project_id.id)]
         
-        else: 
-            previous_payment_schedule = self.env['payment.schedule'].search([
-                ('related_project_id', '=', self.related_project_id.id)
-            ], order='date desc', limit=1)
+        if self._origin.id:
+            search_domain.append(('id', '!=', self.id))
+            search_domain.append(('date', '<', self.date))
+            
+        previous_payment_schedule = self.env['payment.schedule'].search(search_domain, order='date desc', limit=1)
 
+        print(previous_payment_schedule)
+    
         return previous_payment_schedule or None
     
     
@@ -209,17 +208,17 @@ class PaymentSchedule(models.Model):
             if record.line_ids and record.down_payment_total and record.lines_total and record.down_payment != 0:
                 grand_total_amount = record.down_payment_total + record.lines_total
                 
-                record.write({'grand_total': grand_total_amount})
+                record.grand_total = grand_total_amount
             
             elif record.down_payment == 0:
                 grand_total_amount = record.lines_total
                 
-                record.write({'grand_total': grand_total_amount})
+                record.grand_total = grand_total_amount
             
             else:
                 grand_total_amount = record.lines_total
                 
-                record.write({'grand_total': grand_total_amount})
+                record.grand_total = grand_total_amount
     
     # Première version du code pour créer les factures
     # def action_create_invoice(self):
@@ -305,7 +304,7 @@ class PaymentSchedule(models.Model):
             else:
                 # Met à zéro les lignes de down payment précédents.
                 invoice_line.quantity = 0
-                
+        
         
         # Crée la ligne de remboursement sur acompte du mois en cours.
         if self.down_payment_total < 0:
@@ -453,10 +452,17 @@ class PaymentSchedule(models.Model):
         for record in self:
             if record.line_ids:
                 total_invoiced_to_date = sum(record.related_project_id.payment_schedule_ids.mapped("grand_total"))
-                total_project_cost = sum(self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc").mapped("amount_untaxed"))
-                cumulative_progress = (total_invoiced_to_date / total_project_cost) * 100
+                total_project_cost = sum(
+                    self.env["sale.order"]
+                    .search([("project_id", "=", record.related_project_id.id)], order="create_date asc")
+                    .mapped("amount_untaxed"))
                 
-                record.write({'cumulative_progress': cumulative_progress})
+                if total_project_cost:
+                    record.cumulative_progress = (total_invoiced_to_date / total_project_cost) * 100
+                else:
+                    record.cumulative_progress = 0.0
+            else:
+                record.cumulative_progress = 0.0
 
 
     api.depends("line_ids")
@@ -473,7 +479,10 @@ class PaymentSchedule(models.Model):
             if record.line_ids:
                 average_progress = mean(record.line_ids.mapped("total_progress")) * 100
                 
-                record.write({'monthly_progress': int(average_progress)})
+                record.monthly_progress = int(average_progress)
+                
+            else:
+                record.monthly_progress = 0.0
 
 
     # api.depends("schedule_state")
@@ -503,7 +512,11 @@ class PaymentSchedule(models.Model):
             if record._get_base_order() != None:
                 base_order = f"NewId_{record._get_base_order().id}"
             
-            if base_order:
-                lines_sum = sum(line.line_total for line in record.line_ids if not line.is_additional_work)
-                
-                record.base_order_lines_sum = lines_sum
+                if base_order == None:
+                    raise UserError("No quotation found for the related project.")
+                    
+                else:
+                    lines_sum = sum(line.line_total for line in record.line_ids if not line.is_additional_work)
+                    
+                    record.base_order_lines_sum = lines_sum
+
