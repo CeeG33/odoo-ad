@@ -11,7 +11,8 @@
         <field name="model">payment.schedule.line.item</field>
         <field name="arch" type="xml">
             <tree string="Payment Schedule Line Item Form" editable="bottom" create="0">
-                <field name="payment_schedule_id" invisible="1"/>
+                <!-- <field name="payment_schedule_id" invisible="1"/> -->
+                <field name="payment_schedule_id"/>
                 <field name="related_order_id"/>
                 <field name="is_additional_work"/>
                 <field name="description"/>

@@ -86,7 +86,6 @@ class PaymentSchedule(models.Model):
                             
                             else:
                                 new_line = record.env["payment.schedule.line.item"].create({
-                                    'payment_schedule_id': record.id,
                                     'related_order_id': order.id,
                                     'description': line.name,
                                     'trade_total': line.price_unit,
@@ -98,7 +97,7 @@ class PaymentSchedule(models.Model):
                                     
                                     if matching_line:
                                         new_line.previous_progress = matching_line.total_progress
-                
+                                        
                 record.line_ids = lines
     
     
@@ -106,7 +105,8 @@ class PaymentSchedule(models.Model):
     def _compute_related_orders(self):
         """Selects the orders related to the project."""
         for record in self:
-            record.related_order_ids = self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc") or None
+            orders = self.env["sale.order"].search([("project_id", "=", record.related_project_id.id)], order="create_date asc") or None
+            record.related_order_ids = orders
             
             
     @api.depends("line_ids")
@@ -155,23 +155,22 @@ class PaymentSchedule(models.Model):
         """
         new_payment_schedule = super().create(vals)
         vals["related_project_id"] = self.env.context['active_id']
+        self.action_refresh_line_items()
         
         return new_payment_schedule
     
     
     def _get_previous_payment_schedule(self):
         """Returns the previous payment schedule on the project."""
-        search_domain = [('related_project_id', '=', self.related_project_id.id)]
-        
-        if self._origin.id:
-            search_domain.append(('id', '!=', self.id))
-            search_domain.append(('date', '<', self.date))
+        for record in self:
+            search_domain = [('related_project_id', '=', record.related_project_id.id)]
             
-        previous_payment_schedule = self.env['payment.schedule'].search(search_domain, order='date desc', limit=1)
+            if self._origin.id:
+                search_domain.append(('id', '!=', record.id))
+            
+            previous_payment_schedule = self.env['payment.schedule'].search(search_domain, order='date desc', limit=1)
 
-        print(previous_payment_schedule)
-    
-        return previous_payment_schedule or None
+            return previous_payment_schedule or None
     
     
     def _update_previous_progress(self):
@@ -391,6 +390,7 @@ class PaymentSchedule(models.Model):
                             existing_line = record.line_ids.filtered(lambda x: x.description == line.name)
                             line.qty_delivered = existing_line.total_progress
                             line.qty_invoiced = existing_line.total_progress
+                            line.product_uom_qty = existing_line.total_progress
                     
                 #SUR SERV DE PRODUCTION : DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search([("name", "=", "Downpayment")], limit=1)
                 
@@ -451,7 +451,7 @@ class PaymentSchedule(models.Model):
         """Computes the cumulative progress of a project."""
         for record in self:
             if record.line_ids:
-                total_invoiced_to_date = sum(record.related_project_id.payment_schedule_ids.mapped("grand_total"))
+                total_invoiced_to_date = sum(record.related_project_id.payment_schedule_ids.mapped("base_order_lines_sum"))
                 total_project_cost = sum(
                     self.env["sale.order"]
                     .search([("project_id", "=", record.related_project_id.id)], order="create_date asc")

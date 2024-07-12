@@ -15,6 +15,7 @@ from odoo.tools import float_is_zero, format_amount, format_date, html_keep_url,
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
+    _order = 'create_date'
     
     project_id = fields.Many2one("project.project", "Project", required=True)
     payment_schedule_id = fields.Many2one("payment.schedule", "Payment Schedule")
