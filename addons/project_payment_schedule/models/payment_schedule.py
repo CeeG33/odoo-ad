@@ -262,26 +262,29 @@ class PaymentSchedule(models.Model):
     
     
     def action_create_invoice(self):
-        """Creates the associated invoice."""        
-        advance_payment_wizard = self.env["sale.advance.payment.inv"].create({
-            'advance_payment_method': 'delivered',
-            'sale_order_ids': [(6, 0, self.related_order_ids.ids)],
-            'consolidated_billing': True
-        })
-        
-        new_invoice = advance_payment_wizard.create_invoices()
-        
-        self.schedule_state = "IC"
-        
-        latest_invoice = self.env["account.move"].search([("partner_id", "=", self.related_project_id.partner_id.id)], order="create_date desc", limit=1)
-        
-        latest_invoice.move_type = "out_invoice"
-        
-        self._copy_payment_schedule_lines_to_latest_invoice(latest_invoice)
-        
-        self.action_update_sale_order_quantities()
-        
-        return new_invoice
+        """Creates the associated invoice."""
+        for record in self:
+            record._check_order_state()
+            
+            advance_payment_wizard = self.env["sale.advance.payment.inv"].create({
+                'advance_payment_method': 'delivered',
+                'sale_order_ids': [(6, 0, self.related_order_ids.ids)],
+                'consolidated_billing': True
+            })
+            
+            new_invoice = advance_payment_wizard.create_invoices()
+            
+            record.schedule_state = "IC"
+            
+            latest_invoice = self.env["account.move"].search([("partner_id", "=", record.related_project_id.partner_id.id)], order="create_date desc", limit=1)
+            
+            latest_invoice.move_type = "out_invoice"
+            
+            self._copy_payment_schedule_lines_to_latest_invoice(latest_invoice)
+            
+            self.action_update_sale_order_quantities()
+            
+            return new_invoice
     
     
     def _copy_payment_schedule_lines_to_latest_invoice(self, invoice):
@@ -290,7 +293,7 @@ class PaymentSchedule(models.Model):
             raise UserError("No invoice found for the related project.")
         
         payment_schedule_lines = self.line_ids
-        invoice_lines = invoice.invoice_line_ids
+        invoice_lines = invoice.line_ids
         
         # Associe un montant total à la description de la ligne dans l'échéancier.
         payment_schedule_dict = {line.description: line.line_total for line in payment_schedule_lines if line.description != "Remboursement sur acompte"}
@@ -390,7 +393,7 @@ class PaymentSchedule(models.Model):
                             existing_line = record.line_ids.filtered(lambda x: x.description == line.name)
                             line.qty_delivered = existing_line.total_progress
                             line.qty_invoiced = existing_line.total_progress
-                            line.product_uom_qty = existing_line.total_progress
+                            # line.product_uom_qty = existing_line.total_progress
                     
                 #SUR SERV DE PRODUCTION : DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search([("name", "=", "Downpayment")], limit=1)
                 
@@ -412,7 +415,7 @@ class PaymentSchedule(models.Model):
                     print(new_downpayment_lines)
                     
                     for new_downpayment_line in new_downpayment_lines:
-                        new_downpayment_line.qty_invoiced = 1.0 
+                        new_downpayment_line.qty_invoiced = 1.0
     
     
     @api.constrains("date")
@@ -520,3 +523,13 @@ class PaymentSchedule(models.Model):
                     
                     record.base_order_lines_sum = lines_sum
 
+
+    def _check_order_state(self):
+        """Verifies that the related orders are in a state allowing invoices to be created."""
+        for record in self:
+            for order in record.related_order_ids:
+                if order.state in ['draft', 'sent']:
+                    raise ValidationError((f"La commande suivante n'est pas encore confirmée : {order.name}"))
+                
+                if order.state == 'cancel':
+                    raise ValidationError((f"La commande suivante est annulée : {order.name}"))
