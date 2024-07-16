@@ -28,14 +28,18 @@ class PaymentSchedule(models.Model):
     
     #=== FIELDS ===#
 
-    related_order_ids = fields.One2many(
+    related_order_ids = fields.Many2many(
         "sale.order",
-        "payment_schedule_id",
         compute="_compute_related_orders",
         store=True,
         precompute=True,
     )
-    related_project_id = fields.Many2one("project.project", string="Projet", store=True, readonly=True, default= lambda self: self.env.context['active_id'])
+    related_project_id = fields.Many2one(
+        "project.project",
+        string="Projet",
+        store=True,
+        readonly=False,
+        default= lambda self: self.env.context['active_id'])
     line_ids = fields.One2many(
         "payment.schedule.line.item",
         "payment_schedule_id",
