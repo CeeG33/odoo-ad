@@ -272,17 +272,22 @@ class PaymentSchedule(models.Model):
             
             advance_payment_wizard = self.env["sale.advance.payment.inv"].create({
                 'advance_payment_method': 'delivered',
-                'sale_order_ids': [(6, 0, self.related_order_ids.ids)],
+                'sale_order_ids': [(6, 0, record.related_order_ids.ids)],
                 'consolidated_billing': True
             })
             
             new_invoice = advance_payment_wizard.create_invoices()
+            
+            print(f"new_invoice : {new_invoice}")
             
             record.schedule_state = "IC"
             
             latest_invoice = self.env["account.move"].search([("partner_id", "=", record.related_project_id.partner_id.id)], order="create_date desc", limit=1)
             
             latest_invoice.move_type = "out_invoice"
+            
+            print(f"latest_invoice : {latest_invoice}")
+            print(f"latest_invoice payment_reference : {latest_invoice.payment_reference}")
             
             self._copy_payment_schedule_lines_to_latest_invoice(latest_invoice)
             
@@ -293,35 +298,40 @@ class PaymentSchedule(models.Model):
     
     def _copy_payment_schedule_lines_to_latest_invoice(self, invoice):
         """Copies the payment schedule lines to the latest invoice."""
-        if not invoice:
-            raise UserError("No invoice found for the related project.")
-        
-        payment_schedule_lines = self.line_ids
-        invoice_lines = invoice.line_ids
-        
-        # Associe un montant total à la description de la ligne dans l'échéancier.
-        payment_schedule_dict = {line.description: line.line_total for line in payment_schedule_lines if line.description != "Remboursement sur acompte"}
-        
-        for invoice_line in invoice_lines:
-            if invoice_line.name in payment_schedule_dict:
-                # Renseigne les montants totaux des avancements (au lieu de prendre le montant total du lot).
-                invoice_line.quantity = 1
-                invoice_line.price_unit = payment_schedule_dict[invoice_line.name]
-            else:
-                # Met à zéro les lignes de down payment précédents.
-                invoice_line.quantity = 0
-        
-        
-        # Crée la ligne de remboursement sur acompte du mois en cours.
-        if self.down_payment_total < 0:
-            self.env["account.move.line"].create({
-                "move_id": invoice.id,
-                "name": "Remboursement sur acompte",
-                "quantity": 1,
-                "price_unit": self.down_payment_total
-            })
-        
-        return invoice
+        for record in self:
+            if not invoice:
+                raise UserError("No invoice found for the related project.")
+            
+            payment_schedule_lines = record.line_ids
+            invoice_lines = invoice.line_ids
+            print(f"invoice_lines : {invoice_lines}")
+            for invoice_line in invoice_lines:
+                print(f"invoice_line_name & amount : ID {invoice_line.id} {invoice_line.name} : {invoice_line.price_unit}")
+            
+            # Associe un montant total à la description de la ligne dans l'échéancier.
+            payment_schedule_dict = {line.description: line.line_total for line in payment_schedule_lines if line.description != "Remboursement sur acompte"}
+            print(f"payment_schedule_dict : {payment_schedule_dict}")
+            
+            for invoice_line in invoice_lines:
+                if invoice_line.name in payment_schedule_dict:
+                    # Renseigne les montants totaux des avancements (au lieu de prendre le montant total du lot).
+                    invoice_line.quantity = 1
+                    invoice_line.price_unit = payment_schedule_dict[invoice_line.name]
+                else:
+                    # Met à zéro les lignes de down payment précédents.
+                    invoice_line.quantity = 0
+                print(f"after invoice_line_name & amount : ID {invoice_line.id} {invoice_line.name} : {invoice_line.price_unit}")
+            
+            # Crée la ligne de remboursement sur acompte du mois en cours.
+            if record.down_payment_total < 0:
+                record.env["account.move.line"].create({
+                    "move_id": invoice.id,
+                    "name": "Remboursement sur acompte",
+                    "quantity": 1,
+                    "price_unit": record.down_payment_total
+                })
+            
+            return invoice
     
     
     # def _copy_payment_schedule_lines_to_latest_invoice(self):
