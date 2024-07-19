@@ -13,9 +13,8 @@ class AccountMove(models.Model):
     
     def action_post(self):
         """Override the action_post method to update quantities in related sale order lines."""
-        res = super(AccountMove, self).action_post()
         self._update_sale_order_line_quantities()
-        return res
+        return super().action_post()
 
 
     def _update_sale_order_line_quantities(self):
