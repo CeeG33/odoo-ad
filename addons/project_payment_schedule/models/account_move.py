@@ -11,6 +11,14 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
     
     
+    payment_schedule_id = fields.One2many(
+        "payment.schedule",
+        "related_invoice_id",
+        string="Échéance",
+        store=True,
+        readonly=False)
+    
+    
     def action_post(self):
         """Override the action_post method to update quantities in related sale order lines."""
         self._update_sale_order_line_quantities()
@@ -28,4 +36,6 @@ class AccountMove(models.Model):
                             ('description', '=', sale_line.name)
                         ], limit=1)
                         if payment_schedule_line:
+                            print(f"payment_schedule_line : {payment_schedule_line}")
+                            print(f"payment_schedule_line.total_progress : {payment_schedule_line.total_progress}")
                             sale_line.qty_invoiced = payment_schedule_line.total_progress

@@ -48,6 +48,11 @@ class PaymentSchedule(models.Model):
         precompute=True,
         readonly=False
     )
+    related_invoice_id = fields.Many2one(
+        "account.move",
+        string="Facture",
+        store=True,
+        readonly=False)
     lines_description = fields.Text(compute="_compute_lines_description")
     base_order_lines_sum = fields.Monetary(compute="_compute_base_order_lines_sum", store=True, precompute=True, readonly=False)
     lines_total = fields.Monetary(compute="_compute_lines_total_amount", store=True, precompute=True, readonly=False)
@@ -277,6 +282,8 @@ class PaymentSchedule(models.Model):
             })
             
             new_invoice = advance_payment_wizard.create_invoices()
+            
+            new_invoice.payment_schedule_id = record.id
             
             print(f"new_invoice : {new_invoice}")
             

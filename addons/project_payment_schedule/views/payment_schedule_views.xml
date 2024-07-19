@@ -25,6 +25,7 @@
                         <field name="global_progress" widget="percentage"/>
                         <field name="down_payment" widget="percentage"/>
                         <field name="schedule_state"></field>
+                        <field name="related_invoice_id"/>
                     </group>
                     <field name="line_ids" nolabel="1" force_save="1"/>
                     <group class="oe_subtotal_footer oe_right" name="lines_total">

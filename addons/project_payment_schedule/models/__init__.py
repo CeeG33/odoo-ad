@@ -7,3 +7,4 @@ from . import payment_schedule_state
 from . import project
 from . import sale_order
 from . import sale_order_line
+from . import account_move
