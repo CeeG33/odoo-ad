@@ -283,13 +283,14 @@ class PaymentSchedule(models.Model):
             
             new_invoice = advance_payment_wizard.create_invoices()
             
-            new_invoice.payment_schedule_id = record.id
-            
-            print(f"new_invoice : {new_invoice}")
             
             record.schedule_state = "IC"
             
             latest_invoice = self.env["account.move"].search([("partner_id", "=", record.related_project_id.partner_id.id)], order="create_date desc", limit=1)
+            
+            latest_invoice.payment_schedule_id = record
+            
+            print(f"new_invoice : {new_invoice}")
             
             latest_invoice.move_type = "out_invoice"
             

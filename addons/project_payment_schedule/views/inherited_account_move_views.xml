@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
             <!-- Payment schedule ID field added -->
-            <xpath expr="//group[@name='header_left_group']" position="inside">
+            <xpath expr="//group[@id='header_left_group']" position="inside">
                 <field name="payment_schedule_id"/>
             </xpath>
         </field>
