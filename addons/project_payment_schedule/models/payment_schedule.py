@@ -290,12 +290,9 @@ class PaymentSchedule(models.Model):
             
             latest_invoice.payment_schedule_id = record
             
-            print(f"new_invoice : {new_invoice}")
+            record.related_invoice_id = latest_invoice
             
             latest_invoice.move_type = "out_invoice"
-            
-            print(f"latest_invoice : {latest_invoice}")
-            print(f"latest_invoice payment_reference : {latest_invoice.payment_reference}")
             
             self._copy_payment_schedule_lines_to_latest_invoice(latest_invoice)
             
