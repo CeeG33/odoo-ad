@@ -552,3 +552,13 @@ class PaymentSchedule(models.Model):
                 
                 if order.state == 'cancel':
                     raise ValidationError((f"La commande suivante est annulée : {order.name}"))
+
+    @api.onchange("related_invoice_id.payment_state")
+    def _onchange_schedule_state(self):
+        """Update the schedule state based on the related invoice payment state."""
+        if self.related_invoice_id:
+            if self.related_invoice_id.payment_state == "paid":
+                self.schedule_state = "P"
+                
+            elif self.related_invoice_id.payment_state in ["partial", "not_paid", "in_payment"]:
+                self.schedule_state = "I"
