@@ -11,12 +11,9 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
     
     
-    payment_schedule_id = fields.One2many(
+    payment_schedule_id = fields.Many2one(
         "payment.schedule",
-        "related_invoice_id",
-        string="Échéance",
-        store=True,
-        readonly=False)
+        string="Échéance")
     
     
     def action_post(self):
