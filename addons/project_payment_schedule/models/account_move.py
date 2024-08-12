@@ -17,28 +17,36 @@ class AccountMove(models.Model):
     
     
     def _get_qty_invoiced(self):
+        """Returns a dictionary containing the sale order lines ID as keys and the qty invoiced as values."""
         sale_order_qty_invoiced = {}
         
         for move in self:
             if move.invoice_origin and move.payment_schedule_id:
-                sale_order = self.env['sale.order'].search([('name', '=', move.invoice_origin)], limit=1)
-                if sale_order:
+                sale_orders = self.env['sale.order'].search([('payment_schedule_id', '=', move.payment_schedule_id.id)])
+                
+                for sale_order in sale_orders:
+                    line_qty_invoiced = {}
+                    
                     for line in sale_order.order_line:
-                        sale_order_qty_invoiced[line.id] = line.qty_invoiced
+                        line_qty_invoiced[line.id] = line.qty_invoiced
+                    
+                    sale_order_qty_invoiced[sale_order.id] = line_qty_invoiced
     
         return sale_order_qty_invoiced
-    
-    
+
+
     def _restore_qty_invoiced(self, sale_order_qty_invoiced):
         for move in self:
             if move.invoice_origin and move.payment_schedule_id:
-                sale_order = self.env['sale.order'].search([('name', '=', move.invoice_origin)], limit=1)
-                if sale_order:
-                    for line in sale_order.order_line:
-                        if line.id in sale_order_qty_invoiced:
-                            line.qty_invoiced = sale_order_qty_invoiced[line.id]
-    
-    
+                sale_orders = self.env['sale.order'].search([('payment_schedule_id', '=', move.payment_schedule_id.id)])
+                
+                for sale_order in sale_orders:
+                    if sale_order.id in sale_order_qty_invoiced:
+                        for line in sale_order.order_line:
+                            if line.id in sale_order_qty_invoiced[sale_order.id]:
+                                line.qty_invoiced = sale_order_qty_invoiced[sale_order.id][line.id]
+
+
     def _post(self, soft=True):
         sale_order_qty_invoiced = self._get_qty_invoiced()
 
@@ -48,8 +56,8 @@ class AccountMove(models.Model):
         self._restore_qty_invoiced(sale_order_qty_invoiced)
 
         return result
-    
-    
+
+
     def button_draft(self):
         sale_order_qty_invoiced = self._get_qty_invoiced()
 
@@ -59,8 +67,8 @@ class AccountMove(models.Model):
         self._restore_qty_invoiced(sale_order_qty_invoiced)
 
         return result
-    
-    
+
+
     def button_cancel(self):
         sale_order_qty_invoiced = self._get_qty_invoiced()
 
@@ -71,3 +79,28 @@ class AccountMove(models.Model):
 
         return result
 
+    
+    # def _get_qty_invoiced(self):
+    #     """Returns a dictionary containing the sale order lines ID as keys and the qty invoiced as values."""
+    #     sale_order_qty_invoiced = {}
+        
+    #     for move in self:
+    #         if move.invoice_origin and move.payment_schedule_id:
+    #             sale_orders = self.env['sale.order'].search([('name', '=', move.invoice_origin)])
+    #             if sale_orders:
+    #                 for order in sale_orders:
+    #                     for line in order.order_line:
+    #                         sale_order_qty_invoiced[line.id] = line.qty_invoiced
+
+    #     return sale_order_qty_invoiced
+    
+    
+    # def _restore_qty_invoiced(self, sale_order_qty_invoiced):
+    #     for move in self:
+    #         if move.invoice_origin and move.payment_schedule_id:
+    #             sale_orders = self.env['sale.order'].search([('name', '=', move.invoice_origin)])
+    #             if sale_orders:
+    #                 for order in sale_orders:
+    #                     for line in order.order_line:
+    #                         if line.id in sale_order_qty_invoiced:
+    #                             line.qty_invoiced = sale_order_qty_invoiced[line.id]
