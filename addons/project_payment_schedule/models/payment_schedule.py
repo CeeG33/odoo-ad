@@ -66,12 +66,19 @@ class PaymentSchedule(models.Model):
     down_payment_total = fields.Monetary(compute="_compute_down_payment_total", store=True, precompute=True, readonly=False)
     grand_total = fields.Monetary(compute="_compute_grand_total", store=True, precompute=True, readonly=False)
     schedule_state_ids = fields.Many2many("payment.schedule.state", string="Statut de l'échéancier")
-    schedule_state = fields.Selection(selection=[
+    schedule_state = fields.Selection(
+        selection=[
         ("SC", "Schedule Created"),
         ("IC", "Invoice Created"),
         ("I", "Invoice Issued"),
         ("P", "Paid")
-    ], string="Statut de l'échéancier", default="SC", store=True, readonly=False, required=True)
+    ],
+        string="Statut de l'échéancier",
+        default="SC",
+        compute="_compute_schedule_state",
+        store=True,
+        readonly=False,
+        required=True)
     # schedule_state_color = fields.Integer(compute="_compute_schedule_state_color")
 
 
@@ -167,6 +174,15 @@ class PaymentSchedule(models.Model):
         self.action_refresh_line_items()
         
         return new_payment_schedule
+    
+    
+    def unlink(self):
+        """Raises an error when trying to delete a payment schedule whose related invoice is paid."""
+        for record in self:
+            if record.related_invoice_id and record.related_invoice_id.payment_state == "paid":
+                raise ValidationError(_("Vous ne pouvez pas supprimer une échéance qui a été payée."))
+            
+        return super().unlink()
     
     
     def _get_previous_payment_schedule(self):
@@ -553,12 +569,16 @@ class PaymentSchedule(models.Model):
                 if order.state == 'cancel':
                     raise ValidationError((f"La commande suivante est annulée : {order.name}"))
 
-    @api.onchange("related_invoice_id.payment_state")
-    def _onchange_schedule_state(self):
+
+    @api.depends("related_invoice_id.payment_state", "related_invoice_id.state")
+    def _compute_schedule_state(self):
         """Update the schedule state based on the related invoice payment state."""
         if self.related_invoice_id:
             if self.related_invoice_id.payment_state == "paid":
                 self.schedule_state = "P"
-                
-            elif self.related_invoice_id.payment_state in ["partial", "not_paid", "in_payment"]:
+            
+            elif self.related_invoice_id.payment_state in ["partial", "not_paid", "in_payment"] and self.related_invoice_id.state != "draft":
                 self.schedule_state = "I"
+            
+            else:
+                self.schedule_state = "IC"
