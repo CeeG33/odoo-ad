@@ -554,6 +554,7 @@ class PaymentSchedule(models.Model):
                     raise UserError("No quotation found for the related project.")
                     
                 else:
+                    print("recalcul de la somme des lignes de base")
                     lines_sum = sum(line.line_total for line in record.line_ids if not line.is_additional_work)
                     
                     record.base_order_lines_sum = lines_sum

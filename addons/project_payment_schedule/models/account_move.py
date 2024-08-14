@@ -22,8 +22,10 @@ class AccountMove(models.Model):
         
         for move in self:
             if move.invoice_origin and move.payment_schedule_id:
-                sale_orders = self.env['sale.order'].search([('payment_schedule_id', '=', move.payment_schedule_id.id)])
-                
+                sale_orders = self.env['sale.order'].search([('project_id', '=', move.payment_schedule_id.related_project_id.id)])
+                # sale_orders = self.env['sale.order'].search([('project_id', '=', 5)])
+                print(f"move.payment_schedule_id.related_project_id: {move.payment_schedule_id.related_project_id.id}")
+                print(f"sale_orders: {sale_orders}")
                 for sale_order in sale_orders:
                     line_qty_invoiced = {}
                     
@@ -31,14 +33,17 @@ class AccountMove(models.Model):
                         line_qty_invoiced[line.id] = line.qty_invoiced
                     
                     sale_order_qty_invoiced[sale_order.id] = line_qty_invoiced
-    
+
+        print(f"sale_order_qty_invoiced: {sale_order_qty_invoiced}")
+        
         return sale_order_qty_invoiced
 
 
     def _restore_qty_invoiced(self, sale_order_qty_invoiced):
         for move in self:
             if move.invoice_origin and move.payment_schedule_id:
-                sale_orders = self.env['sale.order'].search([('payment_schedule_id', '=', move.payment_schedule_id.id)])
+                sale_orders = self.env['sale.order'].search([('project_id', '=', move.payment_schedule_id.related_project_id.id)])
+                # sale_orders = self.env['sale.order'].search([('project_id', '=', 5)])
                 
                 for sale_order in sale_orders:
                     if sale_order.id in sale_order_qty_invoiced:
