@@ -5,6 +5,7 @@
 {
     "name": "Payment Schedule",
     "version": "17.0",
+    "author": "Ciran Gürbüz",
     "category": "Payment Schedule",
     "summary": "Payment Schedule tool integrated to Quotations.",
     "description": """

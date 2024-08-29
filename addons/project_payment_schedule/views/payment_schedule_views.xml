@@ -106,17 +106,33 @@
         </field>
     </record>
             
-
     <record id="payment_schedule_view_tree" model="ir.ui.view">
         <field name="name">payment.schedule.tree</field>
         <field name="model">payment.schedule</field>
         <field name="arch" type="xml">
-            <tree editable="bottom">
-                <field name="related_order_ids"/>
-                <field name="date"/>
-                <field name="line_ids"/>
+            <tree default_group_by="related_project_id" class="text-center" expand="1">
+                <field name="cumulative_progress" column_invisible="1"/>
+                <field name="maximum_progress" column_invisible="1"/>
+                <field name="date" class="text-center"/>
+                <field name="schedule_state" widget="label_selection" class="text-center" options="{
+                    'classes': {
+                        'SC': 'default',
+                        'IC': 'primary',
+                        'I': 'warning',
+                        'P': 'success'}
+                    }"></field>
+                <field name="related_project_id" class="text-center" widget="many2one"/>
+                <field name="monthly_progress" string="Avancement" widget="progressbar" class="text-start" options="{'max_field': 'maximum_progress'}"/>
+                <field name="grand_total"/>
+                <field name="related_invoice_id" widget="many2one"/>
             </tree>
         </field>
+    </record>
+
+    <record id="menu_payment_schedule_list" model="ir.actions.act_window">
+        <field name="name">Payment Schedule</field>
+        <field name="res_model">payment.schedule</field>
+        <field name="view_mode">tree,form</field>
     </record>
     
 </odoo>

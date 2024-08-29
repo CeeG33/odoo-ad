@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
 <odoo>
 
+    <menuitem id="menu_payment_schedule"
+              name="Échéanciers"
+              parent="project.menu_main_pm"
+              action="menu_payment_schedule_list"/>
+
     <record id="edit_project" model="ir.ui.view">
         <field name="name">project.project.form</field>
         <field name="model">project.project</field>

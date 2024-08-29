@@ -212,12 +212,12 @@ class PaymentSchedule(models.Model):
             search_domain = [("related_project_id", "=", record.related_project_id.id)]
 
             if self._origin.id:
-                search_domain.append(("id", "!=", record.id))
+                search_domain.extend([("id", "!=", record.id), ("date", "<", record.date)])
 
             previous_payment_schedule = self.env["payment.schedule"].search(
                 search_domain, order="date desc", limit=1
             )
-
+            print(f"previous_payment_schedule : {previous_payment_schedule}")
             return previous_payment_schedule or None
 
     def _update_previous_progress(self):
@@ -270,6 +270,7 @@ class PaymentSchedule(models.Model):
 
     def action_create_invoice(self):
         """Creates the associated invoice."""
+        print("méthode >> action_create_invoice")
         for record in self:
             record._check_order_state()
 
@@ -282,7 +283,7 @@ class PaymentSchedule(models.Model):
             )
 
             new_invoice = advance_payment_wizard.create_invoices()
-
+            
             record.schedule_state = "IC"
 
             latest_invoice = self.env["account.move"].search(
@@ -290,17 +291,18 @@ class PaymentSchedule(models.Model):
                 order="create_date desc",
                 limit=1,
             )
-
+            
             latest_invoice.payment_schedule_id = record
 
             record.related_invoice_id = latest_invoice
-
             latest_invoice.move_type = "out_invoice"
-
+            print(f"record.related_invoice_id : {record.related_invoice_id}")
+            print(f"metadata : {record.related_invoice_id.read(['name', 'amount_total_signed', 'line_ids'])}")
+            print("entrée dans méthode _copy_payment_schedule_lines_to_latest_invoice")
             self._copy_payment_schedule_lines_to_latest_invoice(latest_invoice)
-
+            print("methode _copy_payment_schedule_lines_to_latest_invoice OK")
             self.action_update_sale_order_quantities()
-
+            print("methode action_update_sale_order_quantities OK")
             return new_invoice
 
     def _copy_payment_schedule_lines_to_latest_invoice(self, invoice):
@@ -308,7 +310,7 @@ class PaymentSchedule(models.Model):
         for record in self:
             if not invoice:
                 raise UserError("No invoice found for the related project.")
-
+            
             payment_schedule_lines = record.line_ids
             invoice_lines = invoice.line_ids
 
@@ -319,6 +321,7 @@ class PaymentSchedule(models.Model):
                 if line.description != "Remboursement sur acompte"
             }
 
+            print("entrée dans la boucle for")
             for invoice_line in invoice_lines:
                 if invoice_line.name in payment_schedule_dict:
                     # Renseigne les montants totaux des avancements (au lieu de prendre le montant total du lot).
@@ -327,7 +330,7 @@ class PaymentSchedule(models.Model):
                 else:
                     # Met à zéro les lignes de down payment précédents.
                     invoice_line.quantity = 0
-
+            
             # Crée la ligne de remboursement sur acompte du mois en cours.
             if record.down_payment_total < 0:
                 record.env["account.move.line"].create(
@@ -338,7 +341,7 @@ class PaymentSchedule(models.Model):
                         "price_unit": record.down_payment_total,
                     }
                 )
-
+            
             return invoice
 
     def action_update_sale_order_quantities(self):
@@ -448,7 +451,6 @@ class PaymentSchedule(models.Model):
                 record.cumulative_progress = 0.0
 
     api.depends("line_ids")
-
     def _compute_maximum_progress(self):
         """Computes the maximum progress. Useful to determine the maximum value of the gauge."""
         for record in self:
@@ -537,3 +539,28 @@ class PaymentSchedule(models.Model):
         
         else:
             self.schedule_state = "SC"
+    
+    def _compute_display_name(self):
+        """Change the display name of the payment schedule."""
+        for record in self:
+            if record.related_order_ids.partner_id.name and record.date:
+                record.display_name = f"{record.related_order_ids.partner_id.name} - {record.date.month}/{record.date.year}"
+            else:
+                record.display_name = f"{record._name},{record.id}"
+
+    # INVESTIGATIONS POUR MAJ ECHEANCIER SUIVANTS AUTOMATIQUEMENT
+    # @api.onchange("line_ids")
+    # def _onchange_recalculate_following_schedules(self):
+    #     """Recalculates the future payment schedules progress when a payment schedule is modified."""
+    #     print("entrée dans _onchange_recalculate_following_schedules")
+    #     following_schedules = self.env["payment.schedule"].search(
+    #         [("related_project_id", "=", self.related_project_id.id),
+    #             ("date", ">", self.date)
+    #             ]
+    #     )
+    #     print(f"following_schedules : {following_schedules}")
+        
+    #     for schedule in following_schedules:
+    #         print(f"schedule : {schedule}")
+    #         schedule._update_previous_progress()
+    #         print("application de la maj")
