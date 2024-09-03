@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="report_payment_schedule" model="ir.actions.report">
+        <field name="name">Payment Schedule</field>
+        <field name="model">payment.schedule</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">project_payment_schedule.payment_schedule_report_template</field>
+        <field name="report_file">project_payment_schedule.payment_schedule_report_template</field>
+        <field name="print_report_name">'Échéancier prévisionnel - %s' % (object.related_order_ids.partner_id.name).replace('/','')</field>
+        <field name="binding_model_id" ref="model_payment_schedule"/>
+        <field name="binding_type">report</field>
+        <field name="binding_view_types">kanban,list,form</field>
+    </record>
+
+    <record id="report_payment_schedule_list" model="ir.actions.report">
+        <field name="name">Payment Schedule List</field>
+        <field name="model">payment.schedule</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">project_payment_schedule.payment_schedule_list_report</field>
+        <field name="report_file">project_payment_schedule.payment_schedule_list_report</field>
+        <field name="print_report_name">'Échéancier prévisionnel - %s' % (object.related_order_ids.partner_id.name).replace('/','')</field>
+        <field name="binding_model_id" ref="model_payment_schedule"/>
+        <field name="binding_type">report</field>
+        <field name="binding_view_types">list</field>
+    </record>
+
+    <!-- <report
+        id="report_payment_schedule"
+        model="payment.schedule"
+        string="Payment Schedule Report"
+        report_type="qweb-pdf"
+        name="project_payment_schedule.payment_schedule_report_template"
+        file="project_payment_schedule.payment_schedule_report_template"
+        binding_model_id="model_payment_schedule"
+        print_report_name="(object.name or 'Payment Schedule') + '.pdf'"/> -->
+
+
+</odoo>
+
+    <!-- <record id="view_payment_schedule_form_inherit" model="ir.ui.view">
+        <field name="name">payment.schedule.form.inherit</field>
+        <field name="model">payment.schedule</field>
+        <field name="inherit_id" ref="project_payment_schedule.payment_schedule_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@class='oe_kanban_global_click']" position="inside">
+                <button name="%(report_payment_schedule)d" type="action" string="Print Payment Schedule" class="oe_highlight"/>
+            </xpath>
+        </field>
+    </record> -->

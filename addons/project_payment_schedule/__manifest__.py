@@ -19,6 +19,8 @@ This module enables the creation of Payment Schedules for a construction project
         "views/payment_schedule_views.xml",
         "views/payment_schedule_line_item_views.xml",
         "views/inherited_project_views.xml",
+        "report/payment_schedule_templates.xml",
+        "report/payment_schedule_reports.xml",
     ],
     "installable": True,
     "application": True,

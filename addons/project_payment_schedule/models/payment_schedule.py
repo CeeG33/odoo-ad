@@ -68,6 +68,12 @@ class PaymentSchedule(models.Model):
         precompute=True,
         readonly=False,
     )
+    # initial_down_payment_total = fields.Monetary(
+    #     compute="_compute_initial_down_payment_total",
+    #     store=True,
+    #     precompute=True,
+    #     readonly=False,
+    # )
     grand_total = fields.Monetary(
         compute="_compute_grand_total", store=True, precompute=True, readonly=False
     )
@@ -85,6 +91,7 @@ class PaymentSchedule(models.Model):
         readonly=False,
         required=True,
     )
+    description = fields.Char(compute="_compute_description", store=True, precompute=True, readonly=False)
 
     @api.depends("related_order_ids")
     def _compute_line_items(self):
@@ -190,6 +197,7 @@ class PaymentSchedule(models.Model):
         new_payment_schedule = super().create(vals)
         vals["related_project_id"] = self.env.context["active_id"]
         self.action_refresh_line_items()
+        # self._compute_initial_down_payment_total()
 
         return new_payment_schedule
 
@@ -547,6 +555,42 @@ class PaymentSchedule(models.Model):
                 record.display_name = f"{record.related_order_ids.partner_id.name} - {record.date.month}/{record.date.year}"
             else:
                 record.display_name = f"{record._name},{record.id}"
+    
+    @api.depends("monthly_progress", "related_project_id")
+    def _compute_description(self):
+        """Computes the description of the payment schedule depending on the global progress."""
+        for record in self:
+            # Détermine le numéro d'échéance dans le projet
+            payment_schedules = self.env["payment.schedule"].search([
+                ("related_project_id", "=", record.related_project_id.id)
+            ], order="date asc")
+            
+            schedule_number = len(payment_schedules) + 1
+            
+            # Mise à jour du nom selon le global progress
+            if record.monthly_progress == 100:
+                record.description = "Levée des Réserves"
+            elif record.monthly_progress >= 95:
+                record.description = "Réception"
+            else:
+                record.description = f"Situation {schedule_number}"
+    
+    # CHERCHER LE MONTANT DE L'ACOMPTE GLOBAL
+    # def _compute_initial_down_payment_total(self):
+    #     for schedule in self:
+    #         # Suppose que la première commande créée pour le projet est la commande initiale
+    #         initial_order = self.env['sale.order'].search([
+    #             ('project_id', '=', schedule.related_project_id.id)
+    #             ], order='create_date asc', limit=1)
+    #         print(f"initial_order : {initial_order}")
+    #         if initial_order:
+    #             # Filtrer les lignes de commande pour obtenir les lignes d'acompte
+    #             down_payment_line = initial_order.order_line.filtered(lambda l: l.is_downpayment)[:1]
+    #             print(f"down_payment_line : {down_payment_line}")
+    #             schedule.initial_down_payment_total = down_payment_line.mapped('price_unit')[0]
+    #             print(f"initial_down_payment_total : {schedule.initial_down_payment_total}")
+    #         else:
+    #             schedule.initial_down_payment_total = 0.0
 
     # INVESTIGATIONS POUR MAJ ECHEANCIER SUIVANTS AUTOMATIQUEMENT
     # @api.onchange("line_ids")

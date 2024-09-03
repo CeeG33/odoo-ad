@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="payment_schedule_report_template">
+        <t t-foreach="docs" t-as="schedule">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h1>Échéancier de paiement</h1>
+                        <h2>
+                            <span t-field="schedule.date"/>
+                        </h2>
+                        <div>
+                            <strong>Montant Total: </strong>
+                            <span t-field="schedule.lines_total"/>
+                        </div>
+                        <!-- <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="offers" t-value="property.mapped('offer_ids')"/>
+                                <tr t-foreach="offers" t-as="offer">
+                                    <td>
+                                        <span t-field="offer.price"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table> -->
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+
+    <template id="payment_schedule_list_report">
+        <t t-call="web.external_layout">
+            <div class="page" style="font-family: sans-serif;">
+                <main>
+                    <h2>Échéancier de paiement</h2>
+                    <h3>Projet : <span t-field="docs.related_project_id.name"/></h3>
+                    <h4>Date : <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d / %m / %Y')"/></h4>
+                    <h5>Montant de l'acompte initial : <span t-esc="-sum(docs.mapped('down_payment_total'))" t-options="{'widget': 'monetary', 'display_currency': docs.currency_id}"/></h5>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Description</th>
+                                <th class="text-center">Date de l'échéance</th>
+                                <th class="text-center">Avancement</th>
+                                <th class="text-end">Total € HT</th>
+                                <th class="text-end">Reprise sur acompte € HT</th>
+                                <th class="text-end">Montant à facturer € HT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="docs" t-as="schedule">
+                                <tr>
+                                    <td class="text-center align-middle">
+                                        <span t-field="schedule.description"/>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <span t-field="schedule.date"/>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <strong><span t-field="schedule.monthly_progress"/>%</strong>
+                                    </td>
+                                    <td class="text-end align-middle">
+                                        <span t-field="schedule.lines_total" t-options="{'widget': 'monetary', 'display_currency': schedule.currency_id}"/>
+                                    </td>
+                                    <td class="text-end align-middle">
+                                        <span t-field="schedule.down_payment_total" t-options="{'widget': 'monetary', 'display_currency': schedule.currency_id}"/>
+                                    </td>
+                                    <td class="text-end align-middle">
+                                        <strong><span t-field="schedule.grand_total" t-options="{'widget': 'monetary', 'display_currency': schedule.currency_id}"/></strong>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>
+                                    
+                                </td>
+                                <td>
+                                    
+                                </td>
+                                <td>
+
+                                </td>
+                                <td class="text-end">
+                                    <span t-esc="sum(docs.mapped('lines_total'))" t-options="{'widget': 'monetary', 'display_currency': schedule.currency_id}"/>
+                                </td>
+                                <td class="text-end">
+                                    <span t-esc="sum(docs.mapped('down_payment_total'))" t-options="{'widget': 'monetary', 'display_currency': schedule.currency_id}"/>
+                                </td>
+                                <td class="text-end">
+                                    <strong>
+                                        <span t-esc="sum(docs.mapped('grand_total'))" t-options="{'widget': 'monetary', 'display_currency': schedule.currency_id}"/>
+                                    </strong>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <div class="card w-50 float-end text-center border-secondary my-5" style="max-width: 18rem;">
+                        <div class="card-header mb-0">Date &amp; Signature du Client</div>
+                        <div class="card-body pb-5">
+                            <span class="align-top pb-5 mb-3" style="font-size: 13px;">Avec mention "Bon pour Accord"</span>
+                            <div class="pb-5 mb-3"/>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </t>
+    </template>
+</odoo>

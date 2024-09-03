@@ -20,6 +20,7 @@
                     <group>
                         <field name="related_order_ids" invisible="0"/>
                         <field name="related_project_id" context="{'related_project_id': active_id}" invisible="0"/>
+                        <field name="description"/>
                         <field name="date"/>
                         <field name="global_progress" widget="percentage"/>
                         <field name="down_payment" widget="percentage"/>
@@ -45,19 +46,32 @@
         <field name="model">payment.schedule</field>
         <field name="arch" type="xml">
             <kanban default_group_by="date" quick_create="True">
+                <header>
+                    <field name="related_project_id"/>
+                    <button type="action"
+                            name="%(report_payment_schedule)d"
+                            class="btn btn-secondary btn-sm mt8">
+                            Print Schedule
+                    </button>
+                </header>
                 <field name="line_ids"/>
                 <field name="cumulative_progress"/>
                 <field name="maximum_progress"/>
                 <field name="monthly_progress"/>
                 <field name="related_project_id"/>
                 <templates>
-                    <header>
-                        <field name="related_project_id"/>
-                    </header>
+                    
 
                     <t t-name="kanban-box">
                         
                         <div class="oe_kanban_global_click oe_kanban_content">
+                            <div class="row justify-content-between align-items-center">
+                                <div class="col-12">
+                                    <a class="col-12 btn btn-outline-secondary align-self-center mb-3" role="button">
+                                        <field name="description"/>
+                                    </a>
+                                </div>
+                            </div>
 
                             <div class="row justify-content-between align-items-center">
                                 <div class="col-4">
@@ -96,6 +110,12 @@
                                 <field class="lh-lg" name="lines_description" widget="text"/>
                             </div>
 
+                            <!-- <button type="action"
+                                    name="%(report_payment_schedule)d"
+                                    class="btn btn-secondary btn-sm mt8">
+                                Print Schedule
+                            </button> -->
+
                         </div>
                         
                     </t>
@@ -113,6 +133,7 @@
             <tree default_group_by="related_project_id" class="text-center" expand="1">
                 <field name="cumulative_progress" column_invisible="1"/>
                 <field name="maximum_progress" column_invisible="1"/>
+                <field name="description" class="text-start"/>
                 <field name="date" class="text-center"/>
                 <field name="schedule_state" widget="label_selection" class="text-center" options="{
                     'classes': {
@@ -122,7 +143,7 @@
                         'P': 'success'}
                     }"></field>
                 <field name="related_project_id" class="text-center" widget="many2one"/>
-                <field name="monthly_progress" string="Avancement" widget="progressbar" class="text-start" options="{'max_field': 'maximum_progress'}"/>
+                <field name="monthly_progress" string="Avancement" widget="progressbar" class="text-start"/>
                 <field name="grand_total"/>
                 <field name="related_invoice_id" widget="many2one"/>
             </tree>

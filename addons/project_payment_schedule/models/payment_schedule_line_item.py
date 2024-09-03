@@ -113,7 +113,9 @@ class PaymentScheduleLineItem(models.Model):
     def _check_total_progress(self):
         """ "Verifies that the total progress is between a range of -100 to 100%."""
         for record in self:
-            if not -1 <= record.total_progress <= 1:
+            total_progress_rounded = round(record.total_progress, 2)
+            
+            if not -1 <= total_progress_rounded <= 1:
                 raise exceptions.ValidationError(
                     "Vous ne pouvez pas avoir un cumul dépassant 100% d'avancement."
                 )
