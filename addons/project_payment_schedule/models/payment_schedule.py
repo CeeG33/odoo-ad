@@ -68,12 +68,6 @@ class PaymentSchedule(models.Model):
         precompute=True,
         readonly=False,
     )
-    # initial_down_payment_total = fields.Monetary(
-    #     compute="_compute_initial_down_payment_total",
-    #     store=True,
-    #     precompute=True,
-    #     readonly=False,
-    # )
     grand_total = fields.Monetary(
         compute="_compute_grand_total", store=True, precompute=True, readonly=False
     )
@@ -560,14 +554,12 @@ class PaymentSchedule(models.Model):
     def _compute_description(self):
         """Computes the description of the payment schedule depending on the global progress."""
         for record in self:
-            # Détermine le numéro d'échéance dans le projet
             payment_schedules = self.env["payment.schedule"].search([
                 ("related_project_id", "=", record.related_project_id.id)
             ], order="date asc")
             
             schedule_number = len(payment_schedules) + 1
             
-            # Mise à jour du nom selon le global progress
             if record.monthly_progress == 100:
                 record.description = "Levée des Réserves"
             elif record.monthly_progress >= 95:
