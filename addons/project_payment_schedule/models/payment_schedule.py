@@ -20,18 +20,18 @@ class PaymentSchedule(models.Model):
         comodel_name='res.company',
         required=True, index=True, readonly=False,
         default=lambda self: self.env.company)
-    # related_order_ids = fields.Many2many(
-    #     "sale.order",
-    #     compute="_compute_related_orders",
-    #     store=True,
-    #     precompute=True
-    # )
-    # invoiced_order_ids = fields.Many2many(
-    #     "sale.order",
-    #     "payment_schedule_invoiced_order_rel",
-    #     store=True,
-    #     default=lambda self: self.related_order_ids.ids
-    # )
+    related_order_ids = fields.Many2many(
+        "sale.order",
+        compute="_compute_related_orders",
+        store=True,
+        precompute=True
+    )
+    invoiced_order_ids = fields.Many2many(
+        "sale.order",
+        "payment_schedule_invoiced_order_rel",
+        store=True,
+        default=lambda self: self.related_order_ids.ids
+    )
     related_project_id = fields.Many2one(
         "project.project",
         string="Projet",
