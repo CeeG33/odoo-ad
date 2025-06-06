@@ -14,7 +14,7 @@ class Project(models.Model):
         """Verifies that the project has at least one sale order."""
         for record in self:
             if not self.env["sale.order"].search(
-                [("project_id", "=", record.id)], order="create_date asc"
+                [("analytic_account_id.x_studio_projet", "=", record.id)], order="create_date asc"
             ):
                 raise ValidationError("Aucune commande n'a été trouvée pour ce projet.")
 

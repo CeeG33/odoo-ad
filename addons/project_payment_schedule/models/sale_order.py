@@ -8,16 +8,15 @@ class SaleOrder(models.Model):
     _inherit = "sale.order"
     _order = "create_date"
 
-    project_id = fields.Many2one("project.project", "Project", required=True)
     payment_schedule_id = fields.Many2one("payment.schedule", "Payment Schedule")
 
-    @api.onchange("partner_id")
-    def onchange_partner_id(self):
-        """ "Dynamically changes the projects shown if the partner changes."""
-        for record in self:
-            return {
-                "domain": {"project_id": [("partner_id", "=", record.partner_id.id)]}
-            }
+    # @api.onchange("partner_id")
+    # def onchange_partner_id(self):
+    #     """ "Dynamically changes the projects shown if the partner changes."""
+    #     for record in self:
+    #         return {
+    #             "domain": {"analytic_account_id.x_studio_projet": [("partner_id", "=", record.partner_id.id)]}
+    #         }
 
     def get_payment_schedule(self):
         """ "Returns the payment schedules of the project."""

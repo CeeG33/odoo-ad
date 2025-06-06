@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-inherit="mail.Chatter" t-inherit-mode="extension">
+        <!-- Ajout d'un message d'avertissement en-dessous du bouton "Envoyer / Send Message". -->
+        <xpath expr="//div[@class='flex-shrink-0 px-3 pt-3 text-truncate small mb-2']" position="before">
+            <b style="color: red">Attention, ce message sera adressé au client.</b><br/>
+        </xpath>
+
+        <!-- <xpath expr="//button[@class='btn btn-link text-action']" position="after">
+            <button type="button"
+                    string="Afficher/Masquer messages secondaires"
+                    class="btn btn-link text-action"
+                    t-att-data-action="_onToggleMessagesVisibility">
+                <i class="fa fa-eye-slash" role="img"/>
+            </button>
+        </xpath> -->
+    </t>
+    
+
+</templates>

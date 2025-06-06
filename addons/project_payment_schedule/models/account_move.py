@@ -18,7 +18,7 @@ class AccountMove(models.Model):
                 sale_orders = self.env["sale.order"].search(
                     [
                         (
-                            "project_id",
+                            "analytic_account_id.x_studio_projet",
                             "=",
                             move.payment_schedule_id.related_project_id.id,
                         )
@@ -44,7 +44,7 @@ class AccountMove(models.Model):
                 sale_orders = self.env["sale.order"].search(
                     [
                         (
-                            "project_id",
+                            "analytic_account_id.x_studio_projet",
                             "=",
                             move.payment_schedule_id.related_project_id.id,
                         )

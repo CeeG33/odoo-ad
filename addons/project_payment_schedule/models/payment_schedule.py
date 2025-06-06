@@ -2,9 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from statistics import mean
-from odoo import api, fields, models, SUPERUSER_ID, _
+from odoo import api, fields, models, SUPERUSER_ID, _, Command
 from odoo.exceptions import UserError, ValidationError
+import logging
 
+_logger = logging.getLogger(__name__)
+
+WORKS_ACCOUNT_NUMBER = "704000"
 
 class PaymentSchedule(models.Model):
     _name = "payment.schedule"
@@ -12,18 +16,28 @@ class PaymentSchedule(models.Model):
 
     # === FIELDS ===#
 
-    related_order_ids = fields.Many2many(
-        "sale.order",
-        compute="_compute_related_orders",
-        store=True,
-        precompute=True,
-    )
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        required=True, index=True, readonly=False,
+        default=lambda self: self.env.company)
+    # related_order_ids = fields.Many2many(
+    #     "sale.order",
+    #     compute="_compute_related_orders",
+    #     store=True,
+    #     precompute=True
+    # )
+    # invoiced_order_ids = fields.Many2many(
+    #     "sale.order",
+    #     "payment_schedule_invoiced_order_rel",
+    #     store=True,
+    #     default=lambda self: self.related_order_ids.ids
+    # )
     related_project_id = fields.Many2one(
         "project.project",
         string="Projet",
         store=True,
         readonly=False,
-        default=lambda self: self.env.context["active_id"],
+        default=lambda self: self.env.context.get("active_id", False),
     )
     line_ids = fields.One2many(
         "payment.schedule.line.item",
@@ -36,7 +50,9 @@ class PaymentSchedule(models.Model):
     related_invoice_id = fields.Many2one(
         "account.move", string="Facture", store=True, readonly=False
     )
-    lines_description = fields.Text(compute="_compute_lines_description")
+    kanban_lines_description = fields.Text(
+        compute="_compute_kanban_lines_description"
+    )
     base_order_lines_sum = fields.Monetary(
         compute="_compute_base_order_lines_sum",
         store=True,
@@ -45,6 +61,12 @@ class PaymentSchedule(models.Model):
     )
     lines_total = fields.Monetary(
         compute="_compute_lines_total_amount",
+        store=True,
+        precompute=True,
+        readonly=False,
+    )
+    lines_total_with_tax = fields.Monetary(
+        compute="_compute_lines_total_amount_with_tax",
         store=True,
         precompute=True,
         readonly=False,
@@ -61,9 +83,14 @@ class PaymentSchedule(models.Model):
         string="Avancement maximum", compute="_compute_maximum_progress", readonly=True
     )
     monthly_progress = fields.Float(compute="_compute_monthly_progress")
-    down_payment = fields.Float(string="Acompte")
     down_payment_total = fields.Monetary(
         compute="_compute_down_payment_total",
+        store=True,
+        precompute=True,
+        readonly=False,
+    )
+    down_payment_total_with_tax = fields.Monetary(
+        compute="_compute_down_payment_total_with_tax",
         store=True,
         precompute=True,
         readonly=False,
@@ -71,23 +98,46 @@ class PaymentSchedule(models.Model):
     grand_total = fields.Monetary(
         compute="_compute_grand_total", store=True, precompute=True, readonly=False
     )
+    grand_total_with_tax = fields.Monetary(
+        compute="_compute_grand_total_with_tax", store=True, precompute=True, readonly=False
+    )
     schedule_state = fields.Selection(
         selection=[
-            ("SC", "Schedule Created"),
-            ("IC", "Invoice Created"),
-            ("I", "Invoice Issued"),
-            ("P", "Paid"),
+            ("F", "Prévisionnel"),
+            ("E", "Édité"),
+            ("R", "En attente de règlement"),
+            ("P", "Payé"),
         ],
         string="Statut de l'échéancier",
-        default="SC",
+        default="F",
         compute="_compute_schedule_state",
         store=True,
         readonly=False,
         required=True,
     )
-    description = fields.Char(compute="_compute_description", store=True, precompute=True, readonly=False)
+    schedule_type = fields.Selection(
+        selection=[
+            ("E", "Études"),
+            ("M", "Mobilier"),
+            ("T", "Travaux"),
+        ],
+        string="Type d'échéancier",
+        default="T",
+        store=True,
+        required=True,
+    )
+    description = fields.Char(
+        # compute="_compute_description",
+        store=True,
+        precompute=True,
+        readonly=False
+    )
+    analytic_account_description = fields.Char(
+        store=True,
+        readonly=False
+    )
 
-    @api.depends("related_order_ids")
+    @api.depends("invoiced_order_ids", "related_order_ids", "schedule_type")
     def _compute_line_items(self):
         """Copies the related sale orders line items in the payment schedule."""
         for record in self:
@@ -95,59 +145,131 @@ class PaymentSchedule(models.Model):
                 lines = []
 
                 previous_payment_schedule = record._get_previous_payment_schedule()
+                
+                if record.related_order_ids != record.invoiced_order_ids:
+                    
+                    for order in record.invoiced_order_ids:
 
-                for order in record.related_order_ids:
-
-                    for line in order.order_line:
-                        if not line.is_downpayment:
-                            existing_line = record.line_ids.filtered(
-                                lambda x: x.description == line.name
-                            )
-
-                            if existing_line:
-                                existing_line.trade_total = line.price_unit
-
-                            else:
-                                new_line = record.env[
-                                    "payment.schedule.line.item"
-                                ].create(
-                                    {
-                                        "related_order_id": order.id,
-                                        "description": line.name,
-                                        "trade_total": line.price_unit,
-                                    }
+                        for line in order.order_line:
+                            if not line.is_downpayment:
+                                existing_line = record.line_ids.filtered(
+                                    lambda x: x.description == line.name
                                 )
-                                lines.append(new_line.id)
 
-                                if previous_payment_schedule:
-                                    matching_line = (
-                                        previous_payment_schedule.line_ids.filtered(
-                                            lambda x: x.description == line.name
-                                        )
+                                if existing_line:
+                                    existing_line.trade_total = line.price_subtotal
+
+                                else:
+                                    new_line = record.env[
+                                        "payment.schedule.line.item"
+                                    ].create(
+                                        {
+                                            "related_order_id": order.id,
+                                            "related_order_line_id": line.ids[0],
+                                            "related_product_id": line.product_id.id,
+                                            "description": line.name,
+                                            "trade_total": line.price_subtotal,
+                                        }
                                     )
+                                    lines.append(new_line.id)
 
-                                    if matching_line:
-                                        new_line.previous_progress = (
-                                            matching_line.total_progress
+                                    if previous_payment_schedule:
+                                        matching_line = (
+                                            previous_payment_schedule.line_ids.filtered(
+                                                lambda x: x.description == line.name
+                                            )
                                         )
+
+                                        if matching_line:
+                                            new_line.previous_progress = (
+                                                matching_line.total_progress
+                                            )
+                
+                else:
+                    
+                    for order in record.related_order_ids:
+
+                        for line in order.order_line:
+                            if not line.is_downpayment:
+                                existing_line = record.line_ids.filtered(
+                                    lambda x: x.description == line.name
+                                )
+
+                                if existing_line:
+                                    existing_line.trade_total = line.price_subtotal
+
+                                else:
+                                    new_line = record.env[
+                                        "payment.schedule.line.item"
+                                    ].create(
+                                        {
+                                            "related_order_id": order.id,
+                                            "related_order_line_id": line.ids[0],
+                                            "related_product_id": line.product_id.id,
+                                            "description": line.name,
+                                            "trade_total": line.price_subtotal,
+                                        }
+                                    )
+                                    lines.append(new_line.id)
+
+                                    if previous_payment_schedule:
+                                        matching_line = (
+                                            previous_payment_schedule.line_ids.filtered(
+                                                lambda x: x.description == line.name
+                                            )
+                                        )
+
+                                        if matching_line:
+                                            new_line.previous_progress = (
+                                                matching_line.total_progress
+                                            )
 
                 record.line_ids = lines
 
-    @api.depends("related_project_id")
+    @api.depends("related_project_id", "schedule_type")
     def _compute_related_orders(self):
         """Selects the orders related to the project."""
         for record in self:
-            orders = (
-                self.env["sale.order"].search(
-                    [("project_id", "=", record.related_project_id.id)],
-                    order="create_date asc",
+            if record.schedule_type == "M":
+                orders = (
+                    self.env["sale.order"].search(
+                        [("analytic_account_id.x_studio_projet", "=", record.related_project_id.id),
+                        ("tag_ids.id", "=", 10), # Furniture
+                        ("state", "in", ["sent", "sale"]),
+                        ],
+                        order="create_date asc",
+                    )
+                    or None
                 )
-                or None
-            )
+            
+            elif record.schedule_type == "T":
+                orders = (
+                    self.env["sale.order"].search(
+                        [("analytic_account_id.x_studio_projet", "=", record.related_project_id.id),
+                        ("tag_ids.id", "=", 11), # Works
+                        ("state", "in", ["sent", "sale"]),
+                        ],
+                        order="create_date asc",
+                    )
+                    or None
+                )
+            
+            elif record.schedule_type == "E":
+                orders = (
+                    self.env["sale.order"].search(
+                        [("analytic_account_id.x_studio_projet", "=", record.related_project_id.id),
+                        ("tag_ids.id", "=", 12), # Study
+                        ("state", "in", ["sent", "sale"]),
+                        ],
+                        order="create_date asc",
+                    )
+                    or None
+                )
+            
             record.related_order_ids = orders
 
     @api.depends("line_ids")
-    def _compute_lines_description(self):
+    def _compute_kanban_lines_description(self):
         """Shows line item's main information on the Kanban view."""
         for record in self:
             if record.line_ids:
@@ -160,19 +282,19 @@ class PaymentSchedule(models.Model):
                         description_lines.append(new_line)
 
                 if record.down_payment_total:
-                    down_payment = f"Acompte ({round(record.down_payment * 100)}%) : {'{:,.2f}'.format(record.down_payment_total)} € HT"
+                    down_payment = f"Reprise sur acompte : {'{:,.2f}'.format(record.down_payment_total)} € HT"
                     description_lines.append(down_payment)
 
                 if len(description_lines) > 0:
-                    record.lines_description = "\n".join(description_lines)
+                    record.kanban_lines_description = "\n".join(description_lines)
 
                 else:
-                    record.lines_description = "Vide"
+                    record.kanban_lines_description = "Vide"
 
             else:
-                record.lines_description = "Vide"
+                record.kanban_lines_description = "Vide"
 
-    @api.depends("line_ids", "global_progress", "line_ids.current_progress")
+    @api.depends("line_ids", "global_progress", "line_ids.current_progress", "invoiced_order_ids")
     def _compute_lines_total_amount(self):
         """Computes the total value of payment schedule's line items."""
         for record in self:
@@ -189,9 +311,8 @@ class PaymentSchedule(models.Model):
         if the lines descriptions match.
         """
         new_payment_schedule = super().create(vals)
-        vals["related_project_id"] = self.env.context["active_id"]
-        self.action_refresh_line_items()
-        # self._compute_initial_down_payment_total()
+        if self.env.context.get("active_id"):
+            vals["related_project_id"] = self.env.context["active_id"]
 
         return new_payment_schedule
 
@@ -214,12 +335,13 @@ class PaymentSchedule(models.Model):
             search_domain = [("related_project_id", "=", record.related_project_id.id)]
 
             if self._origin.id:
-                search_domain.extend([("id", "!=", record.id), ("date", "<", record.date)])
+                search_domain.extend([("date", "<", record.date)])
+
 
             previous_payment_schedule = self.env["payment.schedule"].search(
                 search_domain, order="date desc", limit=1
             )
-            print(f"previous_payment_schedule : {previous_payment_schedule}")
+
             return previous_payment_schedule or None
 
     def _update_previous_progress(self):
@@ -236,15 +358,18 @@ class PaymentSchedule(models.Model):
                     for matching_line in matching_lines:
                         line.write({"previous_progress": matching_line.total_progress})
 
-    @api.depends("down_payment", "base_order_lines_sum")
+    @api.depends("line_ids", "line_ids.down_payment", "invoiced_order_ids")
     def _compute_down_payment_total(self):
-        """Computes the value of the down payment based on the down payment percentage."""
+        """Computes the value of the down payment total based on each line's down payment percentage."""
         for record in self:
-            down_payment_amount = record.down_payment * -(record.base_order_lines_sum)
+            down_payment_amount = 0
+            
+            for line in record.line_ids:
+                down_payment_amount += line.down_payment * -(line.line_total)
 
             record.down_payment_total = down_payment_amount
 
-    @api.depends("line_ids", "down_payment", "down_payment_total", "lines_total")
+    @api.depends("line_ids", "down_payment_total", "lines_total", "invoiced_order_ids", "schedule_type")
     def _compute_grand_total(self):
         """Computes the value of the grand total of the payment schedule by substracting the down payment
         reimbursement from the lines total value.
@@ -254,13 +379,12 @@ class PaymentSchedule(models.Model):
                 record.line_ids
                 and record.down_payment_total
                 and record.lines_total
-                and record.down_payment != 0
             ):
                 grand_total_amount = record.down_payment_total + record.lines_total
 
                 record.grand_total = grand_total_amount
 
-            elif record.down_payment == 0:
+            elif record.down_payment_total == 0:
                 grand_total_amount = record.lines_total
 
                 record.grand_total = grand_total_amount
@@ -270,81 +394,338 @@ class PaymentSchedule(models.Model):
 
                 record.grand_total = grand_total_amount
 
+    # def action_create_invoice(self):
+    #     """Creates the associated invoice from payment schedule lines."""
+    #     for record in self:
+    #         # 1. Vérification de l'état des commandes associées
+    #         if not record.related_order_ids:
+    #             raise UserError("Aucune commande associée pour générer une facture.")
+            
+    #         # 2. Création de la facture (via context propre)
+    #         invoice_vals = {
+    #             'move_type': 'out_invoice',
+    #             'partner_id': record.related_project_id.partner_id.id,
+    #             'invoice_date': record.date,
+    #             'invoice_origin': ', '.join(record.related_order_ids.mapped('name')),
+    #             'payment_schedule_id': record.id,
+    #             'invoice_line_ids': [],
+    #         }
+            
+    #         # 3. Ajouter les lignes de facture
+    #         for line in record.line_ids:
+    #             for order in record.related_order_ids:
+    #                 order_line = order.order_line.filtered(lambda l: l.name == line.description)
+                    
+    #                 if order_line:
+    #                     invoice_line_vals = {
+    #                         'product_id': order_line.product_id.id,
+    #                         'name': line.description,
+    #                         'quantity': 1,
+    #                         'price_unit': line.line_total,
+    #                         'account_id': self.env['account.account'].search(
+    #                             [('code', '=', WORKS_ACCOUNT_NUMBER)], limit=1).id,
+    #                         'analytic_distribution': {line.related_order_id.analytic_account_id.id: 100},
+    #                     }
+    #                     invoice_vals['invoice_line_ids'].append((0, 0, invoice_line_vals))
+            
+    #         # 4. Création de la facture
+    #         invoice = self.env['account.move'].create(invoice_vals)
+            
+    #         # 5. Mise à jour des références
+    #         record.write({
+    #             'related_invoice_id': invoice.id,
+    #             'schedule_state': 'E'
+    #         })
+            
+    #         for order in record.related_order_ids:
+    #             order.write({'invoice_ids': [(4, invoice.id)]})
+    #             # order._get_invoiced()
+    #             order._get_invoiced()
+    #             _logger.info(f"order invoices: id {order.id} - invoices id : {order.invoice_ids}")
+            
+    #         return {
+    #             'type': 'ir.actions.client',
+    #             'tag': 'display_notification',
+    #             'params': {
+    #                 'title': _('Facture créée'),
+    #                 'message': _('Facture créée avec succès !'),
+    #                 'sticky': True,
+    #                 'type': 'success'
+    #             }
+    #         }
+            
+    #         # return {
+    #         #     'name': _('Facture créée'),
+    #         #     'type': 'ir.actions.act_window',
+    #         #     'res_model': 'account.move',
+    #         #     'res_id': invoice.id,
+    #         #     'view_mode': 'form',
+    #         # }
+
     def action_create_invoice(self):
-        """Creates the associated invoice."""
-        print("méthode >> action_create_invoice")
+        """Creates an invoice for the payment schedule."""
         for record in self:
-            record._check_order_state()
+            if not record.related_order_ids:
+                raise UserError("Aucune commande associée pour générer une facture.")
 
-            advance_payment_wizard = self.env["sale.advance.payment.inv"].create(
-                {
-                    "advance_payment_method": "delivered",
-                    "sale_order_ids": [(6, 0, record.related_order_ids.ids)],
-                    "consolidated_billing": True,
-                }
-            )
+            # advance_payment_wizard = self.env["sale.advance.payment.inv"].create(
+            #     {
+            #         "advance_payment_method": "delivered",
+            #         "sale_order_ids": [(6, 0, record.related_order_ids.ids)],
+            #         "consolidated_billing": True,
+            #     }
+            # )
 
-            new_invoice = advance_payment_wizard.create_invoices()
+            # new_invoice = advance_payment_wizard.create_invoices()
+            record.schedule_state = "E"
+
+            # new_invoice_id = new_invoice.get("res_id")
+            # if not new_invoice_id:
+            #     raise UserError("No invoice was created.")
+
+            # latest_invoice = self.env["account.move"].browse(new_invoice_id)
+            invoice_vals = {
+                'partner_id': record.related_project_id.partner_id.parent_id.id or record.related_project_id.partner_id.id,
+                'invoice_date': record.date,
+                'move_type': 'out_invoice',
+                'payment_schedule_id': record.id,
+                'invoice_origin': ', '.join(record.related_order_ids.mapped('name')),
+            }
             
-            record.schedule_state = "IC"
-
-            latest_invoice = self.env["account.move"].search(
-                [("partner_id", "=", record.related_project_id.partner_id.id)],
-                order="create_date desc",
-                limit=1,
-            )
+            latest_invoice = self.env["account.move"].create(invoice_vals)
             
-            latest_invoice.payment_schedule_id = record
+            # latest_invoice.write({
+            #     'invoice_date': record.date,
+            #     'move_type': 'out_invoice',
+            #     'payment_schedule_id': record.id,
+            #     'invoice_origin': ', '.join(record.related_order_ids.mapped('name')),
+            # })
 
             record.related_invoice_id = latest_invoice
-            latest_invoice.move_type = "out_invoice"
-            print(f"record.related_invoice_id : {record.related_invoice_id}")
-            print(f"metadata : {record.related_invoice_id.read(['name', 'amount_total_signed', 'line_ids'])}")
-            print("entrée dans méthode _copy_payment_schedule_lines_to_latest_invoice")
+
             self._copy_payment_schedule_lines_to_latest_invoice(latest_invoice)
-            print("methode _copy_payment_schedule_lines_to_latest_invoice OK")
             self.action_update_sale_order_quantities()
-            print("methode action_update_sale_order_quantities OK")
-            return new_invoice
+
+            return latest_invoice
+
+    # def _copy_payment_schedule_lines_to_latest_invoice(self, invoice):
+    #     """Copies the payment schedule lines to the latest invoice."""
+    #     for line in self.line_ids:
+    #         order_line = line.related_order_id.order_line.filtered(lambda l: l.name == line.description)
+            
+    #         if not order_line:
+    #             raise UserError(f"Product not found for line description: {line.description}")
+
+    #         product = order_line.product_id
+            
+    #         analytic_distribution = {line.related_order_id.analytic_account_id.id: 100} if line.related_order_id.analytic_account_id else {}
+            
+    #     existing_invoice_line = invoice.invoice_line_ids.filtered(lambda l: l.name == line.description)
+
+    #     if existing_invoice_line:
+    #         # Mettre à jour la ligne de facture existante
+    #         existing_invoice_line.write({
+    #             'quantity': 1,
+    #             'price_unit': line.line_total,
+    #             'product_id': product.id if product else False,
+    #             'analytic_distribution': analytic_distribution,
+    #         })
+    #     else:
+    #         # Créer une nouvelle ligne de facture
+    #         self.env['account.move.line'].create({
+    #             'move_id': invoice.id,
+    #             'name': line.description,
+    #             'quantity': 1,
+    #             'price_unit': line.line_total,
+    #             'product_id': product.id if product else False,
+    #             'analytic_distribution': analytic_distribution,
+    #         })
+
+    # def action_create_invoice(self):
+    #     """Creates an invoice for the payment schedule."""
+    #     for record in self:
+    #         invoice_lines = self._prepare_invoice_lines(record)
+    #         invoice = self._create_invoice(record, invoice_lines)
+    #         self._update_invoice_lines(invoice_lines, record)
+    #         self._create_down_payment_line(invoice, record)
+    #     return invoice
+
+    # def _prepare_invoice_lines(self, record):
+    #     """Prepares the invoice lines based on the payment schedule."""
+    #     invoice_lines = []
+    #     for line in record.line_ids:
+    #         invoice_lines.append({
+    #             'name': line.description,
+    #             'quantity': 1,
+    #             'price_unit': line.line_total,
+    #         })
+    #     return invoice_lines
+
+    # def _create_invoice(self, record, invoice_lines):
+    #     """Creates the invoice record."""
+    #     if record.related_project_id.partner_id.parent_id:
+    #         partner_id = record.related_project_id.partner_id.parent_id.id
+    #     else:
+    #         partner_id = record.related_project_id.partner_id.id
+        
+    #     invoice = self.env['account.move'].create({
+    #         'move_type': 'out_invoice',
+    #         'partner_id': partner_id,
+    #         'invoice_date': record.date,
+    #         'invoice_line_ids': [(0, 0, line) for line in invoice_lines],
+    #     })
+    #     return invoice
+
+    # def _update_invoice_lines(self, invoice_lines, record):
+    #     """Updates the invoice lines with the correct quantities and prices."""
+    #     payment_schedule_dict = {line.description: line.line_total for line in record.line_ids}
+    #     for invoice_line in invoice_lines:
+    #         if invoice_line['name'] in payment_schedule_dict:
+    #             invoice_line['quantity'] = 1
+    #             invoice_line['price_unit'] = payment_schedule_dict[invoice_line['name']]
+    #         else:
+    #             invoice_line['quantity'] = 0
+
+    # def _create_down_payment_line(self, invoice, record):
+    #     """Creates a down payment line if there is a negative down payment total."""
+    #     if record.down_payment_total < 0:
+    #         self.env['account.move.line'].create({
+    #             'move_id': invoice.id,
+    #             'name': 'Remboursement sur acompte',
+    #             'quantity': 1,
+    #             'price_unit': record.down_payment_total,
+    #             'account_id': 1820,  # Journal 419100 répertoriant les avances.
+    #         })
+
+    # # INITIAL METHOD FOR INVOICE CREATION
+    # def action_create_invoice(self):
+    #     """Creates the associated invoice."""
+    #     for record in self:
+    #         # record._check_order_state()
+
+    #         advance_payment_wizard = self.env["sale.advance.payment.inv"].create(
+    #             {
+    #                 "advance_payment_method": "delivered",
+    #                 "sale_order_ids": [(6, 0, record.related_order_ids.ids)],
+    #                 "consolidated_billing": True,
+    #             }
+    #         )
+
+    #         new_invoice = advance_payment_wizard.create_invoices()
+    #         record.schedule_state = "E"
+            
+    #         new_invoice_id = new_invoice.get("res_id")
+
+    #         latest_invoice = self.env["account.move"].browse(new_invoice_id)
+            
+    #         # if record.related_project_id.partner_id.parent_id:
+            
+    #         #     latest_invoice = self.env["account.move"].search(
+    #         #         [
+    #         #             ("partner_id", "=", record.related_project_id.partner_id.parent_id.id),
+    #         #             ("move_type", "=", "out_invoice"),
+    #         #             ("x_studio_compte_analytique", "=", record.related_project_id.analytic_account_id.id)
+    #         #         ],
+    #         #         order="create_date desc",
+    #         #         limit=1,
+    #         #     )
+            
+    #         # else:
+    #         #     latest_invoice = self.env["account.move"].search(
+    #         #         [
+    #         #             ("partner_id", "=", record.related_project_id.partner_id.id),
+    #         #             ("move_type", "=", "out_invoice"),
+    #         #             ("x_studio_compte_analytique", "=", record.related_project_id.analytic_account_id.id)
+    #         #         ],
+    #         #         order="create_date desc",
+    #         #         limit=1,
+    #         #     )
+            
+    #         _logger.info(f"latest invoice : {latest_invoice}")
+    #         _logger.info(f"latest invoice payment reference : {latest_invoice.payment_reference}")
+    #         _logger.info(f"latest invoice date : {latest_invoice.date}")
+            
+    #         # self.env.cr.savepoint()
+    #         # new_invoice.with_context(skip_lock_check=True)
+    #         latest_invoice.write({
+    #             'invoice_date': record.date,
+    #             'move_type': 'out_invoice',
+    #             'payment_schedule_id': record.id,
+    #         })
+
+    #         # latest_invoice.payment_schedule_id = record
+    #         # latest_invoice.invoice_date = record.date
+
+    #         record.related_invoice_id = latest_invoice
+            
+    #         _logger.info(f"méthode > _copy_payment_schedule_lines_to_latest_invoice")
+    #         self._copy_payment_schedule_lines_to_latest_invoice(latest_invoice)
+    #         _logger.info(f"méthode OK")
+            
+    #         _logger.info(f"méthode > action_update_sale_order_quantities")
+    #         self.action_update_sale_order_quantities()
+    #         _logger.info(f"méthode OK")
+
+    #         return latest_invoice
 
     def _copy_payment_schedule_lines_to_latest_invoice(self, invoice):
         """Copies the payment schedule lines to the latest invoice."""
-        for record in self:
-            if not invoice:
-                raise UserError("No invoice found for the related project.")
-            
-            payment_schedule_lines = record.line_ids
-            invoice_lines = invoice.line_ids
+        if not invoice:
+            raise UserError("No invoice found for the related project.")
 
-            # Associe un montant total à la description de la ligne dans l'échéancier.
-            payment_schedule_dict = {
-                line.description: line.line_total
-                for line in payment_schedule_lines
-                if line.description != "Remboursement sur acompte"
-            }
+        payment_schedule_lines = self.line_ids
+        # _logger.info(f"payment_schedule_lines : {payment_schedule_lines}")
+        
+        invoice_lines = invoice.line_ids
+        # _logger.info(f"invoice_lines : {invoice_lines}")
+        
+        # for invoice_line in invoice_lines:
+        #     _logger.info(f"invoice_line : {invoice_line} - line_name : {invoice_line.name} - line_total : {invoice_line.price_unit}")
 
-            print("entrée dans la boucle for")
-            for invoice_line in invoice_lines:
-                if invoice_line.name in payment_schedule_dict:
-                    # Renseigne les montants totaux des avancements (au lieu de prendre le montant total du lot).
-                    invoice_line.quantity = 1
-                    invoice_line.price_unit = payment_schedule_dict[invoice_line.name]
-                else:
-                    # Met à zéro les lignes de down payment précédents.
-                    invoice_line.quantity = 0
-            
-            # Crée la ligne de remboursement sur acompte du mois en cours.
-            if record.down_payment_total < 0:
-                record.env["account.move.line"].create(
-                    {
-                        "move_id": invoice.id,
-                        "name": "Remboursement sur acompte",
-                        "quantity": 1,
-                        "price_unit": record.down_payment_total,
-                    }
-                )
-            
-            return invoice
+        # Associe un montant total à la description de la ligne dans l'échéancier.
+        payment_schedule_dict = {
+            line.description: line.line_total
+            for line in payment_schedule_lines
+            if line.description != "Remboursement sur acompte"
+        }
+
+        _logger.info(f"payment_schedule_dict : {payment_schedule_dict}")
+        
+        for payment_schedule_line in payment_schedule_lines:
+            self.env["account.move.line"].create(
+                {
+                    "move_id": invoice.id,
+                    "product_id": payment_schedule_line.related_product_id.id,
+                    "name": payment_schedule_line.description,
+                    "quantity": 1,
+                    "price_unit": payment_schedule_line.line_total,
+                    # 'analytic_distribution': {payment_schedule_line.related_order_id.analytic_account_id.id: 100},
+                    'sale_line_ids' : [Command.link(payment_schedule_line.related_order_line_id.id)],
+                    'tax_ids' : [(6, 0, payment_schedule_line.related_order_line_id.tax_id.ids)]
+                }
+            )
+            # if invoice_line.name in payment_schedule_dict:
+            #     # Renseigne les montants totaux des avancements (au lieu de prendre le montant total du lot).
+            #     invoice_line.quantity = 1
+            #     invoice_line.price_unit = payment_schedule_dict[invoice_line.name]
+            # # else:
+            # #     # Met à zéro les lignes de down payment précédents.
+            # #     invoice_line.quantity = 0
+
+        # Crée la ligne de remboursement sur acompte du mois en cours.
+        if self.down_payment_total < 0:
+            self.env["account.move.line"].create(
+                {
+                    "move_id": invoice.id,
+                    "product_id": 820,
+                    "name": "Remboursement sur acompte",
+                    "quantity": 1,
+                    "price_unit": self.down_payment_total,
+                    "account_id": 1820, # Journal 419100 répertoriant les avances.
+                    # "analytic_distribution": {self.related_project_id.analytic_account_id.id: 100},
+                }
+            )
+
 
     def action_update_sale_order_quantities(self):
         """Updates the associated sale order delivered and invoiced quantities."""
@@ -359,11 +740,7 @@ class PaymentSchedule(models.Model):
                             line.qty_delivered = existing_line.total_progress
                             line.qty_invoiced = existing_line.total_progress
 
-                # SUR SERV DE PRODUCTION : DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search([("name", "=", "Downpayment")], limit=1)
-
-                DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search(
-                    [("name", "=", "Reprise sur acompte")], limit=1
-                )
+                DOWN_PAYMENT_PRODUCT_ID = self.env["product.product"].search([("name", "=", "Downpayment")], limit=1)
 
                 if record.down_payment_total < 0:
                     down_payment_line = self.env["sale.order.line"].create(
@@ -387,33 +764,33 @@ class PaymentSchedule(models.Model):
                     for new_downpayment_line in new_downpayment_lines:
                         new_downpayment_line.qty_invoiced = 1.0
 
-    @api.constrains("date")
-    def _check_schedule_date(self):
-        """Verifies that the schedule being created is not dated before the latest schedule on the project."""
-        for record in self:
-            previous_payment_schedule = self._get_previous_payment_schedule()
+    # @api.constrains("date")
+    # def _check_schedule_date(self):
+    #     """Verifies that the schedule being created is not dated before the latest schedule on the project."""
+    #     for record in self:
+    #         previous_payment_schedule = self._get_previous_payment_schedule()
 
-            if previous_payment_schedule is not None:
-                if record.date < previous_payment_schedule.date:
-                    raise ValidationError(
-                        "La date de cette échéance ne peut pas être antérieure à la dernière échéance facturée sur le projet."
-                    )
+    #         if previous_payment_schedule is not None:
+    #             if record.date < previous_payment_schedule.date:
+    #                 raise ValidationError(
+    #                     "La date de cette échéance ne peut pas être antérieure à la dernière échéance facturée sur le projet."
+    #                 )
 
-    @api.constrains("date")
-    def _check_schedule_month(self):
-        """Verifies that the schedule being created is not duplicated twice on a same month.
-        Avoids having two schedules on the same month.
-        """
-        for record in self:
-            previous_payment_schedule = self._get_previous_payment_schedule()
+    # @api.constrains("date")
+    # def _check_schedule_month(self):
+    #     """Verifies that the schedule being created is not duplicated twice on a same month.
+    #     Avoids having two schedules on the same month.
+    #     """
+    #     for record in self:
+    #         previous_payment_schedule = self._get_previous_payment_schedule()
 
-            if (
-                previous_payment_schedule
-                and record.date.month == previous_payment_schedule.date.month
-            ):
-                raise ValidationError(
-                    "Vous ne pouvez pas avoir deux échéances sur le même mois. Veuillez supprimer la précédente et réessayer."
-                )
+    #         if (
+    #             previous_payment_schedule
+    #             and record.date.month == previous_payment_schedule.date.month
+    #         ):
+    #             raise ValidationError(
+    #                 "Vous ne pouvez pas avoir deux échéances sur le même mois. Veuillez supprimer la précédente et réessayer."
+    #             )
 
     @api.constrains("global_progress")
     def _check_global_progress(self):
@@ -437,7 +814,7 @@ class PaymentSchedule(models.Model):
                 total_project_cost = sum(
                     self.env["sale.order"]
                     .search(
-                        [("project_id", "=", record.related_project_id.id)],
+                        [("analytic_account_id.x_studio_projet", "=", record.related_project_id.id)],
                         order="create_date asc",
                     )
                     .mapped("amount_untaxed")
@@ -478,16 +855,37 @@ class PaymentSchedule(models.Model):
     def _get_base_order(self):
         """Returns the first sale order of the project."""
         for record in self:
-            return (
-                self.env["sale.order"].search(
-                    [("project_id", "=", record.related_project_id.id)],
-                    order="create_date asc",
-                    limit=1,
+            if record.schedule_type == "T":
+                return (
+                    self.env["sale.order"].search(
+                        [("analytic_account_id.x_studio_projet", "=", record.related_project_id.id), ("tag_ids.id", "=", 11), ("analytic_account_id.code", "ilike", "Travaux")],
+                        order="create_date asc",
+                        limit=1,
+                    )
+                    or None
                 )
-                or None
-            )
+            
+            elif record.schedule_type == "M":
+                return (
+                    self.env["sale.order"].search(
+                        [("analytic_account_id.x_studio_projet", "=", record.related_project_id.id), ("tag_ids.id", "=", 10)],
+                        order="create_date asc",
+                        limit=1,
+                    )
+                    or None
+                )
+            
+            elif record.schedule_type == "E":
+                return (
+                    self.env["sale.order"].search(
+                        [("analytic_account_id.x_studio_projet", "=", record.related_project_id.id), ("tag_ids.id", "=", 12)],
+                        order="create_date asc",
+                        limit=1,
+                    )
+                    or None
+                )
 
-    @api.depends("line_ids", "line_ids.current_progress", "global_progress")
+    @api.depends("line_ids", "line_ids.current_progress", "global_progress", "invoiced_order_ids")
     def _compute_base_order_lines_sum(self):
         """Computes the base order lines sum."""
         for record in self:
@@ -506,59 +904,59 @@ class PaymentSchedule(models.Model):
 
                     record.base_order_lines_sum = lines_sum
 
-    def _check_order_state(self):
-        """Verifies that the related orders are in a state allowing invoices to be created."""
-        for record in self:
-            for order in record.related_order_ids:
-                if order.state in ["draft", "sent"]:
-                    raise ValidationError(
-                        (
-                            f"La commande suivante n'est pas encore confirmée : {order.name}"
-                        )
-                    )
+    # def _check_order_state(self):
+    #     """Verifies that the related orders are in a state allowing invoices to be created."""
+    #     for record in self:
+    #         for order in record.related_order_ids:
+    #             if order.state in ["draft", "sent"]:
+    #                 raise ValidationError(
+    #                     (
+    #                         f"La commande suivante n'est pas encore confirmée : {order.name}"
+    #                     )
+    #                 )
 
-                if order.state == "cancel":
-                    raise ValidationError(
-                        (f"La commande suivante est annulée : {order.name}")
-                    )
+    #             if order.state == "cancel":
+    #                 raise ValidationError(
+    #                     (f"La commande suivante est annulée : {order.name}")
+                    # )
 
     @api.depends("related_invoice_id.payment_state", "related_invoice_id.state")
     def _compute_schedule_state(self):
         """Update the schedule state based on the related invoice payment state."""
         if self.related_invoice_id:
-            if self.related_invoice_id.payment_state == "paid":
+            if self.related_invoice_id[0].payment_state == "paid":
                 self.schedule_state = "P"
 
             elif (
-                self.related_invoice_id.payment_state
+                self.related_invoice_id[0].payment_state
                 in ["partial", "not_paid", "in_payment"]
-                and self.related_invoice_id.state == "posted"
+                and self.related_invoice_id[0].state == "posted"
             ):
-                self.schedule_state = "I"
+                self.schedule_state = "R"
 
             else:
-                self.schedule_state = "IC"
+                self.schedule_state = "E"
         
         else:
-            self.schedule_state = "SC"
-    
+            self.schedule_state = "F"
+
     def _compute_display_name(self):
         """Change the display name of the payment schedule."""
         for record in self:
-            if record.related_order_ids.partner_id.name and record.date:
-                record.display_name = f"{record.related_order_ids.partner_id.name} - {record.date.month}/{record.date.year}"
+            if record.related_order_ids and record.date:
+                record.display_name = f"{record.related_order_ids[0].analytic_account_id.name} - {record.date.month}/{record.date.year}"
             else:
                 record.display_name = f"{record._name},{record.id}"
     
-    @api.depends("monthly_progress", "related_project_id")
+    @api.depends("monthly_progress")
     def _compute_description(self):
-        """Computes the description of the payment schedule depending on the global progress."""
+        """Computes the description of the payment schedule depending on the monthly progress."""
         for record in self:
             payment_schedules = self.env["payment.schedule"].search([
                 ("related_project_id", "=", record.related_project_id.id)
             ], order="date asc")
             
-            schedule_number = len(payment_schedules) + 1
+            schedule_number = payment_schedules.ids.index(record.id) + 1 if record.id in payment_schedules.ids else 1
             
             if record.monthly_progress == 100:
                 record.description = "Levée des Réserves"
@@ -567,12 +965,30 @@ class PaymentSchedule(models.Model):
             else:
                 record.description = f"Situation {schedule_number}"
     
+    @api.depends("lines_total", "invoiced_order_ids")
+    def _compute_lines_total_amount_with_tax(self):
+        """Computes lines total with tax."""
+        for record in self:
+            record.lines_total_with_tax = record.lines_total * 1.2
+    
+    @api.depends("down_payment_total")
+    def _compute_down_payment_total_with_tax(self):
+        """Computes the down payment total with tax."""
+        for record in self:
+            record.down_payment_total_with_tax = record.down_payment_total * 1.2
+    
+    @api.depends("grand_total", "invoiced_order_ids", "schedule_type")
+    def _compute_grand_total_with_tax(self):
+        """Computes the down payment total with tax."""
+        for record in self:
+            record.grand_total_with_tax = record.grand_total * 1.2
+    
     # CHERCHER LE MONTANT DE L'ACOMPTE GLOBAL
     # def _compute_initial_down_payment_total(self):
     #     for schedule in self:
     #         # Suppose que la première commande créée pour le projet est la commande initiale
     #         initial_order = self.env['sale.order'].search([
-    #             ('project_id', '=', schedule.related_project_id.id)
+    #             ('analytic_account_id.x_studio_projet', '=', schedule.related_project_id.id)
     #             ], order='create_date asc', limit=1)
     #         print(f"initial_order : {initial_order}")
     #         if initial_order:
@@ -600,3 +1016,8 @@ class PaymentSchedule(models.Model):
     #         print(f"schedule : {schedule}")
     #         schedule._update_previous_progress()
     #         print("application de la maj")
+
+    @api.onchange("related_order_ids", "schedule_type")
+    def _compute_invoiced_orders(self):
+        for record in self:
+            record.invoiced_order_ids = record.related_order_ids

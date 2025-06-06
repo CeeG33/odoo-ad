@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="custom_external_layout_standard" inherit_id="web.external_layout_standard">
+        <!-- Modification du logo et du texte de l'en-tête -->
+        <xpath expr="//div[@class='col-3 mb4']/img" position="replace">
+            <img t-if="company.logo and o and o.x_studio_orangelo_header == False" t-att-src="image_data_uri(company.logo)" style="max-height: 40px; margin-top:10px;" alt="Logo"/>
+            <img t-elif="company.x_studio_logo_orangelo_1 and o and o.x_studio_orangelo_header" t-att-src="image_data_uri(company.x_studio_logo_orangelo_1)" style="max-height: 40px; margin-top:10px;" alt="Logo Orangelo"/>
+            <h2 t-elif="company.id == 3" style="max-height: 40px; margin-top:10px;">AO PLUS</h2>
+        </xpath>
+
+        <!-- Modification du texte de droite dans l'en-tête -->
+        <xpath expr="//div[@class='col-9 text-end']" position="replace">
+            <div class="col-9 text-end" style="margin-top:22px;" t-if="o and o.x_studio_orangelo_header == False" t-field="company.report_header" name="moto"/>
+            <div class="col-9 text-end" style="margin-top:22px;" t-if="o and o.x_studio_orangelo_header">Furniture as a Service</div>
+        </xpath>
+
+        <!-- Modification des informations de la société dans l'en-tête -->
+        <xpath expr="//div[@class='col-6']" position="replace">
+            <div class="col-6" name="company_address">
+                <ul class="list-unstyled" name="company_address_list">
+                    <li t-if="company.is_company_details_empty">
+                        <span t-field="company.partner_id" t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;], &quot;no_marker&quot;: true}"/>
+                    </li>
+                    <li t-else="">
+                        <t t-if="company.id == 3" t-esc="company.company_details"/>
+                    </li>
+                    <li t-if="not forced_vat"/>
+                    <li t-else="">
+                        <t t-esc="company.country_id.vat_label or 'Tax ID'">Tax ID</t>:
+                        <span t-esc="forced_vat">US12345671</span>
+                    </li>
+                </ul>
+            </div>
+        </xpath>
+
+        <!-- Modification du pied de page -->
+        <xpath expr="//div[@class='text-center']//ul" position="replace">
+            <ul class="list-inline mb4">
+                <div t-if="company.id == 3">
+                    <p class="mb-0 small">SARL au capital de 600 000 € - RCS Meaux 817 463 672</p>
+                </div>
+                <div t-if="o and o.x_studio_orangelo_header == False and company.id != 3">
+                    <p class="mb-0 small"><strong>ARCH. - 13 rue de Caumartin - 75009 PARIS</strong></p>
+                    <p class="mb-0 small">+33 174 922 600 - bonjour@arch.design - http://arch.design - TVA: FR83524027521</p>
+                    <p class="mb-0 small">SAS au capital de 1 657 500 € - RCS Paris 524 027 521</p>
+                </div>
+                <div t-if="o and o.x_studio_orangelo_header">
+                    <p class="mb-0 small"><strong>ARCH. - 35 rue Henri Becquerel - 77500 CHELLES</strong></p>
+                    <p class="mb-0 small">+33 188 320 230 - info@orangelo.io - http://orangelo.io - TVA: FR83524027521</p>
+                    <p class="mb-0 small">SAS au capital de 1 657 500 € - RCS Paris 524 027 521</p>
+                </div>
+            </ul>
+        </xpath>
+
+        <!-- Modification de l'affichage du numéro de page dans le pied de page -->
+        <xpath expr="//div[@class='text-center']//div[@class='text-muted'][1]" position="replace">
+            <div t-if="report_type == 'pdf' and o and o.x_studio_orangelo_header == False" class="text-muted">
+                Page: <span class="page"/> / <span class="topage"/>
+            </div>
+        </xpath>
+    </template>
+</odoo>

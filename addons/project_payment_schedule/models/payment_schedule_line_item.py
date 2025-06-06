@@ -14,6 +14,12 @@ class PaymentScheduleLineItem(models.Model):
     related_order_id = fields.Many2one(
         "sale.order", string="Devis afférent", store=True, readonly=False
     )
+    related_order_line_id = fields.Many2one(
+        "sale.order.line", string="Ligne de commande", store=True, readonly=False
+    )
+    related_product_id = fields.Many2one(
+        "product.product", string="Produit lié", store=True, readonly=False
+    )
     is_additional_work = fields.Boolean(
         string="Travaux Supplémentaires",
         compute="_compute_is_additional_work",
@@ -21,7 +27,13 @@ class PaymentScheduleLineItem(models.Model):
         readonly=False,
     )
     description = fields.Text(string="Description", readonly=True)
-    trade_total = fields.Float(string="Montant du lot (€)", readonly=True)
+    trade_total = fields.Float(string="Montant du lot (€ HT)", readonly=True)
+    down_payment = fields.Float(
+        string="Acompte (%)",
+        compute="_compute_down_payment",
+        store=True,
+        precompute=True,
+    )
     previous_progress = fields.Float(string="Avancement précédent (%)", readonly=True)
     total_progress = fields.Float(
         string="Cumul (%)",
@@ -37,7 +49,7 @@ class PaymentScheduleLineItem(models.Model):
         readonly=False,
     )
     line_total = fields.Float(
-        string="Total HT (€)",
+        string="Total [€ HT]",
         compute="_compute_line_total",
         store=True,
         precompute=True,
@@ -116,6 +128,13 @@ class PaymentScheduleLineItem(models.Model):
             total_progress_rounded = round(record.total_progress, 2)
             
             if not -1 <= total_progress_rounded <= 1:
+
                 raise exceptions.ValidationError(
                     "Vous ne pouvez pas avoir un cumul dépassant 100% d'avancement."
                 )
+    
+    @api.depends("related_order_id.x_studio_pourcentage_acompte")
+    def _compute_down_payment(self):
+        """Computes the percentage of down payment requested through the sale order."""
+        for record in self:
+            record.down_payment = record.related_order_id.x_studio_pourcentage_acompte / 100
