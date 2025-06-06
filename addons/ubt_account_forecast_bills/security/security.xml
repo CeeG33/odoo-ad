@@ -1,0 +1,101 @@
+<odoo noupdate="0">
+
+    <!-- Catégorie et groupes (tels qu'affichés dans les paramètres) -->
+
+    <record model="ir.module.category" id="ubt_account_forecast_bills.module_category_bill_forecast">
+        <field name="name">Bill forecast</field>
+        <field name="parent_id" ref="base.module_category_accounting"/>
+        <field name="sequence">51</field>
+    </record>
+
+    <record id="ubt_account_forecast_bills.owner" model="res.groups">
+        <field name="name">Owner</field>
+        <field name="category_id" ref="ubt_account_forecast_bills.module_category_bill_forecast"/>
+    </record>
+    <record id="ubt_account_forecast_bills.admin" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="implied_ids" eval="[(4, ref('ubt_account_forecast_bills.owner'))]"/>
+        <field name="category_id" ref="ubt_account_forecast_bills.module_category_bill_forecast"/>
+    </record>
+
+    <!-- Règles sur les enregistrements (RLS) -->
+
+    <record id="account_bill_forecast_owner" model="ir.rule">
+        <field name="name">Owners - Forecast</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_forecast" name="model_id"/>
+        <field name="domain_force">[('bill_category_id.user_ids','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.owner'))]"/>
+    </record>
+    <record id="account_bill_forecast_admin" model="ir.rule">
+        <field name="name">Admin - Forecast</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_forecast" name="model_id"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.admin'))]"/>
+    </record>
+
+    <record id="account_bill_budget_owner" model="ir.rule">
+        <field name="name">Owners - Budget</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_budget" name="model_id"/>
+        <field name="domain_force">[('bill_category_id.user_ids','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.owner'))]"/>
+    </record>
+    <record id="account_bill_budget_admin" model="ir.rule">
+        <field name="name">Admin - Budget</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_budget" name="model_id"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.admin'))]"/>
+    </record>
+
+    <record id="account_bill_actual_owner" model="ir.rule">
+        <field name="name">Owners - Actual</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_actual" name="model_id"/>
+        <field name="domain_force">[('bill_category_id.user_ids','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.owner'))]"/>
+    </record>
+    <record id="account_bill_actual_admin" model="ir.rule">
+        <field name="name">Admin - Actual</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_actual" name="model_id"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.admin'))]"/>
+    </record>
+
+    <record id="account_bill_category_owner" model="ir.rule">
+        <field name="name">Owners</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_category" name="model_id"/>
+        <field name="domain_force">[('user_ids','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.owner'))]"/>
+    </record>
+    <record id="account_bill_category_admin" model="ir.rule">
+        <field name="name">Admin</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_category" name="model_id"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.admin'))]"/>
+    </record>
+
+    <record id="account_bill_title_owner" model="ir.rule">
+        <field name="name">Owners</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_title" name="model_id"/>
+        <field name="domain_force">[('bill_category_id.user_ids','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.owner'))]"/>
+    </record>
+    <record id="account_bill_title_admin" model="ir.rule">
+        <field name="name">Admin</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_title" name="model_id"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.admin'))]"/>
+    </record>
+
+    <record id="account_bill_report_owner" model="ir.rule">
+        <field name="name">Owners</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_forecast_report" name="model_id"/>
+        <field name="domain_force">[('bill_category_id.user_ids','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.owner'))]"/>
+    </record>
+    <record id="account_bill_report_admin" model="ir.rule">
+        <field name="name">Admin</field>
+        <field ref="ubt_account_forecast_bills.model_account_bill_forecast_report" name="model_id"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('ubt_account_forecast_bills.admin'))]"/>
+    </record>
+    
+</odoo>

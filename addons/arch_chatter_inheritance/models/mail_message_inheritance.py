@@ -1,21 +1,8 @@
-from odoo import models, fields, api
-
+from odoo import models, fields
 
 class MailMessageInheritance(models.Model):
     _inherit = 'mail.message'
     
     is_hidden = fields.Boolean(string="Hidden", default=False)
-    
-    def action_hide_messages(self):
-        message_types = [1, 2, 3]
-        
-        # Ici, on filtre et on masque les messages en fonction du type
-        messages_to_hide = self.env['mail.message'].search([
-            ('model', '=', 'res.partner'),  # Change 'your.model' par le modèle associé (ex : res.partner)
-            ('message_type', 'in', message_types)  # message_type: email, notification, etc.
-        ])
-        
-        messages_to_hide.write({'is_hidden': True})
-        
-        # for message in messages_to_hide:
-        #     message.is_hidden = True  # Un champ personnalisé pour "masquer" le message
+
+    #Ici le champ is_hidden n'est pas nécessaire car on a toutes les informations nécessaires dans le JS du chatter pour filtrer. Si on a besoin d'avoir un champ is_hidden, il faudra inhériter la méthode _get_message_format_fields de mail.message pour envoyer le champ is_hidden au front-end

@@ -1,0 +1,12 @@
+<!-- /ubt_account_forecast_bills/views/menu_views.xml -->
+<odoo>
+    <menuitem id="menu_forecast_bills_root" name="Bill forecast" sequence="1" web_icon="ubt_account_forecast_bills,static/description/icon.png" />
+    
+    <menuitem id="menu_forecast_bills_forecast" name="Forecasted Costs" parent="menu_forecast_bills_root" sequence="2" action="action_bill_forecast"/>
+    <menuitem id="menu_forecast_bills_budget" name="Budgeted Costs" parent="menu_forecast_bills_root" sequence="2" action="action_bill_budget"/>
+    <menuitem id="menu_forecast_bills_actual" name="Actuals costs adjustments" parent="menu_forecast_bills_root" sequence="2" action="action_bill_actual"/>
+    <menuitem id="menu_forecast_bills_analysis" name="Analysis" parent="menu_forecast_bills_root" sequence="3" action="action_bill_forecast_pivot"/>
+    <menuitem id="menu_forecast_bills_settings" name="Settings" parent="menu_forecast_bills_root" sequence="4"/>
+    <menuitem id="menu_forecast_bills_settings_category" name="Categories" parent="menu_forecast_bills_settings" sequence="5" action="action_bill_category"/>
+    <menuitem id="menu_forecast_bills_settings_title" name="Titles" parent="menu_forecast_bills_settings" sequence="5" action="action_bill_title"/>
+</odoo>

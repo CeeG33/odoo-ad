@@ -1,0 +1,64 @@
+<odoo>
+
+    <!-- Views -->
+
+    <record id="view_bill_forecast_report_pivot" model="ir.ui.view">
+        <field name="name">account.bill.forecast.report.pivot</field>
+        <field name="model">account.bill.forecast.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Bill forecast Analysis">
+                <field name="bill_category_id" type="row" string="Bill category"/>
+                <field name="title" type="row" string="Title"/>
+                <field name="amount_budget" type="measure" string="Budget"/>
+                <field name="amount_forecast" type="measure" string="Forecast"/>
+                <field name="amount_actual" type="measure" string="Actual"/>
+                <field name="amount_actual_forecast" type="measure" string="Actual/Forecast"/>
+                <field name="date" type="col" interval="month" string="Month"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="view_bill_forecast_report_tree" model="ir.ui.view">
+        <field name="name">account.bill.forecast.report.tree</field>
+        <field name="model">account.bill.forecast.report</field>
+        <field name="arch" type="xml">
+            <tree string="Bill forecast" editable="bottom">
+                <field name="bill_category_id"/>
+                <field name="title"/>
+                <field name="account_id"/>
+                <field name="name"/>
+                <field name="supplier_id" />
+                <field name="date"/>
+                <field name="amount_budget" widget="monetary"/>
+                <field name="amount_forecast" widget="monetary"/>
+                <field name="amount_actual" widget="monetary"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" optional="hide"/>
+                <button type="object" name="action_open_record" string="Open" icon="fa-arrow-right"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_bill_forecast_report_search" model="ir.ui.view">
+        <field name="name">account.bill.forecast.report.search</field>
+        <field name="model">account.bill.forecast.report</field>
+        <field name="arch" type="xml">
+            <search string="Bill budget">
+                <field name="bill_category_id" string="Bill Category"/>
+                <filter string="This year" name="filter_this_year" domain="[('date', '&gt;=', datetime.date(context_today().year, 1, 1).strftime('%%Y-%%m-%%d')),('date', '&lt;', datetime.date(context_today().year+1, 1, 1).strftime('%%Y-%%m-%%d'))]"/>
+                <filter name="group_type" string="Type" icon="terp-partner" context="{'group_by':'type'}"/>
+                <filter name="group_bill_category_id" string="Bill category" icon="terp-partner" context="{'group_by':'bill_category_id'}"/>
+                <filter name="group_account_id" string="Account" icon="terp-partner" context="{'group_by':'account_id'}"/>
+            </search>
+        </field>
+    </record>
+
+
+    <!-- Actions -->
+
+    <record id="action_bill_forecast_pivot" model="ir.actions.act_window">
+        <field name="name">Forecast analysis</field>
+        <field name="res_model">account.bill.forecast.report</field>
+        <field name="context">{'search_default_filter_this_year': 1}</field>
+        <field name="view_mode">pivot</field>
+    </record>
+</odoo>

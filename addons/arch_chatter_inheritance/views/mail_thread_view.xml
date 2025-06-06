@@ -1,19 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
 
-    <!-- Used to hide/show messages depending on their subtype -->
-    <record id="view_thread_form_inherit" model="ir.ui.view">
-        <field name="name">mail.thread.form.inherit</field>
-        <field name="model">mail.thread</field>
-        <field name="inherit_id" ref="mail.mail_message_view_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//button[@class='btn btn-link text-action']" position="after">
-                <button type="object" name="action_toggle_message_by_subtype"
-                        string="Afficher/Masquer messages secondaires"
-                        class="oe_stat_button"
-                        icon="fa-eye"/>
-            </xpath>
-        </field>
-    </record>
-    
 </odoo>

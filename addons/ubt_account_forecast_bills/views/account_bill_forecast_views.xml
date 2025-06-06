@@ -1,0 +1,75 @@
+<odoo>
+    <!-- Views -->
+
+    <record id="view_bill_forecast_tree" model="ir.ui.view">
+        <field name="name">account.bill.forecast.tree</field>
+        <field name="model">account.bill.forecast</field>
+        <field name="arch" type="xml">
+            <tree string="Bill forecast" editable="bottom" default_order="start_date asc">
+                <field name="bill_category_id" options="{'no_open': True, 'no_create': True}" required="1"/>
+                <field name="title" options="{'no_open': True, 'no_create': True}" domain="[['id', 'in', allowed_title_ids]]"/>
+                <field name="account_id" options="{'no_open': True, 'no_create': True}" domain="[['id', 'in', allowed_account_ids]]" required="1"/>
+                <field name="allowed_account_ids" column_invisible="1"/>
+                <field name="allowed_title_ids" column_invisible="1"/>
+                <field name="name" required="1"/>
+                <field name="supplier_id" options="{'no_open': True, 'no_create': True}"/>
+                <field name="start_date" required="1"/>
+                <field name="end_date"/>
+                <field name="amount" widget="monetary"/>
+                <field name="currency_id" options="{'no_open': True, 'no_create': True}" column_invisible="1"/>
+                <field name="company_id" options="{'no_open': True, 'no_create': True}" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_bill_forecast_search" model="ir.ui.view">
+        <field name="name">account.bill.forecast.search</field>
+        <field name="model">account.bill.forecast</field>
+        <field name="arch" type="xml">
+            <search string="Bill Forecast">
+                <field name="bill_category_id" string="Bill Category"/>
+                <field name="title" string="Title"/>
+                <field name="account_id" string="Account"/>
+                <field name="supplier_id" string="Supplier"/>
+                <field name="start_date" string="Start Date"/>
+                <field name="end_date" string="End Date"/>
+                <field name="amount" string="Amount"/>
+                <filter name="group_bill_category_id" string="Bill Category" icon="terp-partner" context="{'group_by':'bill_category_id'}"/>
+                <filter name="group_bill_title_id" string="Title" icon="terp-partner" context="{'group_by':'title'}"/>
+            </search>
+        </field>
+    </record>
+    <record id="view_bill_forecast_form" model="ir.ui.view">
+        <field name="name">account.bill.forecast.form</field>
+        <field name="model">account.bill.forecast</field>
+        <field name="arch" type="xml">
+            <form string="Bill forecast">
+                <sheet>
+                    <group>
+                        <field name="bill_category_id" options="{'no_open': True, 'no_create': True}" required="1"/>
+                        <field name="title" options="{'no_open': True, 'no_create': True}" domain="[['id', 'in', allowed_title_ids]]"/>
+                        <field name="account_id" options="{'no_open': True, 'no_create': True}" domain="[['id', 'in', allowed_account_ids]]" required="1"/>
+                        <field name="allowed_account_ids" invisible="1"/>
+                        <field name="allowed_title_ids" invisible="1"/>
+                        <field name="name" required="1"/>
+                        <field name="supplier_id" options="{'no_open': True, 'no_create': True}"/>
+                        <field name="start_date" required="1"/>
+                        <field name="end_date"/>
+                        <field name="amount" widget="monetary"/>
+                        <field name="currency_id" options="{'no_open': True, 'no_create': True}" invisible="1"/>
+                        <field name="company_id" options="{'no_open': True, 'no_create': True}" optional="hide"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+
+    <record id="action_bill_forecast" model="ir.actions.act_window">
+        <field name="name">Forecasted Costs</field>
+        <field name="res_model">account.bill.forecast</field>
+        <field name="context">{'search_default_group_bill_category_id': 1, 'search_default_group_bill_title_id': 1}</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

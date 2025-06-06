@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_message_list_inherit" model="ir.ui.view">
+        <field name="name">mail.activity.schedule.inherit</field>
+        <field name="model">mail.activity.schedule</field>
+        <field name="inherit_id" ref="mail.mail_activity_schedule_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group[2]/group[1]" position="inside">
+                <field name="allowed_contacts" invisible="1"/>
+                <field name="opportunity_id" domain="[('partner_id', 'in', allowed_contacts)]" invisible="res_model != 'res.partner'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>    

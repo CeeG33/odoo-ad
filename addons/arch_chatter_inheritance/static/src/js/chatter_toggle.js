@@ -1,24 +1,42 @@
 /** @odoo-module **/
+import { Chatter } from "@mail/core/web/chatter";
+import { Thread } from '@mail/core/common/thread';
+import { patch } from "@web/core/utils/patch";
+import { useState, onWillStart } from "@odoo/owl";
 
-odoo.define('arch_chatter_inheritance.ChatterToggleButton', function (require) {
-    'use strict';
+patch(Chatter.prototype ,{
+    setup(...args) {
+        super.setup(...args);
 
-    const Chatter = require('mail.Chatter');
-    const { patch } = require('web.utils');
+        // Set default settings
+        this.arch_chatter_settings = useState({
+            show_secondary_messages: true, 
+        });
 
-    patch(Chatter.prototype, 'arch_chatter_inheritance.ChatterToggleButton', {
-        async _onToggleMessagesVisibility(ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
+        // Get settings from localstorage if exists
+        onWillStart(async () => {
+            Object.assign(this.arch_chatter_settings, JSON.parse(localStorage.getItem('odoo_arch_chatter_settings'))??this.arch_chatter_settings)
+        });
 
-            // Appel à la méthode backend pour basculer la visibilité des messages
-            await this._rpc({
-                model: this.'mail.thread',
-                method: 'action_toggle_message_by_subtype',
-            });
 
-            // Forcer le rafraîchissement du Chatter pour refléter les changements
-            this._reload();
-        },
-    });
+        // Update Localstorage
+        this.updateArchSettings = (setting, value) => {
+            var new_arch_chatter_settings = this.arch_chatter_settings
+            new_arch_chatter_settings[setting] = value
+            Object.assign(this.arch_chatter_settings, {...new_arch_chatter_settings})
+            localStorage.setItem('odoo_arch_chatter_settings',JSON.stringify(this.arch_chatter_settings))
+        }
+    },
 });
+
+patch(Thread, {
+    props: [
+        ...Thread.props,
+        "hideSecondary?"
+    ],
+    defaultProps: {
+        ...Thread.defaultProps,
+        hideSecondary : false,
+    },
+});
+

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+        
+    <record id="view_partner_form_inherit" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- Ajout du bouton d'accès à la fiche contact au sein du kanban contact -->
+            <xpath expr="//field[@name='child_ids']/kanban[1]/templates[1]/t[1]/div[1]/div[2]/div[5]" position="after">
+                <div class="o_kanban_button">
+                        <button name="open_child_partner"
+                                type="object" class="btn btn-secondary" icon="fa-id-card-o">
+                        </button>
+                </div>
+            </xpath>
+
+            <!-- Ajout des tags au sein du kanban contact -->
+            <xpath expr="//field[@name='child_ids']/kanban[1]/templates[1]/t[1]/div[1]/div[2]/div[1]" position="after">
+                <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

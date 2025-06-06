@@ -1,0 +1,2 @@
+# Module : Arch Contact Inheritance
+

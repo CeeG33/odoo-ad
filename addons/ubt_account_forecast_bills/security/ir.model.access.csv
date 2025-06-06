@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_bill_title,account.bill.title,model_account_bill_title,ubt_account_forecast_bills.owner,1,1,1,1
+access_account_bill_category_owner,account.bill.category,model_account_bill_category,ubt_account_forecast_bills.owner,1,0,0,0
+access_account_bill_category,account.bill.category,model_account_bill_category,ubt_account_forecast_bills.admin,1,1,1,1
+access_account_bill_forecast,account.bill.forecast,model_account_bill_forecast,ubt_account_forecast_bills.owner,1,1,1,1
+access_account_bill_budget,account.bill.budget,model_account_bill_budget,ubt_account_forecast_bills.owner,1,1,1,1
+access_account_bill_actual,account.bill.actual,model_account_bill_actual,ubt_account_forecast_bills.owner,1,1,1,1
+access_account_bill_forecast_report,account.bill.forecast.report,model_account_bill_forecast_report,ubt_account_forecast_bills.owner,1,1,1,1

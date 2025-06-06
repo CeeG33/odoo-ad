@@ -1,0 +1,41 @@
+<odoo>
+    <!-- Views -->
+
+    <record id="view_bill_title_form" model="ir.ui.view">
+        <field name="name">account.bill.title.form</field>
+        <field name="model">account.bill.title</field>
+        <field name="arch" type="xml">
+            <form string="Bill Title">
+                <sheet>
+                    <group>
+                        <field name="allowed_account_ids" invisible="1"/>
+                        <field name="bill_category_id" options="{'no_open': True, 'no_create': True}" required="1"/>
+                        <field name="name"/>
+                        <field name="account_id" options="{'no_open': True, 'no_create': True}" domain="[('id', 'in', allowed_account_ids)]" required="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_bill_title_tree" model="ir.ui.view">
+        <field name="name">account.bill.title.tree</field>
+        <field name="model">account.bill.title</field>
+        <field name="arch" type="xml">
+            <tree string="Bill Titles" editable="bottom">
+                <field name="allowed_account_ids" column_invisible="1"/>
+                <field name="bill_category_id" options="{'no_open': True, 'no_create': True}" required="1"/>
+                <field name="name"/>
+                <field name="account_id" options="{'no_open': True, 'no_create': True}" domain="[('id', 'in', allowed_account_ids)]" required="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Actions -->
+
+    <record id="action_bill_title" model="ir.actions.act_window">
+        <field name="name">Bill Titles</field>
+        <field name="res_model">account.bill.title</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

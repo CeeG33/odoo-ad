@@ -1,0 +1,71 @@
+<odoo>
+
+    <!-- Views -->
+
+    <record id="view_bill_actual_tree" model="ir.ui.view">
+        <field name="name">account.bill.actual.tree</field>
+        <field name="model">account.bill.actual</field>
+        <field name="arch" type="xml">
+            <tree string="Bill actual" editable="bottom" default_order="start_date asc">
+                <field name="bill_category_id" options="{'no_open': True, 'no_create': True}" required="1"/>
+                <field name="title" options="{'no_open': True, 'no_create': True}"/>
+                <field name="account_id" options="{'no_open': True, 'no_create': True}" domain="[['id', 'in', allowed_account_ids]]" required="1"/>
+                <field name="allowed_account_ids" column_invisible="1"/>
+                <field name="name" required="1"/>
+                <field name="start_date" required="1"/>
+                <field name="end_date"/>
+                <field name="amount" widget="monetary"/>
+                <field name="currency_id" options="{'no_open': True, 'no_create': True}" column_invisible="1"/>
+                <field name="company_id" options="{'no_open': True, 'no_create': True}" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_bill_actual_search" model="ir.ui.view">
+        <field name="name">account.bill.actual.search</field>
+        <field name="model">account.bill.actual</field>
+        <field name="arch" type="xml">
+            <search string="Bill actual">
+                <field name="bill_category_id" string="Bill Category"/>
+                <field name="title" string="Title"/>
+                <field name="account_id" string="Account"/>
+                <field name="start_date" string="Start Date"/>
+                <field name="end_date" string="End Date"/>
+                <field name="amount" string="Amount"/>
+                <filter name="group_bill_category_id" string="Bill category" icon="terp-partner" context="{'group_by':'bill_category_id'}"/>
+                <filter name="group_account_id" string="Account" icon="terp-partner" context="{'group_by':'account_id'}"/>
+            </search>
+        </field>
+    </record>
+    <record id="view_bill_actual_form" model="ir.ui.view">
+        <field name="name">account.bill.actual.form</field>
+        <field name="model">account.bill.actual</field>
+        <field name="arch" type="xml">
+            <form string="Bill actual">
+                <sheet>
+                    <group>
+                        <field name="bill_category_id" options="{'no_open': True, 'no_create': True}" required="1"/>
+                        <field name="title" options="{'no_open': True, 'no_create': True}"/>
+                        <field name="account_id" options="{'no_open': True, 'no_create': True}" domain="[['id', 'in', allowed_account_ids]]" required="1"/>
+                        <field name="allowed_account_ids" invisible="1"/>
+                        <field name="name" required="1"/>
+                        <field name="start_date" required="1"/>
+                        <field name="end_date"/>
+                        <field name="amount" widget="monetary"/>
+                        <field name="currency_id" options="{'no_open': True, 'no_create': True}" invisible="1"/>
+                        <field name="company_id" options="{'no_open': True, 'no_create': True}" optional="hide"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+
+    <record id="action_bill_actual" model="ir.actions.act_window">
+        <field name="name">Actuals adjustments</field>
+        <field name="res_model">account.bill.actual</field>
+        <field name="context">{'search_default_group_bill_category_id': 1, 'search_default_group_account_id': 1}</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

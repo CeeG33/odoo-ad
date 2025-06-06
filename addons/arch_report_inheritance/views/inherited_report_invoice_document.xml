@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_invoice_document_custom" inherit_id="account.report_invoice_document">
+        <!-- Modification pour personnaliser la référence de paiement -->
+        <xpath expr="//div[@class='mb-3'][2]" position="replace">
+            <p name="payment_communication">
+                Veuillez utiliser la référence suivante pour votre paiement : 
+                <span class="fw-bold" t-field="o.payment_reference"/>
+                <!--<t t-if="o.partner_bank_id">-->
+                <!--    <br/> sur ce compte : <span t-field="o.partner_bank_id" class="fw-bold"/>-->
+                <!--</t>-->
+            </p>
+        </xpath>
+    </template>
+</odoo>

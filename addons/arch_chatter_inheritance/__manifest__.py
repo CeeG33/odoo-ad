@@ -7,18 +7,19 @@
     "website": "https://www.arch.design",
     "depends": [
         "base",
-        "mail"
+        "mail",
+        "crm"
     ],
     'data': [
-        # 'security/chatter_view.xml',
-        # 'views/mail_thread_view.xml',
-        # 'views/mail_message_view.xml',
+        'security/chatter_view.xml',
+        'views/mail_message_view.xml',
+        'views/mail_thread_view.xml',
+        'views/activity_schedule.xml',
     ],
     'assets': {
         'web.assets_backend': [
             'arch_chatter_inheritance/static/src/xml/chatter.xml',
-            # 'arch_chatter_inheritance/static/src/js/chatter.js',
-            # 'arch_chatter_inheritance/static/src/js/chatter_toggle.js',
+            'arch_chatter_inheritance/static/src/js/chatter_toggle.js',
         ],
     }
 }

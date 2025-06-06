@@ -1,21 +1,57 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<templates xml:space="preserve">
+<?xml version="1.0" encoding="UTF-8"?>
 
-    <t t-inherit="mail.Chatter" t-inherit-mode="extension">
+<templates id="template" xml:space="preserve">
+    <!--Afficher/Masquer les messages secondaires : Ajouter le bouton en haut du chatter -->
+    <t name="mail.ChatterAdvanced" t-inherit="mail.Chatter" t-inherit-mode="extension" owl="1">
+        <xpath expr="//button[@class='btn btn-link text-action']" position="after">
+            <button type="button"
+                    string="Afficher/Masquer messages secondaires"
+                    t-att-class="'btn btn-link text-action' + (!this.arch_chatter_settings.show_secondary_messages ? ' active' : '')"
+                    t-on-click="() => this.updateArchSettings('show_secondary_messages', !this.arch_chatter_settings.show_secondary_messages)">
+                <i class="fa fa-eye-slash" role="img"/>
+            </button>
+        </xpath>
+        <xpath expr="//div[@class='o-mail-Chatter-content']/t/t[2]/Thread" position="attributes">
+            <attribute name="hideSecondary">!this.arch_chatter_settings.show_secondary_messages</attribute>
+        </xpath>
+
         <!-- Ajout d'un message d'avertissement en-dessous du bouton "Envoyer / Send Message". -->
         <xpath expr="//div[@class='flex-shrink-0 px-3 pt-3 text-truncate small mb-2']" position="before">
             <b style="color: red">Attention, ce message sera adressé au client.</b><br/>
         </xpath>
-
-        <!-- <xpath expr="//button[@class='btn btn-link text-action']" position="after">
-            <button type="button"
-                    string="Afficher/Masquer messages secondaires"
-                    class="btn btn-link text-action"
-                    t-att-data-action="_onToggleMessagesVisibility">
-                <i class="fa fa-eye-slash" role="img"/>
-            </button>
-        </xpath> -->
     </t>
-    
+
+    <!--Afficher/Masquer les messages secondaires - Filtrer les messages à afficher -->
+    <t name="mail.ThreadAdvanced" t-inherit="mail.Thread"
+       t-inherit-mode="extension" owl="1">
+        <xpath expr="//DateSection/.." position="before">
+            <t t-set="show_message" t-value="(!props.hideSecondary)||((msg.subtype_id and msg.subtype_id[0] != 2 and msg.subtype_id[0] != 15 and msg.subtype_id[0] != 54)||msg.type!='notification')"/>
+        </xpath>
+        <xpath expr="//Message" position="attributes">
+            <attribute name="t-elif">show_message</attribute>
+            <attribute name="t-else"/>
+        </xpath>
+        
+        <xpath expr="//DateSection/.." position="attributes"> <!-- Eviter d'afficher la date si aucun message-->
+            <attribute name="t-if">msg.dateDay !== currentDay and props.showDates and show_message</attribute>
+        </xpath>
+    </t>
+
+    <t name="mail.MessageInherit" t-inherit="mail.Message"
+       t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[@t-ref='messageContent']/div/small[2]/t[1]" position="replace">
+            <t t-if="message.model !== 'discuss.channel'">
+                <a t-att-href="message.resUrl"><t t-esc="message.originThread?.displayName" /></a>
+            </t>
+        </xpath>
+    </t>
+
+    <t name="mail.ActivityInherit" t-inherit="mail.Activity"
+       t-inherit-mode="extension" owl="1">
+        <xpath expr="//span[@class='o-mail-Activity-user px-1']" position="after">
+            <span class="px-1" t-if="activity.child_contact_name"><a href="#"><t t-esc="activity.child_contact_name"/></a></span>
+            <span class="px-1" t-if="activity.lead_name"><a href="#"><t t-esc="activity.lead_name"/></a></span>
+        </xpath>
+    </t>
 
 </templates>

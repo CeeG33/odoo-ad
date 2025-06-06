@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record model="ir.ui.view" id="contact_image_form_view">
+        <field name="name">res.partner.form.contact</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//span[@name='address_name']" position="before">
+                <field name="image_url" widget="url"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,41 @@
+<odoo>
+    <!-- Views -->
+
+    <record id="view_bill_category_form" model="ir.ui.view">
+        <field name="name">account.bill.category.form</field>
+        <field name="model">account.bill.category</field>
+        <field name="arch" type="xml">
+            <form string="Bill category">
+                <sheet>
+                    <group>
+                        <field name="sequence" widget="handle"/>
+                        <field name="name"/>
+                        <field name="account_ids" options="{'no_open': True, 'no_create': True}" widget="many2many_tags"/>
+                        <field name="user_ids" options="{'no_open': True, 'no_create': True}" widget="many2many_tags"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_bill_category_tree" model="ir.ui.view">
+        <field name="name">account.bill.category.tree</field>
+        <field name="model">account.bill.category</field>
+        <field name="arch" type="xml">
+            <tree string="Bill categories" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="account_ids" widget="many2many_tags" options="{'no_create_edit': True, 'no_open': True, 'no_create': True}"/>
+                <field name="user_ids" widget="many2many_tags" options="{'no_create_edit': True, 'no_open': True, 'no_create': True}"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Actions -->
+
+    <record id="action_bill_category" model="ir.actions.act_window">
+        <field name="name">Bill Categories</field>
+        <field name="res_model">account.bill.category</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

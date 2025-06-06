@@ -1,0 +1,22 @@
+{
+    'name': 'Bill forecast',
+    'version': '1.0',
+    'category': 'Accounting',
+    'summary': 'App to forecast bills',
+    'description': 'The goal of this app is to manage bill forecast and analyse this data using pivot table.',
+    'author': 'UBT',
+    'depends': ['base', 'account'],
+    'data': [
+        'security/security.xml',
+        'security/ir.model.access.csv',
+        'views/account_bill_category_views.xml',
+        'views/account_bill_actual_views.xml',
+        'views/account_bill_budget_views.xml',
+        'views/account_bill_forecast_report_views.xml',
+        'views/account_bill_forecast_views.xml',
+        'views/account_bill_title_views.xml',
+        'views/menu_views.xml',
+    ],
+    'installable': True,
+    'application': True,
+}
