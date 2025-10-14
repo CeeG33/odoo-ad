@@ -8,14 +8,15 @@
 # Martin Trigaux, 2023
 # Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2023
 # Milan Bojovic <mbojovic@outlook.com>, 2023
+# コフスタジオ, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"POT-Creation-Date: 2025-02-10 10:34+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Milan Bojovic <mbojovic@outlook.com>, 2023\n"
+"Last-Translator: コフスタジオ, 2024\n"
 "Language-Team: Serbian (https://app.transifex.com/odoo/teams/41243/sr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1767,6 +1768,11 @@ msgid "Display Sponsors and Exhibitors on your event pages"
 msgstr "Prikaži sponzore i izlagače na stranica svog događaja"
 
 #. module: event
+#: model:ir.model.fields,field_description:event.field_event_event__date_tz
+msgid "Display Timezone"
+msgstr ""
+
+#. module: event
 #: model:ir.model.fields,field_description:event.field_event_mail__sequence
 msgid "Display order"
 msgstr "Redosled za prikaz"
@@ -2074,8 +2080,6 @@ msgid "Event: Reminder"
 msgstr "Događaj: Podsetnik"
 
 #. module: event
-#. odoo-javascript
-#: code:addons/event/static/src/client_action/event_barcode.js:0
 #: model:ir.actions.act_window,name:event.action_event_view
 #: model:ir.ui.menu,name:event.event_main_menu
 #: model:ir.ui.menu,name:event.menu_event_event
@@ -2084,7 +2088,6 @@ msgstr "Događaj: Podsetnik"
 #: model_terms:ir.ui.view,arch_db:event.view_event_form
 #: model_terms:ir.ui.view,arch_db:event.view_event_search
 #: model_terms:ir.ui.view,arch_db:event.view_event_tree
-#, python-format
 msgid "Events"
 msgstr "Događaji"
 
@@ -2266,7 +2269,7 @@ msgstr "Globalni status komunikacije"
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.res_config_settings_view_form
 msgid "Google Maps"
-msgstr ""
+msgstr "Google Maps"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_res_config_settings__google_maps_static_api_key
@@ -2441,6 +2444,13 @@ msgstr "Važne informacije za ulaznicu"
 #, python-format
 msgid "In Progress"
 msgstr "U radu"
+
+#. module: event
+#: model:ir.model.fields,help:event.field_event_event__date_tz
+msgid ""
+"Indicates the timezone in which the event dates/times will be displayed on "
+"the website."
+msgstr ""
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.res_config_settings_view_form
@@ -2692,7 +2702,7 @@ msgstr ""
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_report_full_page_ticket_layout
 msgid "Marc Demo"
-msgstr ""
+msgstr "Marc Demo"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_event_registration_tree
@@ -3038,7 +3048,7 @@ msgstr "Telefon"
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.attendee_list
 msgid "Phone number"
-msgstr ""
+msgstr "Broj telefona"
 
 #. module: event
 #: model_terms:event.event,ticket_instructions:event.event_0
@@ -3098,7 +3108,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:event.event_report_template_foldable_badge
 #: model_terms:ir.ui.view,arch_db:event.event_report_template_full_page_ticket
 msgid "QR Code"
-msgstr ""
+msgstr "QR Code"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_res_config_settings__module_website_event_track_quiz
@@ -3291,7 +3301,7 @@ msgstr ""
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_report_template_formatted_event_address
 msgid "Rue de la Paix 123"
-msgstr ""
+msgstr "Rue de la Paix 123"
 
 #. module: event
 #: model:ir.model.fields.selection,name:event.selection__event_mail__mail_state__running
@@ -3689,6 +3699,7 @@ msgstr ""
 msgid ""
 "The template which is referenced should be coming from %(model_name)s model."
 msgstr ""
+"The template which is referenced should be coming from %(model_name)s model."
 
 #. module: event
 #. odoo-python
@@ -3834,7 +3845,6 @@ msgid "Tickets can be printed or scanned directly from your phone."
 msgstr "Ulaznice se mogu odštampati ili skenirati direktno sa vašeg telefona."
 
 #. module: event
-#: model:ir.model.fields,field_description:event.field_event_event__date_tz
 #: model:ir.model.fields,field_description:event.field_event_type__default_timezone
 msgid "Timezone"
 msgstr "Vremenska zona"
@@ -3915,6 +3925,10 @@ msgid ""
 "Attended: registrations for which the attendee attended the event\n"
 "Cancelled: registrations cancelled manually"
 msgstr ""
+"Nepotvrđeno: registracije u stanju čekanja na akciju (specifičan slučaj, posebno sa statusom prodaje)\n"
+"Registrovano: registracije smatrane preuzetim od strane klijenta\n"
+"Prisustvovano: registracije za koje je prisutna osoba prisustvovala događaju\n"
+"Otkazano: registracije otkazane ručno"
 
 #. module: event
 #: model_terms:ir.actions.act_window,help:event.action_event_mail
@@ -3949,12 +3963,12 @@ msgstr "Budući/Tekući"
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__use_barcode
 msgid "Use Barcode"
-msgstr ""
+msgstr "Koristite barkod"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_res_config_settings__use_event_barcode
 msgid "Use Event Barcode"
-msgstr ""
+msgstr "Koristite barkod događaja"
 
 #. module: event
 #: model_terms:ir.actions.act_window,help:event.event_tag_category_action_tree
@@ -4087,6 +4101,14 @@ msgid "What's new?"
 msgstr "Šta je novo?"
 
 #. module: event
+#: model:ir.model.fields,help:event.field_event_event__date_begin
+#: model:ir.model.fields,help:event.field_event_registration__event_begin_date
+msgid ""
+"When the event is scheduled to take place (expressed in your local timezone "
+"on the form view)."
+msgstr ""
+
+#. module: event
 #: model:ir.model.fields,help:event.field_event_event__is_ongoing
 msgid "Whether event has begun"
 msgstr "Da li je događaj počeo"
@@ -4137,22 +4159,22 @@ msgstr "Vaša registracija za {{ object.event_id.name }}"
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_tag_category_view_form
 msgid "e.g. \"12-16 years old\""
-msgstr ""
+msgstr "npr. \"12-16 godina\""
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_tag_category_view_form
 msgid "e.g. \"Age Category\""
-msgstr ""
+msgstr "npr. \"Kategorija godina\""
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_event_registration_form
 msgid "e.g. \"Azure Interior\""
-msgstr ""
+msgstr "npr. \"Azure Interior\""
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_stage_view_form
 msgid "e.g. \"Promoting\""
-msgstr ""
+msgstr "npr. \"Promovisanje\""
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_event_view_form_quick_create
@@ -4197,7 +4219,7 @@ msgstr "events@yourcompany.com"
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_report_full_page_ticket_layout
 msgid "https://www.example.com"
-msgstr ""
+msgstr "https://www.example.com"
 
 #. module: event
 #. odoo-python
@@ -4251,7 +4273,7 @@ msgstr "ili"
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_report_full_page_ticket_layout
 msgid "organizer@email.com"
-msgstr ""
+msgstr "organizer@email.com"
 
 #. module: event
 #: model:ir.model.fields,help:event.field_event_event__event_registrations_started

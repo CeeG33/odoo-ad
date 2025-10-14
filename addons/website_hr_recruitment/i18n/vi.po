@@ -3,16 +3,17 @@
 # 	* website_hr_recruitment
 # 
 # Translators:
-# Wil Odoo, 2023
-# Thi Huong Nguyen, 2023
+# Martin Trigaux, 2024
+# Wil Odoo, 2024
+# Thi Huong Nguyen, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"POT-Creation-Date: 2024-03-04 09:08+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2023\n"
+"Last-Translator: Thi Huong Nguyen, 2025\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,10 +23,35 @@ msgstr ""
 
 #. module: website_hr_recruitment
 #. odoo-python
+#: code:addons/website_hr_recruitment/models/hr_job.py:0
+#, python-format
+msgid ""
+"\n"
+"            <span class=\"text-muted small\">Time to Answer</span>\n"
+"            <h6>2 open days</h6>\n"
+"            <span class=\"text-muted small\">Process</span>\n"
+"            <h6>1 Phone Call</h6>\n"
+"            <h6>1 Onsite Interview</h6>\n"
+"            <span class=\"text-muted small\">Days to get an Offer</span>\n"
+"            <h6>4 Days after Interview</h6>\n"
+"        "
+msgstr ""
+"\n"
+"            <span class=\"text-muted small\">Thời gian trả lời</span>\n"
+"            <h6>2 ngày</h6>\n"
+"            <span class=\"text-muted small\">Quy trình</span>\n"
+"            <h6>1 cuộc gọi điện thoại</h6>\n"
+"            <h6>1 cuộc phỏng vấn trực tiếp</h6>\n"
+"            <span class=\"text-muted small\">Ngày để nhận đề xuất</span>\n"
+"            <h6>4 ngày sau ngày Phỏng vấn</h6>\n"
+"        "
+
+#. module: website_hr_recruitment
+#. odoo-python
 #: code:addons/website_hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "%s's Application"
-msgstr "Đơn xin việc của %s"
+msgstr "Đơn ứng tuyển của %s"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
@@ -35,7 +61,7 @@ msgstr "'. Đang hiện kết quả cho '"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 msgid "+1 (650) 555-0187"
-msgstr ""
+msgstr "+1 (650) 555-0187"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -48,6 +74,8 @@ msgid ""
 "<i class=\"fa fa-fw fa-external-link\" role=\"img\"/>\n"
 "                        Job Page"
 msgstr ""
+"<i class=\"fa fa-fw fa-external-link\" role=\"img\"/>\n"
+"                        Trang công việc"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_pages_kanban_view
@@ -57,7 +85,7 @@ msgstr "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.detail
 msgid "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>All Jobs"
-msgstr ""
+msgstr "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>Tất cả công việc"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
@@ -65,11 +93,13 @@ msgid ""
 "<i class=\"fa fa-suitcase fa-fw\" title=\"Employment type\" role=\"img\" "
 "aria-label=\"Employment type\"/>"
 msgstr ""
+"<i class=\"fa fa-suitcase fa-fw\" title=\"Loại hình công việc\" role=\"img\""
+" aria-label=\"Loại hình công việc\"/>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "<i class=\"oi oi-arrow-left\"/> Job Description"
-msgstr ""
+msgstr "<i class=\"oi oi-arrow-left\"/> Mô tả công việc"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -79,7 +109,7 @@ msgstr "<small><b>ĐỌC</b></small>"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_offices
 msgid "<span class=\"fst-italic\">No address specified</span>"
-msgstr ""
+msgstr "<span class=\"fst-italic\">Không xác định địa chỉ</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
@@ -87,11 +117,15 @@ msgid ""
 "<span class=\"h5 fw-light\">In the meantime,</span><br/>\n"
 "                                            <span class=\"h3 mt8 mb32 fw-bold\">Take a look around our website:</span>"
 msgstr ""
+"<span class=\"h5 fw-light\">Trong khi đó,</span><br/>\n"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">hãy xem qua trang web của chúng tôi:</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid "<span class=\"navbar-brand h5 my-0 me-sm-auto\">Our Job Offers</span>"
 msgstr ""
+"<span class=\"navbar-brand h5 my-0 me-sm-auto\">Đề xuất làm việc của chúng "
+"tôi</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -106,7 +140,7 @@ msgstr "<span class=\"s_website_form_label_content\">Công việc</span>"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "<span class=\"s_website_form_label_content\">LinkedIn Profile</span>"
-msgstr ""
+msgstr "<span class=\"s_website_form_label_content\">Hồ sơ LinkedIn</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -124,6 +158,8 @@ msgid ""
 "<span class=\"s_website_form_label_content\">Your Email</span>\n"
 "                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
+"<span class=\"s_website_form_label_content\">Email</span>\n"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -140,6 +176,8 @@ msgid ""
 "<span class=\"s_website_form_label_content\">Your Phone Number</span>\n"
 "                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
+"<span class=\"s_website_form_label_content\">Số điện thoại</span>\n"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_job_website_inherit
@@ -149,22 +187,22 @@ msgstr "<span class=\"text-bg-success\">Đã đăng</span>"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "<span class=\"text-muted small\">Department</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Phòng ban</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "<span class=\"text-muted small\">Employment Type</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Loại hình công việc</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "<span class=\"text-muted small\">Job</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Công việc</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "<span class=\"text-muted small\">Location</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Vị trí</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -172,6 +210,7 @@ msgid ""
 "<span class=\"text-muted small\">Provide either a resume file or a linkedin "
 "profile</span>"
 msgstr ""
+"<span class=\"text-muted small\">Cung cấp tệp CV hoặc hồ sơ LinkedIn</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -286,7 +325,7 @@ msgstr "Có thể đăng"
 #. module: website_hr_recruitment
 #: model:ir.model.fields,help:website_hr_recruitment.field_hr_job__job_details
 msgid "Complementary information that will appear on the job submission page"
-msgstr ""
+msgstr "Thông tin bổ sung sẽ xuất hiện trên trang gửi đơn ứng tuyển"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
@@ -301,7 +340,7 @@ msgstr "Liên hệ"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
 msgid "Countries Filter"
-msgstr ""
+msgstr "Bộ lọc quốc gia"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -314,6 +353,8 @@ msgid ""
 "Create new job pages from the <strong>+ <i>New</i></strong> top-right "
 "button."
 msgstr ""
+"Tạo trang tuyển dụng mới từ nút <strong>+ <i>Mới</i></strong> ở trên bên "
+"phải. "
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -331,7 +372,7 @@ msgstr "Bộ phận"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
 msgid "Departments Filter"
-msgstr ""
+msgstr "Bộ lọc phòng ban"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.jobs_searchbar_input_snippet_options
@@ -360,7 +401,7 @@ msgstr ""
 "Mỗi nhân viên có cơ hội nhìn thấy tầm ảnh hưởng của công việc của mình.\n"
 "               Bạn có thể đóng góp thực sự cho sự thành công của công ty.\n"
 "                <br/>\n"
-"                Khá nhiều hoạt động được thường xuyên tổ chức trong năm, ví dụ như\n"
+"                Nhiều hoạt động được thường xuyên tổ chức trong năm, ví dụ như\n"
 "                buổi tập thể thao hàng tuần, sự kiện kết nối đội ngũ, đồ uống hàng tháng và hơn thế nữa"
 
 #. module: website_hr_recruitment
@@ -371,7 +412,7 @@ msgstr "Ăn uống"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
 msgid "Employment Types Filter"
-msgstr ""
+msgstr "Bộ lọc loại hình công việc"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -382,6 +423,11 @@ msgstr "Mở rộng vốn kiến thức về các ngành kinh doanh khác nhau"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "Experience in writing online content"
 msgstr "Có kinh nghiệm viết nội dung trực tuyến"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
+msgid "Facebook"
+msgstr "Facebook"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
@@ -426,16 +472,23 @@ msgid ""
 "                                                feedback</strong> or if you don't get news from me\n"
 "                                                quickly enough."
 msgstr ""
+"Tôi thường <strong>trả lời đơn ứng tuyển trong vòng 3 ngày</strong>.\n"
+"                                                <br/><br/>\n"
+"                                                Bước tiếp theo là gọi điện hoặc gặp mặt tại văn phòng của chúng tôi.\n"
+"                                                <br/><br/>\n"
+"                                                Đừng ngần ngại <strong>liên hệ với tôi nếu bạn muốn\n"
+"                                                nhận phản hồi sớm hơn</strong> hoặc nếu bạn nhận được\n"
+"                                                phản hồi muộn."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "I'm feeling lucky"
-msgstr ""
+msgstr "Tôi cảm thấy may mắn"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid "Insert a Job Description..."
-msgstr ""
+msgstr "Thêm Mô tả công việc..."
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__is_published
@@ -456,12 +509,12 @@ msgstr "Mô tả công việc"
 #. module: website_hr_recruitment
 #: model:ir.actions.act_window,name:website_hr_recruitment.action_job_pages_list
 msgid "Job Pages"
-msgstr ""
+msgstr "Trang công việc"
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_hr_job
 msgid "Job Position"
-msgstr "Chức vụ"
+msgstr "Vị trí công việc"
 
 #. module: website_hr_recruitment
 #. odoo-python
@@ -473,7 +526,7 @@ msgstr "Chức danh công việc"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid "Job not found"
-msgstr ""
+msgstr "Không tìm thấy công việc nào"
 
 #. module: website_hr_recruitment
 #. odoo-python
@@ -488,12 +541,17 @@ msgstr "Tuyển dụng"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
 msgid "Jobs Page"
-msgstr ""
+msgstr "Trang công việc"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "Lead the entire sales cycle"
 msgstr "Dẫn dắt toàn bộ chu trình kinh doanh"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
+msgid "LinkedIn"
+msgstr "LinkedIn"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -525,7 +583,7 @@ msgstr "Nếu có là lợi thế"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_offices
 msgid "No address specified"
-msgstr ""
+msgstr "Không xác định địa chỉ"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -554,12 +612,14 @@ msgstr "Chưa đăng"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
 msgid "Offices Filter"
-msgstr ""
+msgstr "Bộ lọc văn phòng"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "Optional introduction, or any question you might have about the job…"
 msgstr ""
+"Giới thiệu tùy theo ý muốn hoặc bất kỳ câu hỏi nào bạn có thể thắc mắc về "
+"công việc này…"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_departments
@@ -588,6 +648,9 @@ msgid ""
 "        Strong communication, problem-solving, and work ethic required.\n"
 "        Adaptability, initiative, and willingness to learn are valued."
 msgstr ""
+"Thực hiện trách nhiệm được giao, cộng tác với các thành viên trong đội ngũ và tuân thủ các chính sách của công ty.\n"
+"         Yêu cầu kỹ năng giao tiếp và giải quyết vấn đề tốt, đồng thời có đạo đức nghề nghiệp.\n"
+"         Khả năng thích ứng, sáng kiến và sẵn sàng học hỏi được đánh giá cao."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -615,7 +678,7 @@ msgstr "Các hoạt động thể thao với đồng nghiệp <br/>được tr�
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__job_details
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_job_form_inherit
 msgid "Process Details"
-msgstr ""
+msgstr "Thông tin quy trình"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
@@ -627,7 +690,7 @@ msgstr "Sản phẩm"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_job_website_inherit
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.view_hr_job_tree_inherit_website
 msgid "Published"
-msgstr "Đã công bố"
+msgstr "Đã đăng"
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__published_date
@@ -645,6 +708,7 @@ msgid "Real responsibilities and challenges in a fast evolving company"
 msgstr "Trách nhiệm và thách thức thực sự trong một công ty phát triển nhanh"
 
 #. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_countries
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_offices
 msgid "Remote"
@@ -683,14 +747,14 @@ msgstr "Tên Seo"
 #. module: website_hr_recruitment
 #: model:ir.model.fields,help:website_hr_recruitment.field_hr_job__website_published
 msgid "Set if the application is published on the website of the company."
-msgstr "Đặt nếu đơn xin việc được đăng trên website của công ty. "
+msgstr "Đặt nếu đơn ứng tuyển được đăng trên website của công ty. "
 
 #. module: website_hr_recruitment
 #. odoo-javascript
 #: code:addons/website_hr_recruitment/static/src/js/website_hr_recruitment_editor.js:0
 #, python-format
 msgid "Short Introduction"
-msgstr ""
+msgstr "Giới thiệu ngắn"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
@@ -727,14 +791,14 @@ msgstr "URL đầy đủ để truy cập tài liệu thông qua trang web."
 #: code:addons/website_hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "The job offer has been closed."
-msgstr ""
+msgstr "Đề xuất làm việc này đã hết hiệu lực."
 
 #. module: website_hr_recruitment
 #. odoo-javascript
 #: code:addons/website_hr_recruitment/static/src/js/website_hr_applicant_form.js:0
 #, python-format
 msgid "The value entered doesn't seems like a linkedin profile."
-msgstr ""
+msgstr "Giá trị được nhập có vẻ không phải hồ sơ LinkedIn."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
@@ -742,6 +806,8 @@ msgid ""
 "There are currently no open job opportunities,<br class=\"mb-2\"/>\n"
 "                                            but feel free to <span class=\"fw-bold\">contact us</span> for a spontaneous application."
 msgstr ""
+"Hiện tại không có cơ hội việc làm nào đang mở,<br class=\"mb-2\"/>\n"
+"                                            nhưng đừng ngần ngại <span class=\"fw-bold\">liên hệ với chúng tôi</span> nếu bạn muốn nộp đơn ứng tuyển."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -749,9 +815,14 @@ msgid "Trainings"
 msgstr "Đào tạo"
 
 #. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
+msgid "Twitter"
+msgstr "Twitter"
+
+#. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_employment_type
 msgid "Unspecified type"
-msgstr ""
+msgstr "Loại hình không xác định"
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_recruitment_source__url
@@ -774,8 +845,8 @@ msgid ""
 "We are a team of passionate people whose goal is to improve everyone's life through disruptive products.\n"
 "                                We build great products to solve your business problems."
 msgstr ""
-"Chúng tôi là một đội ngũ những con người đầy nhiệt huyết, có mục đích cải thiện cuộc sống của mọi người qua các sản phẩm đột phá.\n"
-"                                Chúng tôi xây dựng các sản phẩm tuyệt vời để giúp giải quyết các vấn đề cho doanh nghiệp của bạn. "
+"Chúng tôi là một đội ngũ gồm những cá nhân đam mê với mục tiêu cải thiện cuộc sống của mọi người thông qua các sản phẩm đột phá.\n"
+"                                Chúng tôi tạo ra những sản phẩm tuyệt vời để giải quyết các vấn đề kinh doanh của bạn."
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_website
@@ -836,13 +907,15 @@ msgid ""
 "You already applied to another position recently. You can continue if it's "
 "not a mistake."
 msgstr ""
+"Gần đây bạn đã ứng tuyển một vị trí khác. Bạn có thể tiếp tục nếu đây không "
+"phải là sai sót."
 
 #. module: website_hr_recruitment
 #. odoo-javascript
 #: code:addons/website_hr_recruitment/static/src/js/website_hr_applicant_form.js:0
 #, python-format
 msgid "You already applied to this job position recently."
-msgstr ""
+msgstr "Gần đây bạn đã ứng tuyển vị trí công việc này."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.view_hr_job_form_inherit_website
@@ -850,11 +923,13 @@ msgid ""
 "You can write here a short description of your Job Description that will be "
 "displayed on the main Jobs' list page."
 msgstr ""
+"Tại đây, bạn có thể viết nội dung ngắn gọn về Mô tả công việc, phần này sẽ "
+"được hiển thị trên trang tuyển dụng chính."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 msgid "Your <b>contact</b> information is:"
-msgstr ""
+msgstr "Thông tin <b>liên lạc</b> của bạn là:"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -876,6 +951,8 @@ msgid ""
 "Your application has been posted successfully,<br class=\"mb-2\"/>\n"
 "                                    We usually respond within 3 days..."
 msgstr ""
+"Đơn ứng tuyển của bạn đã được gửi thành công,<br class=\"mb-2\"/>\n"
+"                                     Thông thường, chúng tôi sẽ trả lời trong vòng 3 ngày..."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -885,12 +962,22 @@ msgstr "thanh điều hướng"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "e.g. https://www.linkedin.com/in/fpodoo/"
-msgstr ""
+msgstr "VD: https://www.linkedin.com/in/fpodoo/"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 msgid "info@yourcompany.example.com"
-msgstr "support@bizapps.vn"
+msgstr "info@yourcompany.example.com"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
+msgid "open position"
+msgstr "vị trí đang tuyển"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
+msgid "open positions"
+msgstr "vị trí đang tuyển"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_recruitment_source_kanban_inherit_website

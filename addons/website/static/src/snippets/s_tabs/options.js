@@ -25,6 +25,22 @@ options.registry.NavTabs = options.registry.MultipleItems.extend({
     onClone: function () {
         this._generateUniqueIDs();
     },
+    /**
+     * @override
+     */
+    async addItem(previewMode, widgetValue, params) {
+        // TODO: In master, change the template instead.
+        params.item = ".tab-content:first > .tab-pane.active";
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    async removeItem(previewMode, widgetValue, params) {
+        // TODO: In master, change the template instead.
+        params.item = ".tab-content:first > .tab-pane.active";
+        return this._super(...arguments);
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -44,7 +60,7 @@ options.registry.NavTabs = options.registry.MultipleItems.extend({
      */
     _findLinksAndPanes: function () {
         this.$navLinks = this.$target.find('.nav:first .nav-link');
-        this.$tabPanes = this.$target.find('.tab-content:first .tab-pane');
+        this.$tabPanes = this.$target.find(".tab-content:first > .tab-pane");
     },
     /**
      * @private
@@ -83,9 +99,12 @@ options.registry.NavTabs = options.registry.MultipleItems.extend({
      */
     _removeItemCallback($target) {
         const $targetNavLink = this.$(`.nav-item a[href="#${$target.attr('id')}"]`);
-        const $navLinkToShow = this.$navLinks.eq((this.$navLinks.index($targetNavLink) + 1) % this.$navLinks.length);
+        const linkIndex = (this.$navLinks.index($targetNavLink) + 1) % this.$navLinks.length;
+        const $navLinkToShow = this.$navLinks.eq(linkIndex);
+        const $tabPaneToShow = this.$tabPanes.eq(linkIndex);
         $targetNavLink.parent().remove();
         this._findLinksAndPanes();
+        $tabPaneToShow[0].classList.add("active", "show");
         $navLinkToShow.tab('show');
     },
 });
@@ -118,7 +137,7 @@ options.registry.NavTabsStyle = options.Class.extend({
         const isVertical = widgetValue === 'vertical';
         this.$target.toggleClass('row s_col_no_resize s_col_no_bgcolor', isVertical);
         this.$target.find('.s_tabs_nav:first .nav').toggleClass('flex-column', isVertical);
-        this.$target.find('.s_tabs_nav:first > .nav-link').toggleClass('py-2', isVertical);
+        this.$target.find('.s_tabs_nav:first .nav .nav-link').toggleClass('py-2', isVertical);
         this.$target.find('.s_tabs_nav:first').toggleClass('col-md-3', isVertical);
         this.$target.find('.s_tabs_content:first').toggleClass('col-md-9', isVertical);
     },
@@ -139,4 +158,10 @@ options.registry.NavTabsStyle = options.Class.extend({
         }
         return this._super(...arguments);
     },
+});
+
+// Prevent `.nav-items` to be deleted from the bin button
+// as it is bypassing the "add(+)/remove(-)" behaviour
+options.registry.TabsNavItems = options.Class.extend({
+    forceNoDeleteButton: true,
 });

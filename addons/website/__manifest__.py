@@ -20,11 +20,15 @@
         'google_recaptcha',
         'utm',
     ],
+    'external_dependencies': {
+        'python': ['geoip2'],
+    },
     'installable': True,
     'data': [
         # security.xml first, data.xml need the group to exist (checking it)
         'security/website_security.xml',
         'security/ir.model.access.csv',
+        'data/image_library.xml',
         'data/ir_asset.xml',
         'data/ir_cron_data.xml',
         'data/mail_mail_data.xml',
@@ -114,6 +118,8 @@
         'views/neutralize_views.xml',
         'wizard/base_language_install_views.xml',
         'wizard/website_robots.xml',
+        # Replaces a post_init_hook that should be run on upgrade too.
+        'data/update_theme_images.xml',
     ],
     'demo': [
         'data/website_demo.xml',
@@ -125,11 +131,13 @@
     'assets': {
         'web.assets_frontend': [
             ('replace', 'web/static/src/legacy/js/public/public_root_instance.js', 'website/static/src/js/content/website_root_instance.js'),
+            'website/static/src/core/errors/beforeunload_error_handler.js',
             'website/static/src/libs/zoomodoo/zoomodoo.scss',
             'website/static/src/scss/website.scss',
             'website/static/src/scss/website_controller_page.scss',
             'website/static/src/scss/website.ui.scss',
             'website/static/src/libs/zoomodoo/zoomodoo.js',
+            'website/static/src/libs/bootstrap/bootstrap.js',
             'website/static/src/js/utils.js',
             'web/static/src/core/autocomplete/*',
             'website/static/src/components/autocomplete_with_pages/*',
@@ -149,12 +157,16 @@
             'website/static/src/xml/website.background.video.xml',
             'website/static/src/xml/website.share.xml',
             'website/static/src/js/text_processing.js',
+            # Stable fix, will be replaced by an `ir.asset` in master to be able
+            # to clean `<script>` tags in embed code snippets in edit mode.
+            'website/static/src/snippets/s_embed_code/000.js',
         ],
         'web.assets_frontend_minimal': [
             'website/static/src/js/content/inject_dom.js',
             'website/static/src/js/content/auto_hide_menu.js',
             'website/static/src/js/content/redirect.js',
             'website/static/src/js/content/adapt_content.js',
+            'website/static/src/js/content/generate_video_iframe.js',
         ],
         'web.assets_frontend_lazy': [
             # Remove assets_frontend_minimal
@@ -162,6 +174,7 @@
             ('remove', 'website/static/src/js/content/auto_hide_menu.js'),
             ('remove', 'website/static/src/js/content/redirect.js'),
             ('remove', 'website/static/src/js/content/adapt_content.js'),
+            ('remove', 'website/static/src/js/content/generate_video_iframe.js'),
         ],
         'web._assets_primary_variables': [
             'website/static/src/scss/primary_variables.scss',
@@ -174,7 +187,9 @@
             ('prepend', 'website/static/src/scss/secondary_variables.scss'),
         ],
         'web.assets_tests': [
-            'website/static/tests/tour_utils/**/*',
+            'website/static/tests/tour_utils/focus_blur_snippets_options.js',
+            'website/static/tests/tour_utils/website_preview_test.js',
+            'website/static/tests/tour_utils/widget_lifecycle_dep_widget.js',
             'website/static/tests/tours/**/*',
         ],
         'web.assets_backend': [
@@ -190,6 +205,7 @@
             'website/static/src/components/fields/*',
             'website/static/src/components/fullscreen_indication/fullscreen_indication.js',
             'website/static/src/components/fullscreen_indication/fullscreen_indication.scss',
+            'website/static/src/components/fullscreen_indication/fullscreen_indication.xml',
             'website/static/src/components/website_loader/website_loader.js',
             'website/static/src/components/website_loader/website_loader.scss',
             'website/static/src/components/views/*',
@@ -221,12 +237,14 @@
             'website/static/src/js/editor/editor.js',
             '/website/static/src/components/wysiwyg_adapter/toolbar_patch.js',
             'website/static/src/xml/web_editor.xml',
+            'website/static/src/js/editor/widget_link.js',
         ],
         'website.assets_wysiwyg': [
             ('include', 'web._assets_helpers'),
             'web_editor/static/src/scss/bootstrap_overridden.scss',
             'web/static/src/scss/pre_variables.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',
+            'website/static/src/scss/website.wysiwyg.fonts.scss',
             'website/static/src/scss/website.wysiwyg.scss',
             'website/static/src/scss/website.edit_mode.scss',
             'website/static/src/js/editor/snippets.editor.js',
@@ -253,7 +271,6 @@
             'website/static/src/snippets/s_map/options.js',
             'website/static/src/snippets/s_dynamic_snippet/options.js',
             'website/static/src/snippets/s_dynamic_snippet_carousel/options.js',
-            'website/static/src/snippets/s_embed_code/options.js',
             'website/static/src/snippets/s_website_controller_page_listing_layout/options.js',
             'website/static/src/snippets/s_website_form/options.js',
             'website/static/src/js/form_editor_registry.js',
@@ -280,6 +297,17 @@
             ('include', 'web_editor.assets_legacy_wysiwyg'),
             ('include', 'website.assets_wysiwyg'),
             'website/static/src/components/wysiwyg_adapter/wysiwyg_adapter.js',
+            'website/static/src/snippets/s_embed_code/options.js',
+        ],
+        # TODO: in master, we should revisit this and probably opt-in what is
+        # to be added in the iframe instead of excluding what should not be.
+        'website.assets_wysiwyg_inside': [
+            ('include', 'website.assets_wysiwyg'),
+            ('remove', 'website/static/src/scss/website.wysiwyg.fonts.scss'),
+        ],
+        'website.assets_all_wysiwyg_inside': [
+            ('include', 'website.assets_all_wysiwyg'),
+            ('remove', 'website/static/src/scss/website.wysiwyg.fonts.scss'),
         ],
         'web_editor.assets_media_dialog': [
             'website/static/src/components/media_dialog/image_selector.js',

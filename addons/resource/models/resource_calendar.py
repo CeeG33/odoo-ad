@@ -19,7 +19,8 @@ from odoo.osv import expression
 from odoo.tools.float_utils import float_round
 
 from odoo.tools import date_utils, float_utils
-from .utils import Intervals, float_to_time, make_aware, datetime_to_string, string_to_datetime, ROUNDING_FACTOR
+from .utils import Intervals, float_to_time, make_aware, datetime_to_string, string_to_datetime
+from odoo.addons.hr_work_entry_contract.models.hr_work_intervals import WorkIntervals
 
 
 class ResourceCalendar(models.Model):
@@ -53,6 +54,8 @@ class ResourceCalendar(models.Model):
                         'hour_from': attendance.hour_from,
                         'hour_to': attendance.hour_to,
                         'day_period': attendance.day_period,
+                        'date_from': attendance.date_from,
+                        'date_to': attendance.date_to,
                     })
                     for attendance in company_attendance_ids
                 ]
@@ -182,6 +185,9 @@ class ResourceCalendar(models.Model):
         else:
             number_of_days = len(set(attendances.mapped('dayofweek')))
 
+        if not number_of_days:
+            return 0
+
         return float_round(hour_count / float(number_of_days), precision_digits=2)
 
     def switch_calendar_type(self):
@@ -210,7 +216,7 @@ class ResourceCalendar(models.Model):
             ]
 
             self.two_weeks_calendar = True
-            default_attendance = self.default_get('attendance_ids')['attendance_ids']
+            default_attendance = self.default_get(['attendance_ids'])['attendance_ids']
             for idx, att in enumerate(default_attendance):
                 att[2]["week_type"] = '0'
                 att[2]["sequence"] = idx + 1
@@ -222,7 +228,7 @@ class ResourceCalendar(models.Model):
         else:
             self.two_weeks_calendar = False
             self.attendance_ids.unlink()
-            self.attendance_ids = self.default_get('attendance_ids')['attendance_ids']
+            self.attendance_ids = self.default_get(['attendance_ids'])['attendance_ids']
 
     @api.onchange('attendance_ids')
     def _onchange_attendance_ids(self):
@@ -355,12 +361,12 @@ class ResourceCalendar(models.Model):
         result_per_resource_id = dict()
         for tz, resources in resources_per_tz.items():
             res = result_per_tz[tz]
-            res_intervals = Intervals(res)
+            res_intervals = WorkIntervals(res)
             for resource in resources:
                 if resource in per_resource_result:
                     resource_specific_result = [(max(bounds_per_tz[tz][0], tz.localize(val[0])), min(bounds_per_tz[tz][1], tz.localize(val[1])), val[2])
                         for val in per_resource_result[resource]]
-                    result_per_resource_id[resource.id] = Intervals(itertools.chain(res, resource_specific_result))
+                    result_per_resource_id[resource.id] = WorkIntervals(itertools.chain(res, resource_specific_result))
                 else:
                     result_per_resource_id[resource.id] = res_intervals
         return result_per_resource_id
@@ -399,9 +405,14 @@ class ResourceCalendar(models.Model):
         # retrieve leave intervals in (start_dt, end_dt)
         result = defaultdict(lambda: [])
         tz_dates = {}
-        for leave in self.env['resource.calendar.leaves'].search(domain):
+        all_leaves = self.env['resource.calendar.leaves'].search(domain)
+        for leave in all_leaves:
+            leave_resource = leave.resource_id
+            leave_company = leave.company_id
+            leave_date_from = leave.date_from
+            leave_date_to = leave.date_to
             for resource in resources_list:
-                if leave.resource_id.id not in [False, resource.id] or (not leave.resource_id and resource and resource.company_id != leave.company_id):
+                if leave_resource.id not in [False, resource.id] or (not leave_resource and resource and resource.company_id != leave_company):
                     continue
                 tz = tz if tz else timezone((resource or self).tz)
                 if (tz, start_dt) in tz_dates:
@@ -414,8 +425,8 @@ class ResourceCalendar(models.Model):
                 else:
                     end = end_dt.astimezone(tz)
                     tz_dates[(tz, end_dt)] = end
-                dt0 = string_to_datetime(leave.date_from).astimezone(tz)
-                dt1 = string_to_datetime(leave.date_to).astimezone(tz)
+                dt0 = string_to_datetime(leave_date_from).astimezone(tz)
+                dt1 = string_to_datetime(leave_date_to).astimezone(tz)
                 result[resource.id].append((max(start, dt0), min(end, dt1), leave))
 
         return {r.id: Intervals(result[r.id]) for r in resources_list}
@@ -492,7 +503,7 @@ class ResourceCalendar(models.Model):
 
         return {
             # Round the number of days to the closest 16th of a day.
-            'days': sum(float_utils.round(ROUNDING_FACTOR * day_days[day]) / ROUNDING_FACTOR for day in day_days),
+            'days': float_round(sum(day_days[day] for day in day_days), precision_rounding=0.001),
             'hours': sum(day_hours.values()),
         }
 
@@ -506,11 +517,11 @@ class ResourceCalendar(models.Model):
         for start, stop, meta in intervals:
             day_hours[start.date()] += (stop - start).total_seconds() / 3600
 
-        # compute number of days as quarters
-        days = sum(
-            float_utils.round(ROUNDING_FACTOR * day_hours[day] / day_total[day]) / ROUNDING_FACTOR if day_total[day] else 0
+        # compute number of days the hours span over
+        days = float_round(sum(
+            day_hours[day] / day_total[day] if day_total[day] else 0
             for day in day_hours
-        )
+        ), precision_rounding=0.001)
         return {
             'days': days,
             'hours': sum(day_hours.values()),

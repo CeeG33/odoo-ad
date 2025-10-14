@@ -351,14 +351,14 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".badge.dropdown-toggle", "the tags should not be dropdowns");
 
         // click on the tag: should do nothing and open the form view
-        click(target.querySelector(".o_field_many2many_tags .badge :nth-child(1)"));
+        await click(target.querySelector(".o_field_many2many_tags .badge :nth-child(1)"));
         assert.verifySteps(["selectRecord"]);
         await nextTick();
 
         assert.containsNone(target, ".o_colorlist");
 
         await click(target.querySelectorAll(".o_list_record_selector")[1]);
-        click(target.querySelector(".o_field_many2many_tags .badge :nth-child(1)"));
+        await click(target.querySelector(".o_field_many2many_tags .badge :nth-child(1)"));
         assert.verifySteps(["selectRecord"]);
         await nextTick();
 
@@ -386,14 +386,14 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".badge.dropdown-toggle", "the tags should not be dropdowns");
 
         // click on the tag: should do nothing and open the form view
-        click(target.querySelector(".o_field_many2many_tags .badge :nth-child(1)"));
+        await click(target.querySelector(".o_field_many2many_tags .badge :nth-child(1)"));
         assert.verifySteps(["selectRecord"]);
         await nextTick();
 
         assert.containsNone(target, ".o_colorlist");
 
         await click(target.querySelectorAll(".o_list_record_selector")[1]);
-        click(target.querySelector(".o_field_many2many_tags .badge :nth-child(1)"));
+        await click(target.querySelector(".o_field_many2many_tags .badge :nth-child(1)"));
         assert.verifySteps([]);
         await nextTick();
 
@@ -1014,7 +1014,8 @@ QUnit.module("Fields", (hooks) => {
         await triggerEvent(input, null, "focus");
         await click(input);
         await editInput(input, null, "go");
-        await triggerEvent(input, null, "blur");
+        await triggerHotkey("tab");
+        await nextTick();
 
         assert.containsNone(document.body, ".modal");
         assert.containsOnce(target, ".o_field_many2many_tags .badge");
@@ -1028,7 +1029,8 @@ QUnit.module("Fields", (hooks) => {
         await click(input);
         await editInput(input, null, "r");
         await triggerEvent(input, null, "keydown", { key: "ArrowDown" });
-        await triggerEvent(input, null, "blur");
+        await triggerHotkey("tab");
+        await nextTick();
         assert.strictEqual(
             target.querySelectorAll(".o_field_many2many_tags .badge")[1].textContent,
             "red",
@@ -1995,4 +1997,40 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelector("[name='turtles'] input"));
         assert.verifySteps(["name_search"]);
     });
+
+    QUnit.test(
+        "Many2ManyTagsField: quickly remove several tags with backspace",
+        async function (assert) {
+            serverData.models.partner.records[0].timmy = [12, 14];
+            serverData.models.partner.onchanges.timmy = () => {};
+
+            const def = makeDeferred();
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                    <form>
+                        <field name="timmy" widget="many2many_tags"/>
+                    </form>`,
+                mockRPC(route, args) {
+                    if (args.method === "onchange") {
+                        assert.step(`onchange ${JSON.stringify(args.args[1].timmy)}`);
+                        return def;
+                    }
+                },
+                resId: 1,
+            });
+
+            assert.containsN(target, ".o_field_many2many_tags .badge", 2);
+
+            target.querySelectorAll(".o_field_many2many_tags .badge")[1].focus();
+            triggerHotkey("BackSpace");
+            triggerHotkey("BackSpace");
+            def.resolve();
+            await nextTick();
+            assert.containsN(target, ".o_field_many2many_tags .badge", 1);
+            assert.verifySteps(["onchange [[3,14]]"]);
+        }
+    );
 });

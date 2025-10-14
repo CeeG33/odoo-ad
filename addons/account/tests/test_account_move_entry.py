@@ -1160,3 +1160,95 @@ class TestAccountMove(AccountTestInvoicingCommon):
 
         with self.assertRaisesRegex(UserError, 'not balanced'), self.env.cr.savepoint():
             stealer_move.write({'line_ids': [Command.link(honest_move.line_ids[0].id)]})
+
+    def test_validate_move_wizard_with_auto_post_entry(self):
+        """ Test that the wizard to validate a move with auto_post is working fine. """
+        self.test_move.date = fields.Date.today() + relativedelta(months=3)
+        self.test_move.auto_post = 'at_date'
+        wizard = self.env['validate.account.move'].with_context(active_model='account.move', active_ids=self.test_move.ids).create({})
+        wizard.force_post = True
+        wizard.validate_move()
+        self.assertTrue(self.test_move.state == 'posted')
+
+    def test_cumulated_balance(self):
+        move = self.env['account.move'].create({
+            'line_ids': [Command.create({
+                'balance': 100,
+                'account_id': self.company_data['default_account_receivable'].id,
+            }), Command.create({
+                'balance': 100,
+                'account_id': self.company_data['default_account_tax_sale'].id,
+            }), Command.create({
+                'balance': -200,
+                'account_id': self.company_data['default_account_revenue'].id,
+            })]
+        })
+
+        for order, expected in [
+            ('balance DESC', [
+                (100, 0),
+                (100, -100),
+                (-200, -200),
+            ]),
+            ('balance ASC', [
+                (-200, 0),
+                (100, 200),
+                (100, 100),
+            ]),
+        ]:
+            read_results = self.env['account.move.line'].search_read(
+                domain=[('move_id', '=', move.id)],
+                fields=['balance', 'cumulated_balance'],
+                order=order,
+            )
+            for (balance, cumulated_balance), read_result in zip(expected, read_results):
+                self.assertAlmostEqual(balance, read_result['balance'])
+                self.assertAlmostEqual(cumulated_balance, read_result['cumulated_balance'])
+
+    def test_balance_modification_auto_balancing(self):
+        """ Test that amount currency is correctly recomputed when, without multicurrency enabled,
+        the balance is changed """
+        account = self.company_data['default_account_revenue']
+        move = self.env['account.move'].create({
+            'line_ids': [
+                Command.create({
+                    'account_id': self.company_data['default_account_receivable'].id,
+                    'balance': 20,
+                }), Command.create({
+                    'account_id': account.id,
+                    'balance': -20,
+                })]
+        })
+        line = move.line_ids.filtered(lambda l: l.account_id == account)
+        move.write({
+            'line_ids': [
+                Command.update(line.id, {
+                    'debit': 10,
+                    'credit': 0,
+                    'balance': 10
+                }),
+                Command.create({
+                    'account_id': account.id,
+                    'balance': -30,
+                })]
+        })
+
+        self.assertRecordValues(line, [
+            {'amount_currency': 10.00, 'balance': 10.00},
+        ])
+
+    def test_no_partner_id_on_duplication(self):
+        """ Test that when a account_move is duplicated the partner_id is not included in the duplicated_move """
+        move = self.env['account.move'].create({
+            'move_type': 'entry',
+            'partner_id': self.partner_a.id,
+            'date': fields.Date.from_string('2019-01-01'),
+            'currency_id': self.currency_data['currency'].id,
+            'line_ids': [
+                Command.create(self.entry_line_vals_1),
+                Command.create(self.entry_line_vals_2),
+            ],
+        })
+        move_duplicate = move.copy()
+        self.assertTrue(move_duplicate)
+        self.assertFalse(move_duplicate.partner_id)

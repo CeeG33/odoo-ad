@@ -5,6 +5,8 @@ from uuid import uuid4
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.tools import format_amount
+
 
 class LoyaltyCard(models.Model):
     _name = 'loyalty.card'
@@ -52,7 +54,21 @@ class LoyaltyCard(models.Model):
     @api.depends('points', 'point_name')
     def _compute_points_display(self):
         for card in self:
-            card.points_display = "%.2f %s" % (card.points or 0, card.point_name or '')
+            card.points_display = card._format_points(card.points)
+
+    @api.onchange('expiration_date')
+    def _restrict_expiration_on_loyalty(self):
+        for card in self:
+            if card.program_type == 'loyalty' and card.expiration_date:
+                raise ValidationError(_("Expiration date cannot be set on a loyalty card."))
+
+    def _format_points(self, points):
+        self.ensure_one()
+        if self.point_name == self.program_id.currency_id.symbol:
+            return format_amount(self.env, points, self.program_id.currency_id)
+        if points == int(points):
+            return f"{int(points)} {self.point_name or ''}"
+        return f"{points:.2f} {self.point_name or ''}"
 
     # Meant to be overriden
     def _compute_use_count(self):
@@ -65,6 +81,12 @@ class LoyaltyCard(models.Model):
     def _get_mail_partner(self):
         self.ensure_one()
         return self.partner_id
+
+    def _get_mail_author(self):
+        self.ensure_one()
+        return (
+            self.env.user._is_internal() and self.env.user or self.company_id or self.env.company
+        ).partner_id
 
     def _get_signature(self):
         """To be overriden"""
@@ -114,7 +136,18 @@ class LoyaltyCard(models.Model):
             if not create_comm_per_program[coupon.program_id] or not coupon._get_mail_partner():
                 continue
             for comm in create_comm_per_program[coupon.program_id]:
-                comm.mail_template_id.send_mail(res_id=coupon.id, force_send=force_send, email_layout_xmlid='mail.mail_notification_light')
+                mail_template = comm.mail_template_id
+                email_values = {}
+                if not mail_template.email_from:
+                    # provide author_id & email_from values to ensure the email gets sent
+                    author = coupon._get_mail_author()
+                    email_values.update(author_id=author.id, email_from=author.email_formatted)
+                mail_template.send_mail(
+                    res_id=coupon.id,
+                    force_send=force_send,
+                    email_layout_xmlid='mail.mail_notification_light',
+                    email_values=email_values,
+                )
 
     def _send_points_reach_communication(self, points_changes):
         """

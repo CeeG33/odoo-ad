@@ -305,13 +305,35 @@ QUnit.test("Current user that is a follower should be considered as such", async
     await openFormView("res.partner", pyEnv.currentPartnerId);
     await click("button", { text: "Send message" });
     await insertText(".o-mail-Composer-input", "@");
-    await contains(".o-mail-Composer-suggestion", { count: 3 });
+    await contains(".o-mail-Composer-suggestion", { count: 4 });
     await contains(".o-mail-Composer-suggestion", {
         text: "Mitchell Admin",
         before: [".o-mail-Composer-suggestion", { text: "Person B(b@test.com)" }],
     });
     await contains(".o-mail-Composer-suggestion", {
         text: "Person B(b@test.com)",
+        before: [".o-mail-Composer-suggestion", { text: "OdooBot" }],
+    });
+    await contains(".o-mail-Composer-suggestion", {
+        text: "OdooBot",
         before: [".o-mail-Composer-suggestion", { text: "Person A(a@test.com)" }],
+    });
+});
+
+QUnit.test("Suggestions that begin with the search term should have priority", async () => {
+    const pyEnv = await startServer();
+    pyEnv["res.partner"].create([{ name: "Party Partner" }, { name: "Best Partner" }]);
+    const { openFormView } = await start();
+    openFormView("res.partner", pyEnv.currentPartnerId);
+    await click("button", { text: "Send message" });
+    await insertText(".o-mail-Composer-input", "@");
+    await contains(".o-mail-Composer-suggestion", {
+        text: "Best Partner",
+        before: [".o-mail-Composer-suggestion", { text: "Party Partner" }],
+    });
+    await insertText(".o-mail-Composer-input", "part");
+    await contains(".o-mail-Composer-suggestion", {
+        text: "Party Partner",
+        before: [".o-mail-Composer-suggestion", { text: "Best Partner" }],
     });
 });

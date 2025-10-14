@@ -8,6 +8,8 @@ import {
 
 let editableWindow = window;
 const _setEditableWindow = (ew) => editableWindow = ew;
+let editableDocument = document;
+const _setEditableDocument = (ed) => editableDocument = ed;
 
 const COLOR_PALETTE_COMPATIBILITY_COLOR_NAMES = ['primary', 'secondary', 'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'success', 'info', 'warning', 'danger'];
 
@@ -38,6 +40,15 @@ for (let i = 1; i <= 5; i++) {
 for (let i = 100; i <= 900; i += 100) {
     EDITOR_COLOR_CSS_VARIABLES.push(`${i}`);
 }
+
+// Black, white and their opacity variants.
+// These variables are necessary to prevent the colorpicker from being affected
+// by the backend "Dark Mode".
+EDITOR_COLOR_CSS_VARIABLES.push(
+    "black", "black-15", "black-25", "black-50", "black-75",
+    "white", "white-25", "white-50", "white-75", "white-85"
+);
+
 /**
  * window.getComputedStyle cannot work properly with CSS shortcuts (like
  * 'border-width' which is a shortcut for the top + right + bottom + left border
@@ -100,11 +111,11 @@ const BACKGROUND_IMAGE_ATTRIBUTES = new Set([
  *                  - the inverse otherwise
  */
 function _computePxByRem(toRem) {
-    if (_computePxByRem.PX_BY_REM === undefined) {
-        const htmlStyle = editableWindow.getComputedStyle(editableWindow.document.documentElement);
-        _computePxByRem.PX_BY_REM = parseFloat(htmlStyle['font-size']);
+    if (editableDocument.PX_BY_REM === undefined) {
+        const htmlStyle = editableWindow.getComputedStyle(editableDocument.documentElement);
+        editableDocument.PX_BY_REM = parseFloat(htmlStyle['font-size']);
     }
-    return toRem ? (1 / _computePxByRem.PX_BY_REM) : _computePxByRem.PX_BY_REM;
+    return toRem ? (1 / editableDocument.PX_BY_REM) : editableDocument.PX_BY_REM;
 }
 /**
  * Converts the given (value + unit) string to a numeric value expressed in
@@ -161,7 +172,7 @@ function _convertNumericToUnit(value, unitFrom, unitTo, cssProp, $target) {
  * @returns {Array|null}
  */
 function _getNumericAndUnit(value) {
-    const m = value.trim().match(/^(-?[0-9.]+(?:e[+|-]?[0-9]+)?)\s*([A-Za-z%-]*)$/);
+    const m = value.trim().match(/^(-?[0-9.]+(?:e[+|-]?[0-9]+)?)\s*([^\s]*)$/);
     if (!m) {
         return null;
     }
@@ -482,7 +493,61 @@ function _isMobileView(targetEl) {
  * @returns {string}
  */
 function _getLinkLabel(linkEl) {
-    return linkEl.innerText.trim().replaceAll("\u200B", "");
+    return linkEl.textContent.replaceAll("\u200B", "").replaceAll("\uFEFF", "");
+}
+/**
+ * Forwards an image source to its carousel thumbnail.
+ * @param {HTMLElement} imgEl
+ */
+function _forwardToThumbnail(imgEl) {
+    const carouselEl = imgEl.closest(".carousel");
+    if (carouselEl) {
+        const carouselInnerEl = imgEl.closest(".carousel-inner");
+        const carouselItemEl = imgEl.closest(".carousel-item");
+        if (carouselInnerEl && carouselItemEl) {
+            const imageIndex = [...carouselInnerEl.children].indexOf(carouselItemEl);
+            const miniatureEl = carouselEl.querySelector(`.carousel-indicators [data-bs-slide-to="${imageIndex}"]`);
+            if (miniatureEl && miniatureEl.style.backgroundImage) {
+                miniatureEl.style.backgroundImage = `url(${imgEl.getAttribute("src")})`;
+            }
+        }
+    }
+}
+
+/**
+ * @param {HTMLImageElement} img
+ * @returns {Promise<Boolean>}
+ */
+async function _isImageCorsProtected(img) {
+    const src = img.getAttribute("src");
+    if (!src) {
+        return false;
+    }
+    let isCorsProtected = false;
+    if (!src.startsWith("/") || /\/web\/image\/\d+-redirect\//.test(src)) {
+        // The `fetch()` used later in the code might fail if the image is
+        // CORS protected. We check upfront if it's the case.
+        // Two possible cases:
+        // 1. the `src` is an absolute URL from another domain.
+        //    For instance, abc.odoo.com vs abc.com which are actually the
+        //    same database behind.
+        // 2. A "attachment-url" which is just a redirect to the real image
+        //    which could be hosted on another website.
+        isCorsProtected = await fetch(src, { method: "HEAD" })
+            .then(() => false)
+            .catch(() => true);
+    }
+    return isCorsProtected;
+}
+
+/**
+ * @param {string} src
+ * @returns {Promise<Boolean>}
+ */
+async function _isSrcCorsProtected(src) {
+    const dummyImg = document.createElement("img");
+    dummyImg.src = src;
+    return _isImageCorsProtected(dummyImg);
 }
 
 export default {
@@ -507,9 +572,13 @@ export default {
     generateHTMLId: _generateHTMLId,
     getColorClass: _getColorClass,
     setEditableWindow: _setEditableWindow,
+    setEditableDocument: _setEditableDocument,
     addBackgroundImageAttributes: _addBackgroundImageAttributes,
     isBackgroundImageAttribute: _isBackgroundImageAttribute,
     shouldEditableMediaBeEditable: _shouldEditableMediaBeEditable,
     isMobileView: _isMobileView,
     getLinkLabel: _getLinkLabel,
+    forwardToThumbnail: _forwardToThumbnail,
+    isImageCorsProtected: _isImageCorsProtected,
+    isSrcCorsProtected: _isSrcCorsProtected,
 };

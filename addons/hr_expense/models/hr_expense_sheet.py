@@ -195,6 +195,13 @@ class HrExpenseSheet(models.Model):
         domain="[('id', 'in', selectable_payment_method_line_ids)]",
         help="The payment method used when the expense is paid by the company.",
     )
+    attachment_ids = fields.One2many(
+        comodel_name='ir.attachment',
+        inverse_name='res_id',
+        domain="[('res_model', '=', 'hr.expense.sheet')]",
+        string='Attachments of expenses',
+    )
+    message_main_attachment_id = fields.Many2one(compute='_compute_main_attachment', store=True)
     accounting_date = fields.Date(string="Accounting Date", compute='_compute_accounting_date', store=True)
     account_move_ids = fields.One2many(
         string="Journal Entries",
@@ -262,7 +269,7 @@ class HrExpenseSheet(models.Model):
         for sheet in self:
             sheet.payment_method_line_id = sheet.selectable_payment_method_line_ids[:1]
 
-    @api.depends('employee_journal_id', 'payment_method_line_id')
+    @api.depends('employee_journal_id', 'payment_method_line_id', 'payment_mode')
     def _compute_journal_id(self):
         for sheet in self:
             if sheet.payment_mode == 'company_account':
@@ -279,7 +286,7 @@ class HrExpenseSheet(models.Model):
             else:
                 sheet.selectable_payment_method_line_ids = self.env['account.payment.method.line'].search([
                     ('payment_type', '=', 'outbound'),
-                    ('company_id', '=', sheet.company_id.id)
+                    ('company_id', 'parent_of', sheet.company_id.id)
                 ])
 
     @api.depends('account_move_ids', 'payment_state', 'approval_state')
@@ -293,6 +300,17 @@ class HrExpenseSheet(models.Model):
                 sheet.state = sheet.approval_state
             else:
                 sheet.state = 'draft'
+
+    @api.depends('expense_line_ids.attachment_ids')
+    def _compute_main_attachment(self):
+        for sheet in self:
+            attachments = sheet.attachment_ids
+            if not sheet.message_main_attachment_id or sheet.message_main_attachment_id not in attachments:
+                expenses = sheet.expense_line_ids
+                expenses_mma_checksums = expenses.message_main_attachment_id.mapped('checksum')
+                sheet.message_main_attachment_id = attachments.filtered(
+                    lambda att: att.checksum in expenses_mma_checksums
+                )[:1] or attachments[:1]
 
     @api.depends('expense_line_ids.currency_id', 'company_currency_id')
     def _compute_currency_id(self):
@@ -317,9 +335,9 @@ class HrExpenseSheet(models.Model):
     @api.depends_context('uid')
     @api.depends('employee_id')
     def _compute_can_approve(self):
-        is_team_approver = self.user_has_groups('hr_expense.group_hr_expense_team_approver')
-        is_approver = self.user_has_groups('hr_expense.group_hr_expense_user')
-        is_hr_admin = self.user_has_groups('hr_expense.group_hr_expense_manager')
+        is_team_approver = self.user_has_groups('hr_expense.group_hr_expense_team_approver') or self.env.su
+        is_approver = self.user_has_groups('hr_expense.group_hr_expense_user') or self.env.su
+        is_hr_admin = self.user_has_groups('hr_expense.group_hr_expense_manager') or self.env.su
 
         for sheet in self:
             reason = False
@@ -366,12 +384,17 @@ class HrExpenseSheet(models.Model):
     @api.depends_context('uid')
     @api.depends('employee_id', 'user_id', 'state')
     def _compute_is_editable(self):
-        is_hr_admin = self.user_has_groups('hr_expense.group_hr_expense_manager')
+        is_hr_admin = self.user_has_groups('hr_expense.group_hr_expense_manager,base.group_system')
         is_approver = self.user_has_groups('hr_expense.group_hr_expense_user')
         for sheet in self:
             if sheet.state not in {'draft', 'submit', 'approve'}:
                 # Not editable
                 sheet.is_editable = False
+                continue
+
+            if is_hr_admin or self.env.su:
+                # Administrator-level users are not restricted
+                sheet.is_editable = True
                 continue
 
             employee = sheet.employee_id
@@ -387,11 +410,6 @@ class HrExpenseSheet(models.Model):
                 managers |= self.env.user
             if not is_own_sheet and self.env.user in managers:
                 # If Approver-level or designated manager, can edit other people sheet
-                sheet.is_editable = True
-                continue
-
-            if is_hr_admin and sheet.state in {'draft', 'submit', 'approve'}:
-                # Administrator-level users are not restricted
                 sheet.is_editable = True
                 continue
             sheet.is_editable = False
@@ -446,6 +464,22 @@ class HrExpenseSheet(models.Model):
         sheets.activity_update()
         return sheets
 
+    def write(self, vals):
+        if 'state' in vals or 'approval_state' in vals:
+            # Avoid user with write access on expense sheet in draft state to bypass the validation process
+            valid_states = {'submit', None}
+            if (
+                    not self.user_has_groups('hr_expense.group_hr_expense_manager')
+                    and any(state == 'draft' for state in self.mapped('state'))
+                    and (vals.get('state') not in valid_states or vals.get('approval_state') not in valid_states)
+            ):
+                raise UserError(_("You don't have the rights to bypass the validation process of this expense report."))
+            elif vals.get('state') == 'approve' or vals.get('approval_state') == 'approve':
+                self._check_can_approve()
+            elif vals.get('state') == 'cancel' or vals.get('approval_state') == 'cancel':
+                self._check_can_refuse()
+        return super().write(vals)
+
     @api.ondelete(at_uninstall=False)
     def _unlink_except_posted_or_paid(self):
         for expense in self:
@@ -455,19 +489,6 @@ class HrExpenseSheet(models.Model):
     # --------------------------------------------
     # Mail Thread
     # --------------------------------------------
-
-    def _get_mail_thread_data_attachments(self):
-        """
-            In order to see in the sheet attachment preview the corresponding
-            expenses' attachments, the latter attachments are added to the fetched data for the sheet record.
-        """
-        self.ensure_one()
-        res = super()._get_mail_thread_data_attachments()
-        expense_attachments = self.env['ir.attachment'].search(
-            [('res_id', 'in', self.expense_line_ids.ids), ('res_model', '=', 'hr.expense')],
-            order='id desc',
-        )
-        return res | expense_attachments
 
     def _track_subtype(self, init_values):
         self.ensure_one()
@@ -548,7 +569,7 @@ class HrExpenseSheet(models.Model):
         :return: An action opening the account.payment.register wizard.
         '''
         return self.account_move_ids.with_context(default_partner_bank_id=(
-            self.employee_id.sudo().bank_account_id.id if len(self.employee_id.sudo().bank_account_id.ids) <= 1 else None
+            self.account_move_ids.partner_bank_id.id if len(self.account_move_ids.partner_bank_id.ids) <= 1 else None
         )).action_register_payment()
 
     def action_open_expense_view(self):
@@ -626,7 +647,7 @@ class HrExpenseSheet(models.Model):
             raise UserError(_("You can only generate accounting entry for approved expense(s)."))
 
         if any(not sheet.journal_id for sheet in self):
-            raise UserError(_("Specify expense journal to generate accounting entries."))
+            raise UserError(_("Please specify an expense journal in order to generate accounting entries."))
 
         missing_email_employees = self.filtered(lambda sheet: not sheet.employee_id.work_email).employee_id
         if missing_email_employees:
@@ -648,11 +669,13 @@ class HrExpenseSheet(models.Model):
         self.activity_update()
 
     def _do_reset_approval(self):
-        self.sudo().write({'approval_state': False})
+        self.sudo().write({'approval_state': False, 'accounting_date': False})
         self.activity_update()
 
     def _do_refuse(self, reason):
-        self.write({'state': 'cancel'})
+        if self.account_move_ids:  # Todo: in 17.3+, edit it to allow draft entries
+            raise UserError(_("You cannot cancel an expense sheet linked to a journal entry"))
+        self.approval_state = 'cancel'
         subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
         for sheet in self:
             sheet.message_post_with_source(
@@ -668,7 +691,6 @@ class HrExpenseSheet(models.Model):
             'skip_invoice_sync': True,
             'skip_invoice_line_sync': True,
             'skip_account_move_synchronization': True,
-            'check_move_validity': False,
         }
         own_account_sheets = self.filtered(lambda sheet: sheet.payment_mode == 'own_account')
         company_account_sheets = self - own_account_sheets
@@ -690,23 +712,29 @@ class HrExpenseSheet(models.Model):
     def _do_reverse_moves(self):
         self = self.with_context(clean_context(self.env.context))
         moves = self.account_move_ids
-        draft_moves = moves.filtered(lambda m: m.state == 'draft')
-        non_draft_moves = moves - draft_moves
-        non_draft_moves._reverse_moves(
-            default_values_list=[{'invoice_date': fields.Date.context_today(move), 'ref': False} for move in non_draft_moves],
-            cancel=True
-        )
-        draft_moves.unlink()
+        if moves:
+            moves_sudo = self.sudo().account_move_ids
+            draft_moves_sudo = moves_sudo.filtered(lambda m: m.state == 'draft')
+            non_draft_moves_sudo = moves_sudo - draft_moves_sudo
+            non_draft_moves_sudo._reverse_moves(
+                default_values_list=[{'invoice_date': fields.Date.context_today(move), 'ref': False} for move in non_draft_moves_sudo],
+                cancel=True
+            )
+            draft_moves_sudo.unlink()
 
     def _prepare_bills_vals(self):
         self.ensure_one()
+        move_vals = self._prepare_move_vals()
+        if self.employee_id.sudo().bank_account_id:
+            move_vals['partner_bank_id'] = self.employee_id.sudo().bank_account_id.id
         return {
-            **self._prepare_move_vals(),
+            **move_vals,
             'invoice_date': self.accounting_date or fields.Date.context_today(self),
             'journal_id': self.journal_id.id,
             'ref': self.name,
             'move_type': 'in_invoice',
             'partner_id': self.employee_id.sudo().work_contact_id.id,
+            'commercial_partner_id': self.employee_id.user_partner_id.id,
             'currency_id': self.currency_id.id,
             'line_ids': [Command.create(expense._prepare_move_lines_vals()) for expense in self.expense_line_ids],
             'attachment_ids': [
@@ -721,13 +749,13 @@ class HrExpenseSheet(models.Model):
             # force the name to the default value, to avoid an eventual 'default_name' in the context
             # to set it to '' which cause no number to be given to the account.move when posted.
             'name': '/',
-            'date': self.accounting_date or max(self.expense_line_ids.mapped('date')) or fields.Date.context_today(self),
+            'date': self.accounting_date or max(self.expense_line_ids.filtered(lambda exp: exp.date).mapped('date'), default=fields.Date.context_today(self)),
             'expense_sheet_id': self.id,
         }
 
     def _validate_analytic_distribution(self):
         for line in self.expense_line_ids:
-            line._validate_distribution(account=line.account_id.id, business_domain='expense', company_id=line.company_id.id)
+            line._validate_distribution(account=line.account_id.id, product=line.product_id.id, business_domain='expense', company_id=line.company_id.id)
 
     def _get_responsible_for_approval(self):
         if self.user_id:
@@ -743,7 +771,7 @@ class HrExpenseSheet(models.Model):
         if self.payment_mode == 'company_account':
             journal = self.payment_method_line_id.journal_id
             account_dest = (
-                journal.outbound_payment_method_line_ids[:1].payment_account_id
+                self.payment_method_line_id.payment_account_id
                 or journal.company_id.account_journal_payment_credit_account_id
             )
         else:

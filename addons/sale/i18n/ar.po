@@ -4,16 +4,16 @@
 # 
 # Translators:
 # Martin Trigaux, 2023
-# Wil Odoo, 2024
-# Malaz Abuidris <msea@odoo.com>, 2024
+# Malaz Abuidris <msea@odoo.com>, 2025
+# Wil Odoo, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:32+0000\n"
+"POT-Creation-Date: 2025-06-13 00:53+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2024\n"
+"Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -730,23 +730,28 @@ msgstr "<i class=\"fa fa-fw fa-check\" role=\"img\" aria-label=\"Done\" title=\"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
-msgid "<i class=\"fa fa-fw fa-check\"/> <b>Authorized</b>"
-msgstr "<i class=\"fa fa-fw fa-check\"/> <b>مصرح له</b>"
+msgid "<i class=\"fa fa-fw fa-check\"/> Authorized"
+msgstr "<i class=\"fa fa-fw fa-check\"/> مصرح له "
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
-msgid "<i class=\"fa fa-fw fa-check\"/> <b>Paid</b>"
-msgstr "<i class=\"fa fa-fw fa-check\"/> <b>تم الدفع</b> "
+msgid "<i class=\"fa fa-fw fa-check\"/> Paid"
+msgstr "<i class=\"fa fa-fw fa-check\"/> تم الدفع "
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
-msgid "<i class=\"fa fa-fw fa-clock-o\"/> <b>Waiting Payment</b>"
-msgstr "<i class=\"fa fa-fw fa-clock-o\"/> <b>بانتظار الدفع</b> "
+msgid "<i class=\"fa fa-fw fa-check\"/> Reversed"
+msgstr "<i class=\"fa fa-fw fa-check\"/> معكوس "
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_quotations
 msgid "<i class=\"fa fa-fw fa-clock-o\"/> Expired"
 msgstr "<i class=\"fa fa-fw fa-clock-o\"/> منتهي الصلاحية"
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
+msgid "<i class=\"fa fa-fw fa-clock-o\"/> Waiting Payment"
+msgstr "<i class=\"fa fa-fw fa-clock-o\"/> بانتظار الدفع "
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.utm_campaign_view_kanban
@@ -795,11 +800,6 @@ msgstr "<small class=\"text-muted\">جهة اتصالك</small> "
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "<small><b class=\"text-muted\">Your advantage</b></small>"
 msgstr "<small><b class=\"text-muted\">مزاياك</b></small>"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
-msgid "<small><b>This offer expires on</b></small>"
-msgstr "<small><b>تنتهي صلاحية هذا العرض في</b></small> "
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_orders
@@ -886,8 +886,8 @@ msgstr "<span>الضرائب</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
-msgid "<span>Visible at</span>"
-msgstr "<span>مرئي في</span> "
+msgid "<span>Visibility</span>"
+msgstr "<span>الظهور</span> "
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -1158,15 +1158,9 @@ msgid ""
 "e.g. this option can be useful to share Product description files.\n"
 "Confirmed order: the document will be sent to and accessible by customers.\n"
 "e.g. this option can be useful to share User Manual or digital content bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation between the header pages and the quote table. "
+"Inside quote: The document will be included in the pdf of the quotation \n"
+"and sale order between the header pages and the quote table. "
 msgstr ""
-"يسمح لك بمشاركة المستند مع عملائك ضمن عملية بيع.\n"
-"اتركه فارغًا إذا كنت لا تريد مشاركة هذا المستند مع عميل المبيعات.\n"
-"عرض الأسعار: سيتم إرسال المستند إلى العملاء ويمكن الوصول إليهم في أي وقت.\n"
-"على سبيل المثال يمكن أن يكون هذا الخيار مفيدًا لمشاركة ملفات وصف المنتج.\n"
-"أمر مؤكد: سيتم إرسال الوثيقة إلى العملاء ويمكن الوصول إليها من قبلهم.\n"
-"على سبيل المثال يمكن أن يكون هذا الخيار مفيدًا لمشاركة دليل المستخدم أو المحتوى الرقمي الذي تم شراؤه عبر التجارة الإلكترونية.\n"
-"الاقتباس الداخلي: سيتم تضمين المستند في ملف pdf للاقتباس بين صفحات الرأس وجدول الاقتباس. "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__amount_paid
@@ -1561,8 +1555,10 @@ msgstr "أكمل بيانات شركتك"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with DHL"
-msgstr "حساب تكاليف الشحن والشحن عبر DHL"
+msgid ""
+"Compute shipping costs and ship with DHL<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -1571,8 +1567,10 @@ msgstr "حساب تكاليف الشحن والشحن من خلال Easypost"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with FedEx"
-msgstr "حساب تكاليف الشحن والشحن عبر FedEx"
+msgid ""
+"Compute shipping costs and ship with FedEx<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -1586,13 +1584,17 @@ msgstr "حساب تكاليف الشحن والشحن عبر Shiprocket "
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with UPS"
-msgstr "حساب تكاليف الشحن والشحن عبر UPS"
+msgid ""
+"Compute shipping costs and ship with UPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with USPS"
-msgstr "حساب تكاليف الشحن والشحن عبر USPS"
+msgid ""
+"Compute shipping costs and ship with USPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -1878,6 +1880,11 @@ msgid "Customize your quotes and orders."
 msgstr "قم بتخصيص عروض أسعارك وأوامرك. "
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+msgid "DHL Connector"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_dhl
 msgid "DHL Express Connector"
 msgstr "موصل شحن DHL السريع "
@@ -2004,7 +2011,7 @@ msgstr "إيداع "
 #: model:ir.model.fields,field_description:sale.field_res_company__sale_down_payment_product_id
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__deposit_default_product_id
 msgid "Deposit Product"
-msgstr "منتج الإيداع "
+msgstr "منتج التأمين "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__name
@@ -2119,6 +2126,11 @@ msgid "Display Type"
 msgstr "نوع العرض"
 
 #. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__distribution_analytic_account_ids
+msgid "Distribution Analytic Account"
+msgstr "حساب التوزيع التحليلي "
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Documentation"
 msgstr "التوثيق"
@@ -2192,6 +2204,13 @@ msgstr "دفعة مقدّمة (نسبة)"
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "Down payment <br/>"
 msgstr "الدفعة المقدمة <br/>"
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/wizard/sale_make_invoice_advance.py:0
+#, python-format
+msgid "Down payment invoice"
+msgstr "فاتورة الدفعة المقدمة "
 
 #. module: sale
 #. odoo-python
@@ -2290,6 +2309,7 @@ msgstr "بند إضافي مع %s "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_fedex
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "FedEx Connector"
 msgstr "موصل FedEx"
 
@@ -2664,10 +2684,9 @@ msgstr "المفوتر هذا الشهر"
 #: model:ir.actions.act_window,name:sale.action_invoice_salesteams
 #: model:ir.model.fields,field_description:sale.field_sale_order__invoice_ids
 #: model_terms:ir.ui.view,arch_db:sale.crm_team_view_kanban_dashboard
-#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Invoices"
-msgstr "الفواتير"
+msgstr "فواتير العملاء "
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_account_invoice_report_salesteam
@@ -2784,6 +2803,11 @@ msgstr "عنصر اليومية"
 #: model:ir.model.fields,field_description:sale.field_sale_order_cancel__lang
 msgid "Language"
 msgstr "اللغة"
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
+msgid "Last Invoices"
+msgstr "الفواتير الأخيرة "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__write_uid
@@ -3310,11 +3334,6 @@ msgid "Order Date: Last 365 Days"
 msgstr "تاريخ الطلب: آخر 365 يوم "
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
-msgid "Order Detail"
-msgstr "تفاصيل الطلب "
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__order_line
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Order Lines"
@@ -3578,7 +3597,7 @@ msgstr "قوائم الأسعار"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Pricing"
-msgstr "التسعير"
+msgstr "الأسعار "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__group_proforma_sales
@@ -3794,7 +3813,6 @@ msgstr "تاريخ عرض السعر"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "Quotation Date:"
 msgstr "تاريخ عرض السعر: "
 
@@ -4105,14 +4123,14 @@ msgid "Sales Analysis"
 msgstr "تحليل المبيعات"
 
 #. module: sale
-#: model:ir.actions.act_window,name:sale.action_order_report_customers
-msgid "Sales Analysis By Customers"
-msgstr "تحليل المبيعات حسب العملاء "
-
-#. module: sale
 #: model:ir.actions.act_window,name:sale.action_order_report_salesperson
 msgid "Sales Analysis By Salespersons"
 msgstr "تحليل المبيعات حسب مندوبي المبيعات "
+
+#. module: sale
+#: model:ir.actions.act_window,name:sale.action_order_report_customers
+msgid "Sales Analysis Per Customers"
+msgstr "تحليل المبيعات لكل عميل "
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_order_report_products
@@ -4198,7 +4216,6 @@ msgstr "أوامر البيع"
 #: model:ir.ui.menu,name:sale.menu_sales_config
 #: model_terms:ir.ui.view,arch_db:sale.crm_team_view_kanban_dashboard
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_home_menu_sale
-#: model_terms:ir.ui.view,arch_db:sale.portal_my_home_sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_tree
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_view_search_inherit_quotation
 #: model_terms:ir.ui.view,arch_db:sale.view_order_product_search
@@ -4644,6 +4661,11 @@ msgid "Sum of Untaxed Total"
 msgstr "إجمالي المجموع غير شامل الضريبة "
 
 #. module: sale
+#: model:ir.model,name:sale.model_ir_config_parameter
+msgid "System Parameter"
+msgstr "معيار النظام "
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__tag_ids
 #: model:ir.ui.menu,name:sale.menu_tag_config
 msgid "Tags"
@@ -4827,7 +4849,7 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_advance_payment_inv__fixed_amount
 msgid "The fixed amount to be invoiced in advance."
-msgstr "المبلغ الثابت لفوترته مسبقاً. "
+msgstr "المبلغ الثابت لفوترته مقدماً. "
 
 #. module: sale
 #. odoo-python
@@ -4841,12 +4863,12 @@ msgstr "الأوامر التالية ليست في حالة تستدعي الت
 #: code:addons/sale/models/product_template.py:0
 #, python-format
 msgid ""
-"The following products cannot be restricted to the company %s because they have already been used in quotations or sales orders in another company:\n"
-"%s\n"
+"The following products cannot be restricted to the company %(company)s because they have already been used in quotations or sales orders in another company:\n"
+"%(used_products)s\n"
 "You can archive these products and recreate them with your company restriction instead, or leave them as shared product."
 msgstr ""
-"لا يمكن تقييد المنتجات التالية للشركة %s لأنه قد تم استخدامها بالفعل في عروض أسعار في شركة أخرى: \n"
-"%s\n"
+"لا يمكن تقييد المنتجات التالية للشركة %(company)s لأنه قد تم استخدامها بالفعل في عروض أسعار في شركة أخرى: \n"
+"%(used_products)s\n"
 "بإمكانك أرشفة تلك المنتجات لإعادة إنشائها بضوابط شركتك، أو اتركها كمنتجات مشتركة. "
 
 #. module: sale
@@ -4925,6 +4947,13 @@ msgstr "النسبة المئوية للمبلغ المطلوب دفعه لتأ�
 
 #. module: sale
 #. odoo-python
+#: code:addons/sale/models/product_template.py:0
+#, python-format
+msgid "The product (%s) has incompatible values: %s"
+msgstr "المنتج (%s) به قيم غير متوافقة: %s "
+
+#. module: sale
+#. odoo-python
 #: code:addons/sale/wizard/sale_make_invoice_advance.py:0
 #, python-format
 msgid ""
@@ -4963,11 +4992,6 @@ msgid "The value of the down payment amount must be positive."
 msgstr "يجب أن تكون قيمة مبلغ الدفعة المقدّمة قيمة موجبة."
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.portal_my_orders
-msgid "There are currently no orders for your account."
-msgstr "لا توجد طلبات حاليًا بحسابك."
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_quotations
 msgid "There are currently no quotations for your account."
 msgstr "لا توجد عروض أسعار حاليًا بحسابك."
@@ -4981,6 +5005,18 @@ msgstr "لا توجد أوامر بيع في حسابك حالياً. "
 #: model_terms:ir.ui.view,arch_db:sale.view_sale_advance_payment_inv
 msgid "There are existing"
 msgstr "توجد "
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/wizard/sale_order_discount.py:0
+#, python-format
+msgid ""
+"There does not seem to be any discount product configured for this company "
+"yet. You can either use a per-line discount, or ask an administrator to "
+"grant the discount the first time."
+msgstr ""
+"يبدو أنه لا يوجد أي منتج خصم تمت تهيئته لهذه الشركة حتى الآن. يمكنك إما "
+"استخدام خصم لكل بند أو يمكنك أن تطلب من المسؤول منح الخصم في المرة الأولى. "
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -5228,11 +5264,13 @@ msgstr "اكتب لإيجاد منتج... "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_ups
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "UPS Connector"
 msgstr "موصل UPS"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_usps
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "USPS Connector"
 msgstr "موصل USPS"
 
@@ -5372,14 +5410,6 @@ msgstr "عرض التفاصيل "
 #. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
-#, python-format
-msgid "View Order"
-msgstr "عرض الطلب "
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-#: code:addons/sale/models/sale_order.py:0
 #: code:addons/sale/models/sale_order.py:0
 #, python-format
 msgid "View Quotation"
@@ -5398,7 +5428,7 @@ msgstr "إبطال المعاملة"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__volume
 msgid "Volume"
-msgstr "الكثافة "
+msgstr "الحجم "
 
 #. module: sale
 #. odoo-python
@@ -5415,6 +5445,7 @@ msgstr "تحذير"
 
 #. module: sale
 #. odoo-python
+#: code:addons/sale/models/product_template.py:0
 #: code:addons/sale/models/sale_order.py:0
 #: code:addons/sale/models/sale_order_line.py:0
 #, python-format
@@ -5498,6 +5529,13 @@ msgstr "لا يمكنك إلغاء أمر مقفل. يرجى إلغاء قفله
 
 #. module: sale
 #. odoo-python
+#: code:addons/sale/models/sale_order.py:0
+#, python-format
+msgid "You cannot change the pricelist of a confirmed order !"
+msgstr "لا يمكنك تغيير قائمة الأسعار لمنتج تم تأكيده بالفعل! "
+
+#. module: sale
+#. odoo-python
 #: code:addons/sale/models/product_product.py:0
 #: code:addons/sale/models/product_template.py:0
 #, python-format
@@ -5518,6 +5556,13 @@ msgstr ""
 "بند جديد بالنوع الصحيح. "
 
 #. module: sale
+#. odoo-python
+#: code:addons/sale/models/sale_order_line.py:0
+#, python-format
+msgid "You cannot modify the product of this order line."
+msgstr "لا يمكنك تعديل المنتج الموجود في بند الطلب هذا. "
+
+#. module: sale
 #: model:ir.model.constraint,message:sale.constraint_res_company_check_quotation_validity_days
 msgid ""
 "You cannot set a negative number for the default quotation validity. Leave "
@@ -5536,6 +5581,7 @@ msgstr ""
 "                سواءً كان منتجاً قابلاً للتخزين أو استهلاكي أو خدمة. "
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.portal_my_home_sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_orders
 msgid "Your Orders"
 msgstr "طلباتك "

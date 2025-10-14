@@ -55,6 +55,7 @@ const DEFAULT_FIELD_VALUES = {
     selection: false,
     reference: false,
     properties: [],
+    json: false,
 };
 
 // -----------------------------------------------------------------------------
@@ -106,14 +107,14 @@ function makeLogger(prefix, title) {
     return { request, response };
 }
 
-export function makeServerError({ code, context, description, message, subType, type } = {}) {
+export function makeServerError({ code, context, description, message, subType, type, args } = {}) {
     return makeErrorFromResponse({
         code: code || 200,
         message: message || "Odoo Server Error",
         data: {
             name: `odoo.exceptions.${type || "UserError"}`,
             debug: "traceback",
-            arguments: [],
+            arguments: args || [],
             context: context || {},
             subType,
             message: description,
@@ -1049,9 +1050,13 @@ export class MockServer {
                         if (func === "array_agg") {
                             group[name] = records.map((r) => r[fieldName]);
                         } else {
-                            group[name] = 0;
-                            for (const r of records) {
-                                group[name] += r[fieldName];
+                            if (!records.length) {
+                                group[name] = false;
+                            } else {
+                                group[name] = 0;
+                                for (const r of records) {
+                                    group[name] += r[fieldName];
+                                }
                             }
                         }
                         break;
@@ -1127,7 +1132,7 @@ export class MockServer {
         }
 
         if (!groupBy.length) {
-            const group = { __count: records.length };
+            const group = { __count: records.length, __domain: kwargs.domain };
             aggregateFields(group, records);
             return [group];
         }
@@ -1326,6 +1331,9 @@ export class MockServer {
         for (const group of groups) {
             const records = this.getRecords(modelName, group.__domain || []);
             let groupByValue = group[groupBy]; // always technical value here
+            if (Array.isArray(groupByValue)) {
+                groupByValue = groupByValue[1];
+            }
 
             // special case for bool values: rpc call response with capitalized strings
             if (!(groupByValue in data)) {

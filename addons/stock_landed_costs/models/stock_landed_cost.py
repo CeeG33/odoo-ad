@@ -131,20 +131,10 @@ class StockLandedCost(models.Model):
                 linked_layer = line.move_id.stock_valuation_layer_ids[:1]
 
                 # Prorate the value at what's still in stock
-                cost_to_add = (remaining_qty / line.move_id.quantity) * line.additional_landed_cost
+                move_qty = line.move_id.product_uom._compute_quantity(line.move_id.quantity, line.move_id.product_id.uom_id)
+                cost_to_add = (remaining_qty / move_qty) * line.additional_landed_cost
                 if not cost.company_id.currency_id.is_zero(cost_to_add):
-                    valuation_layer = self.env['stock.valuation.layer'].create({
-                        'value': cost_to_add,
-                        'unit_cost': 0,
-                        'quantity': 0,
-                        'remaining_qty': 0,
-                        'stock_valuation_layer_id': linked_layer.id,
-                        'description': cost.name,
-                        'stock_move_id': line.move_id.id,
-                        'product_id': line.move_id.product_id.id,
-                        'stock_landed_cost_id': cost.id,
-                        'company_id': cost.company_id.id,
-                    })
+                    valuation_layer = line._create_in_landed_costs_svl(cost_to_add, linked_layer)
                     linked_layer.remaining_value += cost_to_add
                     valuation_layer_ids.append(valuation_layer.id)
                 # Update the AVCO/FIFO
@@ -164,10 +154,10 @@ class StockLandedCost(models.Model):
                 move_vals['line_ids'] += line._create_accounting_entries(move, qty_out)
 
             # batch standard price computation avoid recompute quantity_svl at each iteration
-            products = self.env['product.product'].browse(p.id for p in cost_to_add_byproduct.keys())
+            products = self.env['product.product'].browse(p.id for p in cost_to_add_byproduct.keys()).with_company(cost.company_id)
             for product in products:  # iterate on recordset to prefetch efficiently quantity_svl
                 if not float_is_zero(product.quantity_svl, precision_rounding=product.uom_id.rounding):
-                    product.with_company(cost.company_id).sudo().with_context(disable_auto_svl=True).standard_price += cost_to_add_byproduct[product] / product.quantity_svl
+                    product.sudo().with_context(disable_auto_svl=True).standard_price += cost_to_add_byproduct[product] / product.quantity_svl
 
             move_vals['stock_valuation_layer_ids'] = [(6, None, valuation_layer_ids)]
             # We will only create the accounting entry when there are defined lines (the lines will be those linked to products of real_time valuation category).
@@ -188,7 +178,8 @@ class StockLandedCost(models.Model):
                 for product in cost.cost_lines.product_id:
                     accounts = product.product_tmpl_id.get_product_accounts()
                     input_account = accounts['stock_input']
-                    all_amls.filtered(lambda aml: aml.account_id == input_account and not aml.reconciled).reconcile()
+                    all_amls.filtered(lambda aml: aml.account_id == input_account and not aml.reconciled\
+                         and not aml.display_type in ('line_section', 'line_note')).reconcile()
 
     def get_valuation_lines(self):
         self.ensure_one()
@@ -196,15 +187,16 @@ class StockLandedCost(models.Model):
 
         for move in self._get_targeted_move_ids():
             # it doesn't make sense to make a landed cost for a product that isn't set as being valuated in real time at real cost
-            if move.product_id.cost_method not in ('fifo', 'average') or move.state == 'cancel' or not move.product_qty:
+            if move.product_id.cost_method not in ('fifo', 'average') or move.state == 'cancel' or not move.quantity:
                 continue
+            qty = move.product_uom._compute_quantity(move.quantity, move.product_id.uom_id)
             vals = {
                 'product_id': move.product_id.id,
                 'move_id': move.id,
-                'quantity': move.product_qty,
+                'quantity': qty,
                 'former_cost': sum(move.stock_valuation_layer_ids.mapped('value')),
-                'weight': move.product_id.weight * move.product_qty,
-                'volume': move.product_id.volume * move.product_qty
+                'weight': move.product_id.weight * qty,
+                'volume': move.product_id.volume * qty
             }
             lines.append(vals)
 
@@ -219,6 +211,7 @@ class StockLandedCost(models.Model):
 
         towrite_dict = {}
         for cost in self.filtered(lambda cost: cost._get_targeted_move_ids()):
+            cost = cost.with_company(cost.company_id)
             rounding = cost.currency_id.rounding
             total_qty = 0.0
             total_cost = 0.0
@@ -263,15 +256,16 @@ class StockLandedCost(models.Model):
                             value = (line.price_unit / total_line)
 
                         if rounding:
-                            value = tools.float_round(value, precision_rounding=rounding, rounding_method='UP')
-                            fnc = min if line.price_unit > 0 else max
-                            value = fnc(value, line.price_unit - value_split)
+                            value = tools.float_round(value, precision_rounding=rounding, rounding_method='HALF-UP')
                             value_split += value
 
                         if valuation.id not in towrite_dict:
                             towrite_dict[valuation.id] = value
                         else:
                             towrite_dict[valuation.id] += value
+                rounding_diff = cost.currency_id.round(line.price_unit - value_split)
+                if not cost.currency_id.is_zero(rounding_diff):
+                    towrite_dict[max(towrite_dict.keys())] += rounding_diff
         for key, value in towrite_dict.items():
             AdjustementLines.browse(key).write({'additional_landed_cost': value})
         return True
@@ -296,16 +290,15 @@ class StockLandedCost(models.Model):
     def _check_sum(self):
         """ Check if each cost line its valuation lines sum to the correct amount
         and if the overall total amount is correct also """
-        prec_digits = self.env.company.currency_id.decimal_places
         for landed_cost in self:
             total_amount = sum(landed_cost.valuation_adjustment_lines.mapped('additional_landed_cost'))
-            if not tools.float_is_zero(total_amount - landed_cost.amount_total, precision_digits=prec_digits):
+            if not landed_cost.currency_id.is_zero(total_amount - landed_cost.amount_total):
                 return False
 
             val_to_cost_lines = defaultdict(lambda: 0.0)
             for val_line in landed_cost.valuation_adjustment_lines:
                 val_to_cost_lines[val_line.cost_line_id] += val_line.additional_landed_cost
-            if any(not tools.float_is_zero(cost_line.price_unit - val_amount, precision_digits=prec_digits)
+            if any(not landed_cost.currency_id.is_zero(cost_line.price_unit - val_amount)
                    for cost_line, val_amount in val_to_cost_lines.items()):
                 return False
         return True
@@ -469,3 +462,24 @@ class AdjustmentLines(models.Model):
                 AccountMoveLine.append([0, 0, credit_line])
 
         return AccountMoveLine
+
+    def _prepare_in_landed_costs_svl_values(self, cost_to_add, linked_layer):
+        self.ensure_one()
+        linked_layer.ensure_one()
+        cost = self.cost_id
+        return {
+            'value': cost_to_add,
+            'unit_cost': 0,
+            'quantity': 0,
+            'remaining_qty': 0,
+            'stock_valuation_layer_id': linked_layer.id,
+            'description': cost.name,
+            'stock_move_id': self.move_id.id,
+            'product_id': self.move_id.product_id.id,
+            'stock_landed_cost_id': cost.id,
+            'company_id': cost.company_id.id,
+        }
+
+    def _create_in_landed_costs_svl(self, cost_to_add, linked_layer):
+        values = self._prepare_in_landed_costs_svl_values(cost_to_add, linked_layer)
+        return self.env['stock.valuation.layer'].create(values)

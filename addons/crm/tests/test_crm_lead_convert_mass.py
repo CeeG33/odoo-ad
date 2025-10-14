@@ -42,7 +42,7 @@ class TestLeadConvertMass(crm_common.TestLeadConvertMassCommon):
         with self.assertQueryCount(user_sales_manager=0):
             test_leads = self.env['crm.lead'].browse(test_leads.ids)
 
-        with self.assertQueryCount(user_sales_manager=583):  # crm 543 / com 545 / ent 583
+        with self.assertQueryCount(user_sales_manager=584):  # crm 543 / com 545 / ent 584
             test_leads._handle_salesmen_assignment(user_ids=user_ids, team_id=team_id)
 
         self.assertEqual(test_leads.team_id, self.sales_team_convert)
@@ -167,7 +167,7 @@ class TestLeadConvertMass(crm_common.TestLeadConvertMassCommon):
         user_ids = self.assign_users.ids
 
         # randomness: at least 1 query
-        with self.assertQueryCount(user_sales_manager=1800):  # crm 1503 / com 1790 / ent 1800
+        with self.assertQueryCount(user_sales_manager=1802):  # crm 1481 / com 1794 / ent 1802
             mass_convert = self.env['crm.lead2opportunity.partner.mass'].with_context({
                 'active_model': 'crm.lead',
                 'active_ids': test_leads.ids,
@@ -211,3 +211,20 @@ class TestLeadConvertMass(crm_common.TestLeadConvertMassCommon):
             self.assertEqual(lead.type, 'opportunity')
             assigned_user = self.assign_users[idx % len(self.assign_users)]
             self.assertEqual(lead.user_id, assigned_user)
+
+    @users('user_sales_manager')
+    def test_mass_convert_with_original_and_duplicate_selected(self):
+        _customer, lead_1_dups = self._create_duplicates(self.lead_1, create_opp=False)
+
+        mass_convert = self.env['crm.lead2opportunity.partner.mass'].with_context({
+            'active_model': 'crm.lead',
+            'active_ids': (self.lead_1 + lead_1_dups).ids,
+        }).create({
+            'deduplicate': True,
+        })
+
+        mass_convert.action_mass_convert()
+
+        remaining_leads = (self.lead_1 + lead_1_dups).exists()
+        self.assertEqual(len(remaining_leads), 1)
+        self.assertEqual(remaining_leads.type, 'opportunity')

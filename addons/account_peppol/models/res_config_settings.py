@@ -55,6 +55,12 @@ class ResConfigSettings(models.TransientModel):
     # -------------------------------------------------------------------------
 
     def _call_peppol_proxy(self, endpoint, params=None, edi_user=None):
+        errors = {
+            'code_incorrect': _('The verification code is not correct'),
+            'code_expired': _('This verification code has expired. Please request a new one.'),
+            'too_many_attempts': _('Too many attempts to request an SMS code. Please try again later.'),
+        }
+
         if not edi_user:
             edi_user = self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'peppol')
 
@@ -68,8 +74,19 @@ class ResConfigSettings(models.TransientModel):
             raise UserError(e.message)
 
         if 'error' in response:
-            raise UserError(response['error'].get('message') or response['error']['data']['message'])
+            error_code = response['error'].get('code')
+            error_message = response['error'].get('message') or response['error'].get('data', {}).get('message')
+            raise UserError(errors.get(error_code) or error_message or _('Connection error, please try again later.'))
         return response
+
+    # -------------------------------------------------------------------------
+    # ONCHANGE METHODS
+    # -------------------------------------------------------------------------
+
+    @api.onchange('account_peppol_endpoint')
+    def _onchange_account_peppol_endpoint(self):
+        if self.account_peppol_endpoint:
+            self.account_peppol_endpoint = ''.join(char for char in self.account_peppol_endpoint if char.isalnum())
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -82,12 +99,8 @@ class ResConfigSettings(models.TransientModel):
 
     @api.depends('is_account_peppol_eligible', 'account_peppol_edi_user')
     def _compute_account_peppol_edi_mode(self):
-        edi_mode = self.env['ir.config_parameter'].sudo().get_param('account_peppol.edi.mode')
         for config in self:
-            if config.account_peppol_edi_user:
-                config.account_peppol_edi_mode = config.account_peppol_edi_user.edi_mode
-            else:
-                config.account_peppol_edi_mode = edi_mode or 'prod'
+            config.account_peppol_edi_mode = config.company_id._get_peppol_edi_mode()
 
     def _inverse_account_peppol_edi_mode(self):
         for config in self:
@@ -131,12 +144,33 @@ class ResConfigSettings(models.TransientModel):
                 _('Cannot register a user with a %s application', self.account_peppol_proxy_state))
 
         if not self.account_peppol_phone_number:
-            raise ValidationError(_("Please enter a phone number to verify your application."))
+            raise ValidationError(_("Please enter a mobile number to verify your application."))
         if not self.account_peppol_contact_email:
             raise ValidationError(_("Please enter a primary contact email to verify your application."))
 
         company = self.company_id
         edi_proxy_client = self.env['account_edi_proxy_client.user']
+        edi_identification = edi_proxy_client._get_proxy_identification(company, 'peppol')
+
+        recovered_edi_users = self.env['account_edi_proxy_client.user']._try_recover_peppol_proxy_users(company, peppol_identifier=edi_identification)
+        if recovered_edi_users:
+            return
+
+        company.partner_id._check_peppol_eas()
+
+        if (
+            (participant_info := company.partner_id._check_peppol_participant_exists(edi_identification, check_company=True))
+            and not self.account_peppol_migration_key
+        ):
+            error_msg = _(
+                "A participant with these details has already been registered on the network. "
+                "If you have previously registered to a Peppol service, please deregister."
+            )
+
+            if isinstance(participant_info, str):
+                error_msg += _("The Peppol service that is used is likely to be %s.", participant_info)
+            raise UserError(error_msg)
+
         edi_user = edi_proxy_client.sudo()._register_proxy_user(company, 'peppol', self.account_peppol_edi_mode)
         self.account_peppol_proxy_state = 'not_verified'
 
@@ -181,7 +215,7 @@ class ResConfigSettings(models.TransientModel):
         self.ensure_one()
 
         if not self.account_peppol_contact_email or not self.account_peppol_phone_number:
-            raise ValidationError(_("Contact email and phone number are required."))
+            raise ValidationError(_("Contact email and mobile number are required."))
 
         params = {
             'update_data': {
@@ -227,6 +261,8 @@ class ResConfigSettings(models.TransientModel):
         )
         self.account_peppol_proxy_state = 'pending'
         self.account_peppol_verification_code = False
+        # in case they have already been activated on the IAP side
+        self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger()
 
     def button_cancel_peppol_registration(self):
         """
@@ -264,15 +300,7 @@ class ResConfigSettings(models.TransientModel):
         The migration key is then displayed in Peppol settings.
         Currently, reopening after migrating away is not supported.
         """
-        self.ensure_one()
-
-        if self.account_peppol_proxy_state != 'active':
-            raise UserError(_(
-                "Can't migrate registration with this status: %s", self.account_peppol_proxy_state
-            ))
-
-        response = self._call_peppol_proxy(endpoint='/api/peppol/1/migrate_peppol_registration')
-        self.account_peppol_migration_key = response['migration_key']
+        raise UserError(_("This feature is deprecated. Contact odoo support if you need a migration key."))
 
     @handle_demo
     def button_deregister_peppol_participant(self):

@@ -17,8 +17,6 @@ class AccountChartTemplate(models.AbstractModel):
             'property_stock_account_input_categ_id': '1450',
             'property_stock_account_output_categ_id': '1250',
             'property_stock_valuation_account_id': '3200',
-            'property_tax_payable_account_id': 'pay',
-            'property_tax_receivable_account_id': 'pay',
         }
 
     @template('nl', 'res.company')
@@ -37,5 +35,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_journal_early_pay_discount_gain_account_id': '8065',
                 'account_sale_tax_id': 'btw_21',
                 'account_purchase_tax_id': 'btw_21_buy',
+                'deferred_expense_account_id': '1205',
+                'deferred_revenue_account_id': '1405',
             },
         }

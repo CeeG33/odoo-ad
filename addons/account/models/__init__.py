@@ -30,7 +30,9 @@ from . import company
 from . import res_config_settings
 from . import account_cash_rounding
 from . import account_incoterms
+from . import decimal_precision
 from . import digest
+from . import kpi_provider
 from . import res_users
 from . import ir_attachment
 from . import ir_actions_report

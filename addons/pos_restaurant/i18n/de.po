@@ -3,16 +3,16 @@
 # 	* pos_restaurant
 # 
 # Translators:
-# Wil Odoo, 2024
-# Larissa Manderfeld, 2024
+# Wil Odoo, 2025
+# Larissa Manderfeld, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:30+0000\n"
+"POT-Creation-Date: 2025-02-10 10:33+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Larissa Manderfeld, 2024\n"
+"Last-Translator: Larissa Manderfeld, 2025\n"
 "Language-Team: German (https://app.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -129,6 +129,7 @@ msgstr "Rechnungsteilung erlauben"
 
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_pos_config__iface_orderline_notes
+#: model:ir.model.fields,help:pos_restaurant.field_res_config_settings__pos_iface_orderline_notes
 msgid "Allow custom Internal notes on Orderlines."
 msgstr "Erlauben Sie benutzerdefinierte interne Notizen auf Bestellzeilen."
 
@@ -248,9 +249,16 @@ msgid "Blue"
 msgstr "Blau"
 
 #. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/app/product_screen/product_screen.xml:0
+#, python-format
+msgid "Book table"
+msgstr "Tisch buchen"
+
+#. module: pos_restaurant
 #: model:product.template,name:pos_restaurant.burger_drink_combo_product_template
 msgid "Burger Menu Combo"
-msgstr "Burger-Menü-Kombination"
+msgstr "Burger-Menü-Kombi"
 
 #. module: pos_restaurant
 #. odoo-python
@@ -290,7 +298,7 @@ msgstr "Schließen"
 #: code:addons/pos_restaurant/static/src/overrides/components/payment_screen/payment_screen.xml:0
 #, python-format
 msgid "Close Tab"
-msgstr "Reiter schließen"
+msgstr "Abrechnen"
 
 #. module: pos_restaurant
 #: model:product.template,name:pos_restaurant.pos_food_club_product_template
@@ -428,7 +436,7 @@ msgstr "Raumname?"
 #: model:ir.actions.act_window,name:pos_restaurant.action_restaurant_floor_form
 #: model:ir.ui.menu,name:pos_restaurant.menu_restaurant_floor_all
 msgid "Floor Plans"
-msgstr "Lagepläne"
+msgstr "Raumpläne"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -560,6 +568,7 @@ msgstr "Vom Kellner hinzugefügte interne Notiz."
 
 #. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_config__iface_orderline_notes
+#: model:ir.model.fields,field_description:pos_restaurant.field_res_config_settings__pos_iface_orderline_notes
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
 msgid "Internal Notes"
 msgstr "Interne Notizen"
@@ -597,6 +606,14 @@ msgstr "Zuletzt aktualisiert am"
 #, python-format
 msgid "Light grey"
 msgstr "Hellgrau"
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/app/floor_screen/edit_bar.xml:0
+#: code:addons/pos_restaurant/static/src/app/floor_screen/edit_bar.xml:0
+#, python-format
+msgid "Loading"
+msgstr "Ladevorgang"
 
 #. module: pos_restaurant
 #: model:product.template,name:pos_restaurant.pos_food_maki_product_template
@@ -678,7 +695,7 @@ msgstr "Ups! Keine Räume verfügbar."
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.xml:0
 #, python-format
 msgid "Oops! No tables available."
-msgstr "Ups! Keine Tische verfügbar,"
+msgstr "Ups! Keine Tische verfügbar."
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -771,11 +788,6 @@ msgid "Point of Sales"
 msgstr "Kassensystem"
 
 #. module: pos_restaurant
-#: model:ir.model.fields,field_description:pos_restaurant.field_res_config_settings__pos_iface_orderline_notes
-msgid "Pos Iface Orderline Notes"
-msgstr "Kassensystem Iface Bestellungsnotizen"
-
-#. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_res_config_settings__pos_iface_printbill
 msgid "Pos Iface Printbill"
 msgstr "Kassensystem Iface Rechnungsdruck"
@@ -816,13 +828,6 @@ msgstr "Lila"
 #, python-format
 msgid "Red"
 msgstr "Rot"
-
-#. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/product_screen/product_screen.xml:0
-#, python-format
-msgid "Release table"
-msgstr "Tisch freigeben"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -1337,3 +1342,10 @@ msgstr "Änderungen"
 #, python-format
 msgid "items"
 msgstr "Artikel"
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/overrides/components/order_widget/order_widget.js:0
+#, python-format
+msgid "or book the table for later"
+msgstr "oder den Tisch für später buchen"

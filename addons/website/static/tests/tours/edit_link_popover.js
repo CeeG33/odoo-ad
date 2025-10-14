@@ -92,7 +92,7 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     // 2. Test links in navbar (website)
     {
         content: "Click navbar menu Home",
-        trigger: 'iframe #top_menu a:contains("Home")',
+        trigger: 'iframe .top_menu a:contains("Home")',
     },
     {
         content: "Popover should be shown (2)",
@@ -112,7 +112,7 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     {
         content: "Click on the Home menu again",
         extra_trigger: 'div:not(.o_loading_dummy) > #oe_snippets',
-        trigger: 'iframe #top_menu a:contains("Home")[href="/contactus"]',
+        trigger: 'iframe .top_menu a:contains("Home")[href="/contactus"]',
     },
     {
         content: "Popover should be shown with updated preview data (2)",
@@ -135,7 +135,7 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     // 3. Test other links (CTA in navbar & links in footer)
     {
         content: "Click CTA in navbar",
-        trigger: 'iframe #o_main_nav a.btn-primary[href="/contactus"]',
+        trigger: 'iframe .o_main_nav a.btn-primary[href="/contactus"]',
     },
     {
         content: "Popover should be shown (3)",
@@ -150,6 +150,15 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     {
         content: "Click 'Home' link in footer",
         trigger: 'iframe footer a[href="/"]',
+        run: function (actions) {
+            // Simulate a real click, as the current step does not properly set
+            // focus on the link.
+            actions.click();
+            const el = this.$anchor[0];
+            const sel = el.ownerDocument.getSelection();
+            sel.collapse(el.childNodes[1], 1);
+            el.focus();
+        },
     },
     {
         content: "Popover should be shown (4)",

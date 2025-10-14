@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_slides
-# 
+# * website_slides
+#
 # Translators:
 # Eric Antones <eantones@users.noreply.github.com>, 2023
 # ericrolo, 2023
@@ -11,7 +11,6 @@
 # Albert Parera, 2023
 # Sandra Franch <sandra.franch@upc.edu>, 2023
 # martioodo hola, 2023
-# Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2023
 # Cristian Cruz, 2023
 # CristianCruzParra, 2023
 # Carles Antoli <carlesantoli@hotmail.com>, 2023
@@ -19,30 +18,37 @@
 # Harcogourmet, 2023
 # Jonatan Gk, 2023
 # Arnau Ros, 2023
-# Josep Anton Belchi, 2023
 # marcescu, 2023
 # jabiri7, 2023
 # RGB Consulting <odoo@rgbconsulting.com>, 2023
-# Quim - eccit <quim@eccit.com>, 2023
-# M Palau <mpalau@tda.ad>, 2023
 # Martin Trigaux, 2023
 # Óscar Fonseca <tecnico@pyming.com>, 2023
 # Manel Fernandez Ramirez <manelfera@outlook.com>, 2023
 # Ivan Espinola, 2023
-# 
+# Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2024
+# M Palau <mpalau@tda.ad>, 2024
+# Braulio D. López Vázquez <bdl@odoo.com>, 2024
+# Quim - coopdevs <quim.rebull@coopdevs.org>, 2024
+# Josep Anton Belchi, 2025
+# Santiago Payà <santiagopim@gmail.com>, 2025
+# Noemi Pla, 2025
+# Wil Odoo, 2025
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:31+0000\n"
-"PO-Revision-Date: 2023-10-26 23:10+0000\n"
-"Last-Translator: Ivan Espinola, 2023\n"
-"Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
+"POT-Creation-Date: 2025-05-22 18:36+0000\n"
+"PO-Revision-Date: 2025-09-25 01:40+0000\n"
+"Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
+"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-17/"
+"website_slides/ca/>\n"
+"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ca\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__members_engaged_count
@@ -217,6 +223,13 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Hola:<br><br>\n"
+"        Estàs inscrit en un nou curs: <t t-out=\"object.channel_id.name or ''\">Fonaments de la jardineria</t>.\n"
+"    </p>\n"
+"</div>\n"
+"            "
 
 #. module: website_slides
 #: model:mail.template,body_html:website_slides.mail_template_slide_channel_invite
@@ -229,6 +242,13 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Hola:<br><br>\n"
+"        L'han convidat a consultar aquest curs: <t t-out=\"object.channel_id.name or ''\">Fonaments de la jardineria</t>.\n"
+"    </p>\n"
+"</div>\n"
+"            "
 
 #. module: website_slides
 #: model:mail.template,body_html:website_slides.mail_template_channel_completed
@@ -254,6 +274,26 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                        <p style=\"margin: 0px;\">Hola, <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>:</p><br>\n"
+"                        <p><b>Enhorabona!</b></p>\n"
+"                        <p>Ha completat el curs <b t-out=\"object.channel_id.name or ''\">Bàsics de jardineria</b></p>\n"
+"                        <p>Faci una ullada als altres cursos que hi ha disponibles.</p><br>\n"
+"\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a href=\"/slides/all\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">\n"
+"                                Explorar cursos\n"
+"                            </a>\n"
+"                        </div>\n"
+"                        Gaudeix d'aquest contingut exclusiu!\n"
+"                        <t t-if=\"object.channel_id.user_id.signature\">\n"
+"                            <br>\n"
+"                            <t t-out=\"object.channel_id.user_id.signature or ''\">--<br>Mitchell Admin</t>\n"
+"                        </t>\n"
+"                    </div>\n"
+"                </div>\n"
+"            "
 
 #. module: website_slides
 #: model:mail.template,body_html:website_slides.mail_template_channel_shared
@@ -279,6 +319,26 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                        Hola:<br><br>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> ha compartit el <strong t-out=\"object.name or ''\">document</strong> amb vostè!\n"
+"                        <div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"object.website_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" style=\"height:auto; width:150px; margin: 16px;\">\n"
+"                            </a>\n"
+"                        </div>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"object.website_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px;                                 text-decoration: none; color: #fff; border-radius: 5px;\">\n"
+"                                Visualitzar <strong t-out=\"object.name or ''\">document</strong></a>\n"
+"                        </div>\n"
+"                        <t t-if=\"user.signature\">\n"
+"                            <br>\n"
+"                            <t t-out=\"user.signature or ''\">--<br>Mitchell Admin</t>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: website_slides
 #: model:mail.template,body_html:website_slides.slide_template_shared
@@ -303,6 +363,25 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                        Hola:<br><br>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> ha compartit el <t t-out=\"object.slide_category or ''\">document</t> <strong t-out=\"object.name or ''\">Arbres</strong> amb vostè!\n"
+"                        <div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\">\n"
+"                            </a>\n"
+"                        </div>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">Visualitzar <strong t-out=\"object.name or ''\">Arbres</strong></a>\n"
+"                        </div>\n"
+"                        <t t-if=\"user.signature\">\n"
+"                            <br>\n"
+"                            <t t-out=\"user.signature or ''\">--<br>Mitchell Admin</t>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: website_slides
 #: model:mail.template,body_html:website_slides.slide_template_published
@@ -331,6 +410,29 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                        Hola:<br><br>\n"
+"                        Hi ha novetats al curs <strong t-out=\"object.channel_id.name or ''\">Arbres, fusta i jardins</strong> que vostè segueix:<br><br>\n"
+"                        <center><strong t-out=\"object.name or ''\">Arbres</strong></center>\n"
+"                        <t t-if=\"object.image_1024\">\n"
+"                            <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                                <a t-att-href=\"object.website_share_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\">\n"
+"                            </a>\n"
+"                        </div>\n"
+"                        </t>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"object.website_share_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">Visualitzar el contingut</a>\n"
+"                        </div>\n"
+"                        Gaudeix de contingut exclusiu!\n"
+"                        <t t-if=\"user.signature\">\n"
+"                            <br>\n"
+"                            <t t-out=\"user.signature or ''\">--<br>Mitchell Admin</t>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.user_profile_content
@@ -400,11 +502,9 @@ msgstr "<i class=\"fa fa-comments\"/> Comentaris ("
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid ""
-"<i class=\"fa fa-desktop me-2\"/>\n"
-"                <span class=\"d-none d-sm-inline-block\">Fullscreen</span>"
+"<i class=\"fa fa-desktop me-xl-2 my-1\"/>\n"
+"                <span class=\"d-none d-xl-inline-block\">Fullscreen</span>"
 msgstr ""
-"<i class=\"fa fa-desktop me-2\"/>\n"
-"                <span class=\"d-none d-sm-inline-block\">Pantalla completa</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_email
@@ -576,11 +676,9 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid ""
-"<i class=\"fa fa-share-alt me-2\"/>\n"
-"                <span class=\"d-none d-sm-inline-block\">Share</span>"
+"<i class=\"fa fa-share-alt me-xl-2 my-1\"/>\n"
+"                <span class=\"d-none d-xl-inline-block\">Share</span>"
 msgstr ""
-"<i class=\"fa fa-share-alt me-2\"/>\n"
-"                <span class=\"d-none d-sm-inline-block\">Comparteix</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
@@ -786,7 +884,7 @@ msgstr "<span class=\"text-500 mx-2\">•</span>"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 msgid "<span class=\"text-bg-danger\">Archived</span>"
-msgstr ""
+msgstr "<span class=\"text-bg-danger\">Arxivat</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
@@ -863,19 +961,13 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<span id=\"zoomout\" class=\"d-none d-sm-inline ms-2 me-2\" title=\"Zoom out\" aria-label=\"Zoom out\" role=\"button\">\n"
+"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-label=\"Zoom out\" role=\"button\">\n"
 "                                            <i class=\"fa fa-search-minus\"/>\n"
 "                                        </span>\n"
-"                                        <span id=\"zoomin\" class=\"d-none d-sm-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
+"                                        <span id=\"zoomin\" class=\"d-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
 "                                            <i class=\"fa fa-search-plus\"/>\n"
 "                                        </span>"
 msgstr ""
-"<span id=\"zoomout\" class=\"d-none d-sm-inline ms-2 me-2\" title=\"Zoom out\" aria-label=\"Zoom out\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-minus\"/>\n"
-"                                        </span>\n"
-"                                        <span id=\"zoomin\" class=\"d-none d-sm-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-plus\"/>\n"
-"                                        </span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
@@ -982,11 +1074,8 @@ msgstr "Una fruita"
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 #, python-format
 msgid ""
-"A good course has a structure. Pick a name for your first section and click "
-"<b>Save</b> to create it."
+"A good course has a structure. Pick a name for your first <b>Section</b>."
 msgstr ""
-"Un bon curs té una estructura. Triï un nom per a la seva primera secció i "
-"faci clic en <b>Guardar</b> per a crear-lo."
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_1_4
@@ -1240,7 +1329,12 @@ msgstr "Afegir un comentari en aquesta resposta"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
 msgid "Add contacts..."
-msgstr ""
+msgstr "Afegeix contactes..."
+
+#. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
+msgid "Add quiz"
+msgstr "Afegeix qüestionari"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -1276,7 +1370,7 @@ msgstr "Avançat"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__channel_partner_all_ids
 msgid "All Attendees Information"
-msgstr ""
+msgstr "Informació de tots els assistents"
 
 #. module: website_slides
 #: model:ir.actions.act_window,name:website_slides.slide_channel_action_overview
@@ -1289,14 +1383,14 @@ msgstr "Tots els cursos"
 #: code:addons/website_slides/static/src/js/public/components/slide_unsubscribe_dialog/slide_unsubscribe_dialog.xml:0
 #, python-format
 msgid "All progress will be lost until you rejoin this course."
-msgstr ""
+msgstr "Es perdrà tot el progrès fins que us torneu a unir a aquest curs."
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/slides_course_quiz.js:0
 #, python-format
 msgid "All questions must be answered!"
-msgstr ""
+msgstr "S'han de respondre totes les preguntes."
 
 #. module: website_slides
 #. odoo-python
@@ -1306,6 +1400,8 @@ msgid ""
 "All questions must have at least one correct answer and one incorrect answer: \n"
 "%s\n"
 msgstr ""
+"Totes les preguntes han de tenir almenys una resposta correcta i una incorrecta: \n"
+"%s\n"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.user_profile_content
@@ -1558,6 +1654,11 @@ msgid "Back"
 msgstr "Enrere"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
+msgid "Back to course"
+msgstr ""
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__website_default_background_image_url
 msgid "Background image URL"
 msgstr "URL de la imatge de fons"
@@ -1592,7 +1693,7 @@ msgstr "Notificat quan s'afegeix un contingut nou."
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_invite__body_has_template_value
 msgid "Body content is the same as the template"
-msgstr ""
+msgstr "El cos del text és el mateix que el de la plantilla"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__can_comment
@@ -1820,6 +1921,13 @@ msgid "Clear filters"
 msgstr "Neteja els filtres"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
+#, python-format
+msgid "Click <b>Save</b> to create it."
+msgstr ""
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.mail_notification_channel_invite
 msgid "Click here to get started"
 msgstr ""
@@ -1850,8 +1958,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 #, python-format
-msgid "Click on the <b>Create</b> button to create your first course."
-msgstr "Feu clic al botó <b>Crea</b> per crear el vostre primer curs."
+msgid "Click on the <b>Save</b> button to create your first course."
+msgstr ""
 
 #. module: website_slides
 #. odoo-javascript
@@ -2022,7 +2130,7 @@ msgstr "Configuració"
 #. module: website_slides
 #: model:mail.template,subject:website_slides.mail_template_channel_completed
 msgid "Congratulations! You completed {{ object.channel_id.name }}"
-msgstr "Felicitats! Heu completat {{ object.channelid.name }}"
+msgstr "Felicitats! Heu completat {{ object.channel_id.name }}"
 
 #. module: website_slides
 #. odoo-javascript
@@ -2535,6 +2643,7 @@ msgstr "Defineix qui pot accedir als vostres cursos i el seu contingut."
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/slides_category_delete.js:0
+#: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 #, python-format
 msgid "Delete"
@@ -2593,7 +2702,7 @@ msgstr "Descobreix més"
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid "Dislike"
-msgstr "Desagrada"
+msgstr "No m'agrada"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__dislikes
@@ -2774,6 +2883,7 @@ msgid "Earn more Karma to leave a comment."
 msgstr "Aneu més Karma per a deixar un comentari."
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 msgid "Edit"
 msgstr "Modificar"
@@ -2842,6 +2952,13 @@ msgstr "Codi insertat"
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_embed_view_tree
 msgid "Embed Views"
 msgstr "Incrusta vistes"
+
+#. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/models/slide_slide.py:0
+#, python-format
+msgid "Embed code"
+msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_embed
@@ -2947,6 +3064,11 @@ msgid "Exercises"
 msgstr "exercicis"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
+msgid "Exit Fullscreen"
+msgstr "Sortir de pantalla completa"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__embed_code_external
 msgid "External Embed Code"
 msgstr "Codi extern incrustat"
@@ -2998,6 +3120,11 @@ msgstr "Nom del fitxer"
 #, python-format
 msgid "File is too big. File size cannot exceed 25MB"
 msgstr "L'arxiu és massa gran. L'arxiu no pot excedir els 25MB"
+
+#. module: website_slides
+#: model:ir.model,name:website_slides.model_ir_binary
+msgid "File streaming helper model for controllers"
+msgstr "Model d'ajuda de transmissió de fitxers per a controladors"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
@@ -3127,6 +3254,11 @@ msgid ""
 msgstr "Des d'aquí podreu controlar els assistents i seguir el seu progrés."
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
+msgid "Fullscreen"
+msgstr "Pantalla Complerta"
+
+#. module: website_slides
 #: model:slide.channel.tag,name:website_slides.slide_channel_tag_role_furniture
 msgid "Furniture Designer"
 msgstr "Dissenyador de mobles"
@@ -3194,7 +3326,11 @@ msgid "Google Doc Key"
 msgstr "Clau de document de Google"
 
 #. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/models/slide_slide.py:0
+#: code:addons/website_slides/models/slide_slide.py:0
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__video_source_type__google_drive
+#, python-format
 msgid "Google Drive"
 msgstr "Google Drive"
 
@@ -3631,7 +3767,7 @@ msgstr "Enllaç d' invitació"
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid "Invite"
-msgstr "Invitar"
+msgstr "Convidar"
 
 #. module: website_slides
 #. odoo-python
@@ -4239,7 +4375,8 @@ msgstr "Nou curs"
 #: model:mail.template,subject:website_slides.slide_template_published
 msgid ""
 "New {{ object.slide_category }} published on {{ object.channel_id.name }}"
-msgstr "{{ object.slidecategory }} nou publicat a {{ object.channelid.name }}"
+msgstr ""
+"{{ object.slide_category }} nou publicat a {{ object.channel_id.name }}"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
@@ -4254,6 +4391,7 @@ msgstr "Cursos més nous"
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
+#: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 #, python-format
 msgid "Next"
 msgstr "Següent"
@@ -4543,6 +4681,13 @@ msgid "Ongoing Courses"
 msgstr ""
 
 #. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/controllers/mail.py:0
+#, python-format
+msgid "Only a single review can be posted per course."
+msgstr ""
+
+#. module: website_slides
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_channel__enroll__public
 msgid "Open"
 msgstr "Oberts"
@@ -4723,10 +4868,16 @@ msgid "Presentation Published"
 msgstr "Presentació publicada"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid "Preview"
 msgstr "Vista prèvia"
+
+#. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
+msgid "Previous"
+msgstr "Anterior"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -4737,6 +4888,17 @@ msgstr "Canal Privat"
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_partner_view_tree
 msgid "Progress"
 msgstr "Progrés"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
+#: model_terms:ir.ui.view,arch_db:website_slides.course_card
+#: model_terms:ir.ui.view,arch_db:website_slides.course_join
+#: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
+#: model_terms:ir.ui.view,arch_db:website_slides.slide_main
+#, python-format
+msgid "Progress bar"
+msgstr "Barra de progrès"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__promoted_slide_id
@@ -5087,7 +5249,7 @@ msgstr "Ressenyes"
 #: code:addons/website_slides/static/src/js/portal_chatter.js:0
 #, python-format
 msgid "Reviews (%s)"
-msgstr ""
+msgstr "Revisions (%s)"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__quiz_fourth_attempt_reward
@@ -5172,6 +5334,7 @@ msgid "Score"
 msgstr "Puntuació"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.course_nav
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
 msgid "Search"
 msgstr "Cercar"
@@ -5325,6 +5488,7 @@ msgid "Settings"
 msgstr "Configuració"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid "Share"
 msgstr "Compartir"
@@ -5542,7 +5706,10 @@ msgstr ""
 "respostes bones"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/xml/website_slides_fullscreen.xml:0
 #: model:ir.model,name:website_slides.model_slide_slide
+#, python-format
 msgid "Slides"
 msgstr "Diapositives"
 
@@ -6024,6 +6191,8 @@ msgid ""
 "This question must have at least one correct answer and one incorrect "
 "answer."
 msgstr ""
+"Aquesta pregunta ha de tenir almenys una resposta correcta i una "
+"d'incorrecta."
 
 #. module: website_slides
 #. odoo-javascript
@@ -6306,6 +6475,11 @@ msgstr ""
 "Utilitzeu grups de cursos per classificar i organitzar els vostres cursos."
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
+msgid "Use template"
+msgstr "Utilitzar plantilla"
+
+#. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__tag_ids
 msgid "Used to categorize and filter displayed channels/courses"
 msgstr "Utilitzat per categoritzar i filtrar els canals/cursos mostrats"
@@ -6396,7 +6570,11 @@ msgid "Views •"
 msgstr "Vistes s"
 
 #. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/models/slide_slide.py:0
+#: code:addons/website_slides/models/slide_slide.py:0
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__video_source_type__vimeo
+#, python-format
 msgid "Vimeo"
 msgstr "Vimeo"
 
@@ -6824,7 +7002,7 @@ msgstr ""
 #. module: website_slides
 #: model:mail.template,subject:website_slides.mail_template_slide_channel_enroll
 msgid "You have been invited to join {{ object.channel_id.name }}"
-msgstr "Heu estat convidat a unir-vos a {{ object.channelid.name }}"
+msgstr "Heu estat convidat a unir-vos a {{ object.channel_id.name }}"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_main
@@ -6874,7 +7052,10 @@ msgid "You're enrolled"
 msgstr "Esteu inscrit"
 
 #. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/models/slide_slide.py:0
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__video_source_type__youtube
+#, python-format
 msgid "YouTube"
 msgstr "YouTube"
 

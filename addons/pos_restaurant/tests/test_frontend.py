@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import odoo.tests
+from odoo import Command
 from odoo.addons.point_of_sale.tests.common_setup_methods import setup_pos_combo_items
 from odoo.addons.point_of_sale.tests.common import archive_products
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
@@ -9,7 +10,7 @@ from odoo.addons.base.tests.common import HttpCaseWithUserDemo
 
 
 @odoo.tests.tagged('post_install', '-at_install')
-class TestFrontend(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
+class TestFrontendCommon(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
 
     @classmethod
     def setUpClass(cls, chart_template_ref=None):
@@ -186,6 +187,55 @@ class TestFrontend(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
             'taxes_id': [(6, 0, [])],
         })
 
+        #desk organizer (variant product)
+        cls.desk_organizer = cls.env['product.product'].create({
+            'name': 'Desk Organizer',
+            'available_in_pos': True,
+            'list_price': 5.10,
+            'pos_categ_ids': [(4, drinks_category.id)], # will put it as a drink for convenience
+        })
+        desk_size_attribute = cls.env['product.attribute'].create({
+            'name': 'Size',
+            'display_type': 'radio',
+            'create_variant': 'no_variant',
+        })
+        desk_size_s = cls.env['product.attribute.value'].create({
+            'name': 'S',
+            'attribute_id': desk_size_attribute.id,
+        })
+        desk_size_m = cls.env['product.attribute.value'].create({
+            'name': 'M',
+            'attribute_id': desk_size_attribute.id,
+        })
+        desk_size_l = cls.env['product.attribute.value'].create({
+            'name': 'L',
+            'attribute_id': desk_size_attribute.id,
+        })
+        cls.env['product.template.attribute.line'].create({
+            'product_tmpl_id': cls.desk_organizer.product_tmpl_id.id,
+            'attribute_id': desk_size_attribute.id,
+            'value_ids': [(6, 0, [desk_size_s.id, desk_size_m.id, desk_size_l.id])]
+        })
+        desk_fabrics_attribute = cls.env['product.attribute'].create({
+            'name': 'Fabric',
+            'display_type': 'select',
+            'create_variant': 'no_variant',
+        })
+        desk_fabrics_leather = cls.env['product.attribute.value'].create({
+            'name': 'Leather',
+            'attribute_id': desk_fabrics_attribute.id,
+        })
+        desk_fabrics_other = cls.env['product.attribute.value'].create({
+            'name': 'Custom',
+            'attribute_id': desk_fabrics_attribute.id,
+            'is_custom': True,
+        })
+        cls.env['product.template.attribute.line'].create({
+            'product_tmpl_id': cls.desk_organizer.product_tmpl_id.id,
+            'attribute_id': desk_fabrics_attribute.id,
+            'value_ids': [(6, 0, [desk_fabrics_leather.id, desk_fabrics_other.id])]
+        })
+
         pricelist = cls.env['product.pricelist'].create({'name': 'Restaurant Pricelist'})
         pos_config.write({'pricelist_id': pricelist.id})
 
@@ -201,6 +251,9 @@ class TestFrontend(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
             ],
         })
         cls.pos_admin.partner_id.email = 'pos_admin@test.com'
+
+
+class TestFrontend(TestFrontendCommon):
 
     def test_01_pos_restaurant(self):
 
@@ -269,3 +322,24 @@ class TestFrontend(AccountTestInvoicingCommon, HttpCaseWithUserDemo):
         self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'SaveLastPreparationChangesTour', login="pos_admin")
         self.assertTrue(self.pos_config.current_session_id.order_ids.last_order_preparation_change, "There should be a last order preparation change")
         self.assertTrue("Coca" in self.pos_config.current_session_id.order_ids.last_order_preparation_change, "The last order preparation change should contain 'Coca'")
+
+    def test_11_bill_screen_qrcode(self):
+        self.env.company.point_of_sale_use_ticket_qr_code = True
+        self.pos_config.with_user(self.pos_admin).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'BillScreenTour', login="pos_admin")
+
+    def test_combo_preparation_receipt(self):
+        setup_pos_combo_items(self)
+        self.env['product.product'].search([('name', 'ilike', 'Combo')]).write({'pos_categ_ids': [(Command.set(self.env['pos.category'].search([], limit=1).ids))]})
+        self.env['pos.printer'].create({
+            'name': 'Printer',
+            'printer_type': 'epson_epos',
+            'epson_printer_ip': '0.0.0.0',
+            'product_categories_ids': [Command.set(self.env['pos.category'].search([]).ids)],
+        })
+        self.pos_config.write({
+            'is_order_printer': True,
+            'printer_ids': [Command.set(self.env['pos.printer'].search([]).ids)],
+        })
+        self.pos_config.with_user(self.pos_admin).open_ui()
+        self.start_tour(f"/pos/ui?config_id={self.pos_config.id}", 'ComboPreparationReceiptTour', login="pos_admin")

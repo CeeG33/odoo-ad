@@ -13,8 +13,6 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'sa_account_201002',
             'property_account_expense_categ_id': 'sa_account_400001',
             'property_account_income_categ_id': 'sa_account_500001',
-            'property_tax_payable_account_id': 'sa_account_202003',
-            'property_tax_receivable_account_id': 'sa_account_100103',
             'code_digits': '6',
         }
 
@@ -27,10 +25,12 @@ class AccountChartTemplate(models.AbstractModel):
                 'cash_account_code_prefix': '105',
                 'transfer_account_code_prefix': '100',
                 'account_default_pos_receivable_account_id': 'sa_account_102012',
-                'income_currency_exchange_account_id': 'sa_account_400053',
-                'expense_currency_exchange_account_id': 'sa_account_500011',
+                'income_currency_exchange_account_id': 'sa_account_500011',
+                'expense_currency_exchange_account_id': 'sa_account_400053',
                 'account_sale_tax_id': 'sa_sales_tax_15',
                 'account_purchase_tax_id': 'sa_purchase_tax_15',
+                'deferred_expense_account_id': 'sa_account_104020',
+                'deferred_revenue_account_id': 'sa_account_201018'
             },
         }
 

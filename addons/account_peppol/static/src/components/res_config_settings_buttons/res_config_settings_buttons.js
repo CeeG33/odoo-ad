@@ -8,8 +8,9 @@ import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
-import { Component, markup } from "@odoo/owl";
+import { Component, markup, useState } from "@odoo/owl";
 
+const waitTime = 60000;
 
 class PeppolSettingsButtons extends Component {
     static props = {
@@ -21,6 +22,9 @@ class PeppolSettingsButtons extends Component {
         super.setup();
         this.dialogService = useService("dialog");
         this.notification = useService("notification");
+        this.state = useState({
+            isSmsButtonDisabled: false,
+        });
     }
 
     get proxyState() {
@@ -89,14 +93,6 @@ class PeppolSettingsButtons extends Component {
         });
     }
 
-    migrate() {
-        this.showConfirmation(
-            "This will migrate your Peppol registration away from Odoo. A migration key will be generated. \
-            If the other service does not support migration, consider deregistering instead.",
-            "button_migrate_peppol_registration"
-        )
-    }
-
     deregister() {
         if (this.ediMode === 'demo') {
             this._callConfigMethod("button_deregister_peppol_participant");
@@ -123,6 +119,13 @@ class PeppolSettingsButtons extends Component {
         // avoid making users click save on the settings
         // and then clicking the confirm button to check the code
         await this._callConfigMethod("button_check_peppol_verification_code", true);
+    }
+
+    async sendCode() {
+        this.state.isSmsButtonDisabled = true;
+        // don't allow spamming the button
+        setTimeout(() => this.state.isSmsButtonDisabled = false, waitTime);
+        await this._callConfigMethod("button_send_peppol_verification_code", true);
     }
 
     async createUser() {

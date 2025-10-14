@@ -4,15 +4,15 @@
 # 
 # Translators:
 # Wil Odoo, 2023
-# Rasareeyar Lappiam, 2023
+# Rasareeyar Lappiam, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"POT-Creation-Date: 2024-02-08 07:29+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Rasareeyar Lappiam, 2023\n"
+"Last-Translator: Rasareeyar Lappiam, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -42,13 +42,6 @@ msgstr ""
 #: model:ir.model,name:spreadsheet_account.model_account_account
 msgid "Account"
 msgstr "บัญชี"
-
-#. module: spreadsheet_account
-#. odoo-javascript
-#: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
-#, python-format
-msgid "Account type."
-msgstr "ประเภทบัญชี"
 
 #. module: spreadsheet_account
 #: model:ir.model,name:spreadsheet_account.model_res_company
@@ -86,17 +79,9 @@ msgstr "รายการสมุดรายวันสำหรับคำ
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
-#: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 #, python-format
-msgid "Reference date."
-msgstr "วันที่อ้างอิง"
-
-#. module: spreadsheet_account
-#. odoo-javascript
-#: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
-#, python-format
-msgid "Returns the account ids of a given group."
-msgstr "ส่งกลับรหัสบัญชีของกลุ่มที่กำหนด"
+msgid "Returns the account codes of a given group."
+msgstr ""
 
 #. module: spreadsheet_account
 #. odoo-javascript
@@ -163,8 +148,29 @@ msgstr "ช่วงวันที่ รูปแบบที่รองร�
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 #, python-format
+msgid "The day from which to extract the fiscal year end."
+msgstr "วันที่จะใช้สำหรับการดึงข้อมูลบัญชีสิ้นปี"
+
+#. module: spreadsheet_account
+#. odoo-javascript
+#: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
+#, python-format
+msgid "The day from which to extract the fiscal year start."
+msgstr "วันที่จะใช้สำหรับการดึงวันที่เริ่มต้นของปีบัญชี"
+
+#. module: spreadsheet_account
+#. odoo-javascript
+#: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
+#, python-format
 msgid "The prefix of the accounts."
 msgstr "คำนำหน้าบัญชี"
+
+#. module: spreadsheet_account
+#. odoo-javascript
+#: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
+#, python-format
+msgid "The technical account type (possible values are: %s)."
+msgstr ""
 
 #. module: spreadsheet_account
 #. odoo-javascript

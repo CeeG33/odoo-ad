@@ -13,7 +13,7 @@ import { Reactive } from "@web/core/utils/reactive";
 import { HWPrinter } from "@point_of_sale/app/printer/hw_printer";
 import { memoize } from "@web/core/utils/functions";
 import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
-import { ConnectionLostError } from "@web/core/network/rpc_service";
+import { ConnectionLostError, RPCError } from "@web/core/network/rpc_service";
 import { _t } from "@web/core/l10n/translation";
 import { CashOpeningPopup } from "@point_of_sale/app/store/cash_opening_popup/cash_opening_popup";
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
@@ -22,6 +22,7 @@ import { renderToString } from "@web/core/utils/render";
 import { batched } from "@web/core/utils/timing";
 import { TicketScreen } from "@point_of_sale/app/screens/ticket_screen/ticket_screen";
 import { EditListPopup } from "./select_lot_popup/select_lot_popup";
+import { unique } from "@web/core/utils/arrays";
 
 /* Returns an array containing all elements of the given
  * array corresponding to the rule function {agg} and without duplicates
@@ -151,6 +152,7 @@ export class PosStore extends Reactive {
         this.ordersToUpdateSet = new Set(); // used to know which orders need to be sent to the back end when syncing
         this.loadingOrderState = false; // used to prevent orders fetched to be put in the update set during the reactive change
         this.showOfflineWarning = true; // Allows to avoid the display of the offline popup when the user has already had it.
+        this.tempScreenIsShown = false;
 
         // these dynamic attributes can be watched for change by other models or widgets
         Object.assign(this, {
@@ -172,6 +174,8 @@ export class PosStore extends Reactive {
         // FIXME POSREF: the hardwareProxy needs the pos and the pos needs the hardwareProxy. Maybe
         // the hardware proxy should just be part of the pos service?
         this.hardwareProxy.pos = this;
+
+        this.syncingOrders = new Set();
         await this.load_server_data();
         if (this.config.use_proxy) {
             await this.connectToProxy();
@@ -179,6 +183,19 @@ export class PosStore extends Reactive {
         this.closeOtherTabs();
         this.preloadImages();
         this.showScreen("ProductScreen");
+    }
+    toggleImages(imageType = "product") {
+        if (imageType === "product") {
+            this.show_product_images = !this.show_product_images;
+        }
+        if (imageType === "category") {
+            this.show_category_images = !this.show_category_images;
+        }
+        this.orm.silent.call("pos.config", "toggle_images", [
+            [this.config.id],
+            this.show_product_images ? "yes" : "no",
+            this.show_category_images ? "yes" : "no",
+        ]);
     }
     get productListViewMode() {
         const viewMode = this.productListView && this.ui.isSmall ? this.productListView : "grid";
@@ -202,6 +219,11 @@ export class PosStore extends Reactive {
             searchTerm: "",
         };
     }
+
+    async setDiscountFromUI(line, val) {
+        line.set_discount(val);
+    }
+
     getDefaultPricelist() {
         const current_order = this.get_order();
         if (current_order) {
@@ -225,8 +247,7 @@ export class PosStore extends Reactive {
         window.addEventListener("beforeunload", () =>
             this.db.save("TO_REFUND_LINES", this.toRefundLines)
         );
-        const { start_category, iface_start_categ_id } = this.config;
-        this.selectedCategoryId = (start_category && iface_start_categ_id?.[0]) || 0;
+        this.resetProductScreenSearch();
         this.hasBigScrollBars = this.config.iface_big_scrollbars;
         // Push orders in background, do not await
         this.push_orders();
@@ -272,6 +293,7 @@ export class PosStore extends Reactive {
         this._loadProductProduct(loadedData["product.product"]);
         this.db.add_packagings(loadedData["product.packaging"]);
         this.attributes_by_ptal_id = loadedData["attributes_by_ptal_id"];
+        this._add_ptal_ids_by_ptav_id(this.attributes_by_ptal_id);
         this.cash_rounding = loadedData["account.cash.rounding"];
         this.payment_methods = loadedData["pos.payment.method"];
         this._loadPosPaymentMethod();
@@ -280,8 +302,27 @@ export class PosStore extends Reactive {
         this.pos_has_valid_product = loadedData["pos_has_valid_product"];
         this.db.addProductIdsToNotDisplay(loadedData["pos_special_products_ids"]);
         this.partner_commercial_fields = loadedData["partner_commercial_fields"];
+        this.show_product_images = loadedData["show_product_images"] === "yes";
+        this.show_category_images = loadedData["show_category_images"] === "yes";
         await this._loadPosPrinters(loadedData["pos.printer"]);
         this.open_orders_json = loadedData["open_orders"];
+    }
+    _add_ptal_ids_by_ptav_id(attributes_by_ptal_id) {
+        // Create a cache based on attributes_by_ptal_id
+        // that enables faster lookup for all ptal_ids
+        // inside a given attribute's "values" list,
+        // given a specific ptav_id.
+        this.ptal_ids_by_ptav_id = {};
+        for (const [ptal_id, attribute] of Object.entries(attributes_by_ptal_id)) {
+            for (const value of attribute["values"]) {
+                const ptav_id = value["id"];
+                if (ptav_id in this.ptal_ids_by_ptav_id) {
+                    this.ptal_ids_by_ptav_id[ptav_id].push(ptal_id);
+                } else {
+                    this.ptal_ids_by_ptav_id[ptav_id] = [ptal_id];
+                }
+            }
+        }
     }
     _loadPosSession() {
         // We need to do it here, since only then the local storage has the correct uuid
@@ -511,7 +552,7 @@ export class PosStore extends Reactive {
                 delete this.toRefundLines[line.refunded_orderline_id];
             }
         }
-        if (this.isOpenOrderShareable() && removeFromServer) {
+        if ((this.isOpenOrderShareable() || order.server_id) && removeFromServer) {
             if (this.ordersToUpdateSet.has(order)) {
                 this.ordersToUpdateSet.delete(order);
             }
@@ -618,22 +659,20 @@ export class PosStore extends Reactive {
         await this._loadMissingPartners(jsons);
         var orders = [];
 
-        for (var i = 0; i < jsons.length; i++) {
-            var json = jsons[i];
-            if (json.pos_session_id === this.pos_session.id) {
-                orders.push(this.createReactiveOrder(json));
-            }
-        }
-        for (i = 0; i < jsons.length; i++) {
-            json = jsons[i];
+        for (const json of jsons) {
             if (
-                json.pos_session_id !== this.pos_session.id &&
-                (json.lines.length > 0 || json.statement_ids.length > 0)
+                json.pos_session_id === this.pos_session.id ||
+                json.lines.length > 0 ||
+                json.statement_ids.length > 0
             ) {
-                orders.push(this.createReactiveOrder(json));
-            } else if (json.pos_session_id !== this.pos_session.id) {
-                this.db.remove_unpaid_order(jsons[i]);
+                try {
+                    orders.push(this.createReactiveOrder(json));
+                    continue;
+                } catch (error) {
+                    console.error("There was an error while loading the order", json, error);
+                }
             }
+            this.db.remove_unpaid_order(json);
         }
 
         orders = orders.sort(function (a, b) {
@@ -669,13 +708,7 @@ export class PosStore extends Reactive {
         if (!missingProductIds.size) {
             return;
         }
-        const products = await this.orm.call(
-            "pos.session",
-            "get_pos_ui_product_product_by_params",
-            [odoo.pos_session_id, { domain: [["id", "in", [...missingProductIds]]] }]
-        );
-        await this._loadMissingPricelistItems(products);
-        this._loadProductProduct(products);
+        await this._addProducts([...missingProductIds], false);
     }
     async _loadMissingPricelistItems(products) {
         if (!products.length) {
@@ -828,7 +861,8 @@ export class PosStore extends Reactive {
                 message = messageFp;
             }
         }
-        await this._getMissingProducts(ordersJson);
+        await this._loadMissingProducts(ordersJson);
+        await this._loadMissingPartners(ordersJson);
         const allOrders = [...this.get_order_list()];
         this._replaceOrders(allOrders, ordersJson);
         this.sortOrders();
@@ -866,17 +900,6 @@ export class PosStore extends Reactive {
             "get_pos_ui_product_pricelists_by_ids",
             [[odoo.pos_session_id], pricelistsToGet]
         );
-    }
-    async _getMissingProducts(ordersJson) {
-        const productIds = [];
-        for (const order of ordersJson) {
-            for (const orderline of order.lines) {
-                if (!this.db.get_product_by_id(orderline[2].product_id)) {
-                    productIds.push(orderline[2].product_id);
-                }
-            }
-        }
-        await this._addProducts(productIds, false);
     }
     _addPosPricelists(pricelistsJson) {
         if (!this.config.use_pricelist) {
@@ -936,6 +959,50 @@ export class PosStore extends Reactive {
     sortOrders() {
         this.orders.sort((a, b) => (a.name > b.name ? 1 : -1));
     }
+    /**
+     * This method generates mapping of tax names into corresponding names and amounts,
+     * for a single product according to a fiscal position.
+     * Note: a tax can be removed (mapped to null).
+     * @param {number[]} taxIds - Original tax IDs.
+     * @param {number} priceWithoutTax - Product price without tax.
+     * @param {object} fpos - Fiscal position.
+     * @returns {object} - Mapping ex. {"Tax 15%": { new_name: "Tax 30%", new_amount: 300.00 } }
+     */
+    _getFiscalPositionTaxNameMapping(taxIds, priceWithoutTax, fpos) {
+        if (!fpos) {
+            throw new Error("Fiscal position not passed in the args!")
+        }
+
+        const taxMapping = {};
+        for (const taxId of taxIds) {
+            const tax = this.taxes_by_id[taxId];
+            if (!tax) {
+                continue;
+            }
+            const taxMaps = Object.values(fpos.fiscal_position_taxes_by_id).filter(
+                (fposTax) => fposTax.tax_src_id[0] === tax.id
+            );
+            if (taxMaps.length) {
+                for (const taxMap of taxMaps) {
+                    if (taxMap.tax_dest_id) {
+                        const mappedTax = this.taxes_by_id[taxMap.tax_dest_id[0]];
+                        if (mappedTax) {
+                            const computedTax = this.compute_all([mappedTax],priceWithoutTax,1,this.currency.rounding);
+                            taxMapping[tax.name] = {
+                                new_name: mappedTax.name,
+                                new_amount: computedTax.total_included - computedTax.total_excluded
+                            };
+                        }
+                    } else {
+                        taxMapping[tax.name] = null  // Fiscal position removes this tax
+                    }
+                }
+            }
+        }
+        return taxMapping;
+    }
+
+
     async getProductInfo(product, quantity) {
         const order = this.get_order();
         // check back-end method `get_product_info_pos` to see what it returns
@@ -948,6 +1015,28 @@ export class PosStore extends Reactive {
         ]);
 
         const priceWithoutTax = productInfo["all_prices"]["price_without_tax"];
+
+        // Update price and taxes according to fiscal postions
+        if (order.fiscal_position) {
+            const taxMapping = this._getFiscalPositionTaxNameMapping(
+                product.taxes_id,
+                priceWithoutTax,
+                order.fiscal_position,
+            );
+            productInfo.all_prices.tax_details = productInfo.all_prices.tax_details
+                .filter(tax => taxMapping[tax.name] !== null)
+                .map(tax => {
+                    if (taxMapping[tax.name]) {
+                        return {
+                            name: taxMapping[tax.name].new_name,
+                            amount: taxMapping[tax.name].new_amount
+                        };
+                    }
+                    return tax;
+            });
+            productInfo.all_prices.price_with_tax = product.get_display_price({iface_tax_included:"total"})
+        }
+
         const margin = priceWithoutTax - product.standard_price;
         const orderPriceWithoutTax = order.get_total_without_tax();
         const orderCost = order.get_total_cost();
@@ -1027,20 +1116,8 @@ export class PosStore extends Reactive {
 
             if (mapped_included_taxes.length > 0) {
                 if (new_included_taxes.length > 0) {
-                    const price_without_taxes = this.compute_all(
-                        mapped_included_taxes,
-                        price,
-                        1,
-                        this.currency.rounding,
-                        true
-                    ).total_excluded;
-                    return this.compute_all(
-                        new_included_taxes,
-                        price_without_taxes,
-                        1,
-                        this.currency.rounding,
-                        false
-                    ).total_included;
+                    //If previous tax and new tax where both included in price. The price including tax is the same
+                    return price;
                 } else {
                     return this.compute_all(
                         mapped_included_taxes,
@@ -1098,18 +1175,52 @@ export class PosStore extends Reactive {
         });
     }
 
+    // To be used in the context of closing the POS
+    // Saves the order locally and try to send it to the backend.
+    // If there is an error show a popup
+    async push_orders_with_closing_popup (opts = {}) {
+        try {
+            await this.push_orders(opts);
+            return true;
+        } catch (error) {
+            console.warn(error);
+            const reason = this.failed
+                ? _t(
+                      'Some orders could not be submitted to ' +
+                          'the server due to configuration errors. ' +
+                          'You can exit the Point of Sale, but do ' +
+                          'not close the session before the issue ' +
+                          'has been resolved.'
+                  )
+                : _t(
+                      'Some orders could not be submitted to ' +
+                          'the server due to internet connection issues. ' +
+                          'You can exit the Point of Sale, but do ' +
+                          'not close the session before the issue ' +
+                          'has been resolved.'
+                  );
+            await this.env.services.popup.add(ConfirmPopup, {
+                title: _t('Offline Orders'),
+                body: reason,
+            });
+            return false;
+        }
+    }
+
     push_orders(opts = {}) {
+        // The 'printedOrders' is added to prevent printed orders from being reverted to draft
+        opts = Object.assign({ printedOrders: true }, opts);
         return this.pushOrderMutex.exec(() => this._flush_orders(this.db.get_orders(), opts));
     }
 
     push_single_order(order) {
         const order_id = this.db.add_order(order.export_as_JSON());
-        return this.pushOrderMutex.exec(() => this._flush_orders([this.db.get_order(order_id)]));
+        return this.pushOrderMutex.exec(() => this._flush_orders([this.db.get_order(order_id)], order._getOrderOptions()));
     }
 
     // Send validated orders to the backend.
     // Resolves to the backend ids of the synced orders.
-    async _flush_orders(orders, options) {
+    async _flush_orders(orders, options = {}) {
         try {
             const server_ids = await this._save_to_server(orders, options);
             for (let i = 0; i < server_ids.length; i++) {
@@ -1118,10 +1229,7 @@ export class PosStore extends Reactive {
             }
             return server_ids;
         } catch (error) {
-            if (error instanceof ConnectionLostError) {
-                Promise.reject(error);
-                return error;
-            } else {
+            if (!(error instanceof ConnectionLostError) && !options.printedOrders) {
                 for (const order of orders) {
                     const reactiveOrder = this.orders.find((o) => o.uid === order.id);
                     reactiveOrder.finalized = false;
@@ -1131,9 +1239,39 @@ export class PosStore extends Reactive {
                 this.set_synch("connected");
                 throw error;
             }
+            if (error instanceof RPCError) {
+                await this._flush_orders_retry(orders, options);
+            }
+            throw error;
         } finally {
             this._after_flush_orders(orders);
         }
+    }
+    // Attempts to send the orders to the server one by one if an RPC error is encountered.
+    async _flush_orders_retry(orders, options) {
+        let lastError;
+        let serverIds = [];
+
+        for (let order of orders) {
+            try {
+                let server_ids = await this._save_to_server([order], options);
+                this.validated_orders_name_server_id_map[server_ids[0].pos_reference] = server_ids[0].id;
+                serverIds.push(server_ids[0]);
+            } catch (error) {
+                lastError = error;
+            }
+        }
+
+        if (serverIds.length === orders.length) {
+            this.set_synch('connected');
+            return serverIds;
+        }
+        if (lastError instanceof ConnectionLostError) {
+            this.set_synch('disconnected');
+        } else {
+            this.set_synch('error');
+        }
+        throw lastError;
     }
     /**
      * Hook method after _flush_orders resolved or rejected.
@@ -1174,6 +1312,17 @@ export class PosStore extends Reactive {
         this.synch = { status, pending };
     }
 
+    /**
+     * Context to be overriden in other modules/localisations
+     * while processing orders in the backend
+     */
+    _getCreateOrderContext(orders, options) {
+        const orderContext = this.context || {};
+        if (options.printedOrders !== undefined) {
+            orderContext.is_receipt_printed = options.printedOrders;
+        }
+        return orderContext;
+    }
     // send an array of orders to the server
     // available options:
     // - timeout: timeout for the rpc call in ms
@@ -1183,15 +1332,26 @@ export class PosStore extends Reactive {
         if (!orders || !orders.length) {
             return Promise.resolve([]);
         }
-        this.set_synch("connecting", orders.length);
+
+        // Filter out orders that are already being synced
+        const ordersToSync = orders.filter(order => !this.syncingOrders.has(order.id));
+
+        if (!ordersToSync.length) {
+            return Promise.resolve([]);
+        }
+
+        // Add these order IDs to the syncing set
+        ordersToSync.forEach(order => this.syncingOrders.add(order.id));
+
+        this.set_synch("connecting", ordersToSync.length);
         options = options || {};
 
         // Keep the order ids that are about to be sent to the
         // backend. In between create_from_ui and the success callback
         // new orders may have been added to it.
-        var order_ids_to_sync = orders.map((o) => o.id);
+        const order_ids_to_sync = ordersToSync.map((o) => o.id);
 
-        for (const order of orders) {
+        for (const order of ordersToSync) {
             order.to_invoice = options.to_invoice || false;
         }
         // we try to send the order. silent prevents a spinner if it takes too long. (unless we are sending an invoice,
@@ -1201,10 +1361,14 @@ export class PosStore extends Reactive {
         try {
             // FIXME POSREF timeout
             // const timeout = typeof options.timeout === "number" ? options.timeout : 30000 * orders.length;
-            const serverIds = await orm.call("pos.order", "create_from_ui", [
-                orders,
-                options.draft || false,
-            ]);
+            const serverIds = await orm.call(
+                "pos.order",
+                "create_from_ui",
+                [ordersToSync, options.draft || false],
+                {
+                    context: this._getCreateOrderContext(ordersToSync, options),
+                }
+            );
 
             for (const serverId of serverIds) {
                 const order = this.env.services.pos.orders.find(
@@ -1224,7 +1388,7 @@ export class PosStore extends Reactive {
             this.set_synch("connected");
             return serverIds;
         } catch (error) {
-            console.warn("Failed to send orders:", orders);
+            console.warn("Failed to send orders:", ordersToSync);
             if (error.code === 200) {
                 // Business Logic Error, not a connection problem
                 // Hide error if already shown before ...
@@ -1236,6 +1400,8 @@ export class PosStore extends Reactive {
             }
             this.set_synch("disconnected");
             throw error;
+        } finally {
+            order_ids_to_sync.forEach(order_id => this.syncingOrders.delete(order_id));
         }
     }
 
@@ -1436,7 +1602,8 @@ export class PosStore extends Reactive {
 
         // 2) Deal with the rounding methods
 
-        var round_tax = this.company.tax_calculation_rounding_method != "round_globally";
+        const company = this.company;
+        var round_tax = company.tax_calculation_rounding_method != "round_globally";
 
         var initial_currency_rounding = currency_rounding;
         if (!round_tax) {
@@ -1444,7 +1611,37 @@ export class PosStore extends Reactive {
         }
 
         // 3) Iterate the taxes in the reversed sequence order to retrieve the initial base of the computation.
-        var recompute_base = function (base_amount, fixed_amount, percent_amount, division_amount) {
+        var recompute_base = function (base_amount, incl_tax_amounts) {
+            let fixed_amount = incl_tax_amounts.fixed_amount;
+            let division_amount = 0.0;
+            for (const [, tax_factor] of incl_tax_amounts.division_taxes) {
+                division_amount += tax_factor;
+            }
+            let percent_amount = 0.0;
+            for (const [, tax_factor] of incl_tax_amounts.percent_taxes) {
+                percent_amount += tax_factor;
+            }
+
+            if (company.country && company.country.code === "IN") {
+                let total_tax_amount = 0.0;
+                for(const [i, tax_factor] of incl_tax_amounts.percent_taxes){
+                    const tax_amount = round_pr(base_amount * tax_factor / (100 + percent_amount), currency_rounding);
+                    total_tax_amount += tax_amount;
+                    cached_tax_amounts[i] = tax_amount;
+                    fixed_amount += tax_amount;
+                }
+                for (const [i,] of incl_tax_amounts.percent_taxes) {
+                    cached_base_amounts[i] = base - total_tax_amount;
+                }
+                percent_amount = 0.0;
+            }
+
+            Object.assign(incl_tax_amounts, {
+                percent_taxes: [],
+                division_taxes: [],
+                fixed_amount: 0.0,
+            });
+
             return (
                 (((base_amount - fixed_amount) / (1.0 + percent_amount / 100.0)) *
                     (100 - division_amount)) /
@@ -1464,36 +1661,38 @@ export class PosStore extends Reactive {
         var i = taxes.length - 1;
         var store_included_tax_total = true;
 
-        var incl_fixed_amount = 0.0;
-        var incl_percent_amount = 0.0;
-        var incl_division_amount = 0.0;
+        const incl_tax_amounts = {
+            percent_taxes: [],
+            division_taxes: [],
+            fixed_amount: 0.0,
+        };
 
         var cached_tax_amounts = {};
+        var cached_base_amounts = {};
+        let is_base_affected = true;
         if (handle_price_include) {
             taxes.reverse().forEach(function (tax) {
-                if (tax.include_base_amount) {
-                    base = recompute_base(
-                        base,
-                        incl_fixed_amount,
-                        incl_percent_amount,
-                        incl_division_amount
-                    );
-                    incl_fixed_amount = 0.0;
-                    incl_percent_amount = 0.0;
-                    incl_division_amount = 0.0;
+                if (tax.include_base_amount && is_base_affected) {
+                    base = recompute_base(base, incl_tax_amounts);
                     store_included_tax_total = true;
                 }
                 if (tax.price_include) {
                     if (tax.amount_type === "percent") {
-                        incl_percent_amount += tax.amount * tax.sum_repartition_factor;
+                        incl_tax_amounts.percent_taxes.push([
+                            i,
+                            tax.amount * tax.sum_repartition_factor,
+                        ]);
                     } else if (tax.amount_type === "division") {
-                        incl_division_amount += tax.amount * tax.sum_repartition_factor;
+                        incl_tax_amounts.division_taxes.push([
+                            i,
+                            tax.amount * tax.sum_repartition_factor,
+                        ]);
                     } else if (tax.amount_type === "fixed") {
-                        incl_fixed_amount +=
+                        incl_tax_amounts.fixed_amount +=
                             Math.abs(quantity) * tax.amount * tax.sum_repartition_factor;
                     } else {
                         var tax_amount = self._compute_all(tax, base, quantity);
-                        incl_fixed_amount += tax_amount;
+                        incl_tax_amounts.fixed_amount += tax_amount;
                         cached_tax_amounts[i] = tax_amount;
                     }
                     if (store_included_tax_total) {
@@ -1502,11 +1701,12 @@ export class PosStore extends Reactive {
                     }
                 }
                 i -= 1;
+                is_base_affected = tax.is_base_affected;
             });
         }
 
         var total_excluded = round_pr(
-            recompute_base(base, incl_fixed_amount, incl_percent_amount, incl_division_amount),
+            recompute_base(base, incl_tax_amounts),
             initial_currency_rounding
         );
         var total_included = total_excluded;
@@ -1521,23 +1721,21 @@ export class PosStore extends Reactive {
         i = 0;
         var cumulated_tax_included_amount = 0;
         taxes.reverse().forEach(function (tax) {
-            if (tax.price_include || tax.is_base_affected) {
+            if (tax.price_include && i in cached_base_amounts) {
+                var tax_base_amount = cached_base_amounts[i];
+            } else if (tax.price_include || tax.is_base_affected) {
                 var tax_base_amount = base;
             } else {
                 tax_base_amount = total_excluded;
             }
 
-            if (
-                !skip_checkpoint &&
-                tax.price_include &&
-                total_included_checkpoints[i] !== undefined &&
-                tax.sum_repartition_factor != 0
-            ) {
-                var tax_amount =
-                    total_included_checkpoints[i] - (base + cumulated_tax_included_amount);
+            if (tax.price_include && cached_tax_amounts.hasOwnProperty(i)) {
+                var tax_amount = cached_tax_amounts[i];
+            } else if (!skip_checkpoint && tax.price_include && total_included_checkpoints[i] !== undefined) {
+                var tax_amount = total_included_checkpoints[i] - (base + cumulated_tax_included_amount);
                 cumulated_tax_included_amount = 0;
-            } else {
-                tax_amount = self._compute_all(tax, tax_base_amount, quantity, true);
+            }else{
+                var tax_amount = self._compute_all(tax, tax_base_amount, quantity, true);
             }
 
             tax_amount = round_pr(tax_amount, currency_rounding);
@@ -1647,6 +1845,10 @@ export class PosStore extends Reactive {
         return false;
     }
 
+    disallowLineDiscountChange() {
+        return false;
+    }
+
     getCurrencySymbol() {
         return this.currency ? this.currency.symbol : "$";
     }
@@ -1656,14 +1858,60 @@ export class PosStore extends Reactive {
      */
     async _addProducts(ids, setAvailable = true) {
         if (setAvailable) {
-            await this.orm.write("product.product", ids, { available_in_pos: true });
+            try {
+                await this.orm.write("product.product", ids, { available_in_pos: true });
+            } catch (error) {
+                const ignoreError =
+                    error instanceof RPCError &&
+                    error.exceptionName === "odoo.exceptions.AccessError";
+                if (!ignoreError) {
+                    throw error;
+                }
+            }
         }
-        const product = await this.orm.call("pos.session", "get_pos_ui_product_product_by_params", [
+        const products = await this._loadProductByIds(ids);
+        const missingProductIds = await this._loadMissingPosCombos(products);
+        if (missingProductIds && missingProductIds.length) {
+            products.push(...(await this._loadProductByIds(missingProductIds)));
+        }
+        await this._loadMissingPricelistItems(products);
+        this._loadProductProduct(products);
+    }
+    async _loadProductByIds(productIds) {
+        return await this.orm.call("pos.session", "get_pos_ui_product_product_by_params", [
             odoo.pos_session_id,
-            { domain: [["id", "in", ids]] },
+            { domain: [["id", "in", productIds]] },
         ]);
-        await this._loadMissingPricelistItems(product);
-        this._loadProductProduct(product);
+    }
+    async _loadMissingPosCombos(products) {
+        const missingComboIds = unique(
+            products
+                .flatMap((product) => product.combo_ids)
+                .filter((id) => !this.db.combo_by_id[id]),
+        );
+        if (!missingComboIds.length) {
+            return;
+        }
+        const combos = await this.orm.call("pos.combo", "search_read", [], {
+            fields: ["id", "name", "combo_line_ids", "base_price"],
+            domain: [["id", "in", missingComboIds]],
+        });
+        this.db.add_combos(combos);
+        const comboLines = await this.orm.call("pos.combo.line", "search_read", [], {
+            fields: ["id", "product_id", "combo_price", "combo_id"],
+            domain: [["combo_id", "in", missingComboIds]],
+        });
+        this.db.add_combo_lines(comboLines);
+        const missingProductIds = unique(
+            comboLines
+                .map((comboLine) => comboLine.product_id[0])
+                .filter(
+                    (id) =>
+                        !this.db.get_product_by_id(id) &&
+                        !products.map((product) => product.id).includes(id),
+                ),
+        );
+        return missingProductIds;
     }
     isOpenOrderShareable() {
         return this.config.trusted_config_ids.length > 0;
@@ -1718,8 +1966,8 @@ export class PosStore extends Reactive {
 
         //We make sure that the last_order_change is updated in the backend
         order.save_to_db();
-        order.pos.ordersToUpdateSet.add(this);
-        order.pos.sendDraftToServer();
+        order.pos.ordersToUpdateSet.add(order);
+        await order.pos.sendDraftToServer();
     }
     closeScreen() {
         this.addOrderIfEmpty();
@@ -1775,39 +2023,13 @@ export class PosStore extends Reactive {
         // If pos is not properly loaded, we just go back to /web without
         // doing anything in the order data.
         if (!this || this.db.get_orders().length === 0) {
-            window.location = "/web#action=point_of_sale.action_client_pos_menu";
+            this.redirectToBackend();
         }
 
         // If there are orders in the db left unsynced, we try to sync.
-        // If sync successful, close without asking.
-        // Otherwise, ask again saying that some orders are not yet synced.
-        try {
-            await this.push_orders();
-            window.location = "/web#action=point_of_sale.action_client_pos_menu";
-        } catch (error) {
-            console.warn(error);
-            const reason = this.failed
-                ? _t(
-                      "Some orders could not be submitted to " +
-                          "the server due to configuration errors. " +
-                          "You can exit the Point of Sale, but do " +
-                          "not close the session before the issue " +
-                          "has been resolved."
-                  )
-                : _t(
-                      "Some orders could not be submitted to " +
-                          "the server due to internet connection issues. " +
-                          "You can exit the Point of Sale, but do " +
-                          "not close the session before the issue " +
-                          "has been resolved."
-                  );
-            const { confirmed } = await this.popup.add(ConfirmPopup, {
-                title: _t("Offline Orders"),
-                body: reason,
-            });
-            if (confirmed) {
-                window.location = "/web#action=point_of_sale.action_client_pos_menu";
-            }
+        const syncSuccess = await this.push_orders_with_closing_popup();
+        if (syncSuccess) {
+            this.redirectToBackend();
         }
     }
     async selectPartner() {
@@ -1844,7 +2066,7 @@ export class PosStore extends Reactive {
         }
         this.get_order() || this.add_new_order();
 
-        options = { ...options, ...(await product.getAddProductOptions()) };
+        options = { ...(await product.getAddProductOptions()), ...options };
 
         if (!Object.keys(options).length) {
             return;
@@ -1852,6 +2074,9 @@ export class PosStore extends Reactive {
 
         // Add the product after having the extra information.
         await this.addProductFromUi(product, options);
+        if (product.tracking == "serial") {
+            this.selectedOrder?.selected_orderline?.set_quantity_by_lot();
+        }
         this.numberBuffer.reset();
     }
 
@@ -1884,15 +2109,17 @@ export class PosStore extends Reactive {
                 component: registry.category("pos_screens").get(name),
                 props: { ...props, resolve },
             };
+            this.tempScreenIsShown = true;
         });
     }
 
     closeTempScreen() {
+        this.tempScreenIsShown = false;
         this.tempScreen = null;
     }
     openCashControl() {
         if (this.shouldShowCashControl()) {
-            this.popup.add(CashOpeningPopup, { keepBehind: true });
+            this.popup.add(CashOpeningPopup);
         }
     }
     shouldShowCashControl() {
@@ -1961,6 +2188,20 @@ export class PosStore extends Reactive {
 
     isChildPartner(partner) {
         return partner.parent_name;
+    }
+
+    redirectToBackend() {
+        window.location = "/web#action=point_of_sale.action_client_pos_menu";
+    }
+
+    resetProductScreenSearch() {
+        this.searchProductWord = "";
+        const { start_category, iface_start_categ_id } = this.config;
+        this.selectedCategoryId = (start_category && iface_start_categ_id?.[0]) || 0;
+    }
+
+    getPhoneSearchFields() {
+        return ["phone", "mobile"];
     }
 }
 

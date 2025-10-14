@@ -70,10 +70,13 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
         })
         self.assertFalse(channel_info['anonymous_name'])
         self.assertEqual(channel_info['anonymous_country'], {'code': 'BE', 'id': belgium.id, 'name': 'Belgium'})
+        operator_member = self.env['discuss.channel.member'].search([('channel_id', '=', channel_info['id']), ('partner_id', '=', operator.partner_id.id)])
+        visitor_member = self.env['discuss.channel.member'].search([('channel_id', '=', channel_info['id']), ('partner_id', '=', test_user.partner_id.id)])
         self.assertEqual(channel_info['channelMembers'], [['ADD', [
             {
                 'thread': {'id': channel_info['id'], 'model': "discuss.channel"},
-                'id': self.env['discuss.channel.member'].search([('channel_id', '=', channel_info['id']), ('partner_id', '=', operator.partner_id.id)]).id,
+                'create_date': fields.Datetime.to_string(operator_member.create_date),
+                'id': operator_member.id,
                 'persona': {
                     'active': True,
                     'country': False,
@@ -86,7 +89,8 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
             },
             {
                 'thread': {'id': channel_info['id'], 'model': "discuss.channel"},
-                'id': self.env['discuss.channel.member'].search([('channel_id', '=', channel_info['id']), ('partner_id', '=', test_user.partner_id.id)]).id,
+                'create_date': fields.Datetime.to_string(visitor_member.create_date),
+                'id': visitor_member.id,
                 'persona': {
                     'active': True,
                     'country': {
@@ -112,13 +116,15 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
             'user_id': operator.id,
             'channel_id': self.livechat_channel.id,
         })
+        operator_member = self.env['discuss.channel.member'].search([('channel_id', '=', channel_info['id']), ('partner_id', '=', operator.partner_id.id)])
         self.assertEqual(channel_info['operator_pid'], [operator.partner_id.id, "Michel Operator"])
         self.assertFalse(channel_info['anonymous_name'])
         self.assertEqual(channel_info['anonymous_country'], False)
         self.assertEqual(channel_info['channelMembers'], [['ADD', [
             {
                 'thread': {'id': channel_info['id'], 'model': "discuss.channel"},
-                'id': self.env['discuss.channel.member'].search([('channel_id', '=', channel_info['id']), ('partner_id', '=', operator.partner_id.id)]).id,
+                'create_date': fields.Datetime.to_string(operator_member.create_date),
+                'id': operator_member.id,
                 'persona': {
                     'active': True,
                     'country': False,
@@ -227,3 +233,20 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
             ],
         ):
             channel.execute_command_help()
+
+    def test_livechat_manager_can_invite_anyone(self):
+        channel = self.env["discuss.channel"].create(
+            {
+                "channel_type": "livechat",
+                "livechat_operator_id": self.operators[2].partner_id.id,
+                "name": "test",
+            }
+        )
+        other_member = channel.with_user(self.operators[0]).add_members(
+            partner_ids=self.operators[1].partner_id.ids
+        )
+        self.assertEqual(other_member.partner_id, self.operators[1].partner_id)
+        self_member = channel.with_user(self.operators[0]).add_members(
+            partner_ids=self.operators[0].partner_id.ids
+        )
+        self.assertEqual(self_member.partner_id, self.operators[0].partner_id)

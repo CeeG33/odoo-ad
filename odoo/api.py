@@ -381,6 +381,22 @@ def model(method):
     return method
 
 
+def private(method):
+    """ Decorate a record-style method to indicate that the method cannot be
+        called using RPC. Example::
+
+            @api.private
+            def method(self, args):
+                ...
+
+        If you have business methods that should not be called over RPC, you
+        should prefix them with "_". This decorator may be used in case of
+        existing public methods that become non-RPC callable or for ORM
+        methods.
+    """
+    method._api_private = True
+    return method
+
 _create_logger = logging.getLogger(__name__ + '.create')
 
 
@@ -486,11 +502,17 @@ class Environment(Mapping):
         """ Reset the transaction, see :meth:`Transaction.reset`. """
         self.transaction.reset()
 
-    def __new__(cls, cr, uid, context, su=False):
+    def __new__(cls, cr, uid, context, su=False, uid_origin=None):
+        assert isinstance(cr, BaseCursor)
         if uid == SUPERUSER_ID:
             su = True
+
+        # isinstance(uid, int) is to handle `RequestUID`
+        uid_origin = uid_origin or (uid if isinstance(uid, int) else None)
+        if uid_origin == SUPERUSER_ID:
+            uid_origin = None
+
         assert context is not None
-        args = (cr, uid, context, su)
 
         # determine transaction object
         transaction = cr.transaction
@@ -499,13 +521,13 @@ class Environment(Mapping):
 
         # if env already exists, return it
         for env in transaction.envs:
-            if env.args == args:
+            if (env.cr, env.uid, env.context, env.su, env.uid_origin) == (cr, uid, context, su, uid_origin):
                 return env
 
         # otherwise create environment, and add it in the set
         self = object.__new__(cls)
-        args = (cr, uid, frozendict(context), su)
-        self.cr, self.uid, self.context, self.su = self.args = args
+        self.cr, self.uid, self.context, self.su = self.args = (cr, uid, frozendict(context), su)
+        self.uid_origin = uid_origin
 
         self.transaction = self.all = transaction
         self.registry = transaction.registry
@@ -561,7 +583,7 @@ class Environment(Mapping):
         if context is None:
             context = clean_context(self.context) if su and not self.su else self.context
         su = (user is None and self.su) if su is None else su
-        return Environment(cr, uid, context, su)
+        return Environment(cr, uid, context, su, self.uid_origin)
 
     def ref(self, xml_id, raise_if_not_found=True):
         """ Return the record corresponding to the given ``xml_id``.
@@ -691,6 +713,7 @@ class Environment(Mapping):
             This may be useful when recovering from a failed ORM operation.
         """
         lazy_property.reset_all(self)
+        self._cache_key.clear()
         self.transaction.clear()
 
     def invalidate_all(self, flush=True):
@@ -808,6 +831,8 @@ class Environment(Mapping):
                     return get_context('lang') or None
                 elif key == 'active_test':
                     return get_context('active_test', field.context.get('active_test', True))
+                elif key.startswith('bin_size'):
+                    return bool(get_context(key))
                 else:
                     val = get_context(key)
                     if type(val) is list:
@@ -867,6 +892,7 @@ class Transaction:
         for env in self.envs:
             env.registry = self.registry
             lazy_property.reset_all(env)
+            env._cache_key.clear()
         self.clear()
 
 
@@ -904,6 +930,10 @@ class Cache(object):
         # cache, but not yet written in the database; their changed values are
         # in `_data`
         self._dirty = defaultdict(OrderedSet)
+
+        # {field: {record_id: ids}} record ids to be added to the values of
+        # x2many fields if they are not in cache yet
+        self._patches = defaultdict(lambda: defaultdict(list))
 
     def __repr__(self):
         # for debugging: show the cache content and dirty flags as stars
@@ -968,6 +998,8 @@ class Cache(object):
             cache_value = field_cache[record._ids[0]]
             if field.translate and cache_value is not None:
                 lang = field._lang(record.env)
+                if not (field.compute or field.store and record._origin):
+                    return cache_value.get(lang, cache_value.get('en_US'))
                 return cache_value[lang]
             return cache_value
         except KeyError:
@@ -987,27 +1019,33 @@ class Cache(object):
             dirty must raise an exception
         """
         field_cache = self._set_field_cache(record, field)
+        record_id = record.id
+
         if field.translate and value is not None:
             # only for model translated fields
             lang = record.env.lang or 'en_US'
-            cache_value = field_cache.get(record._ids[0]) or {}
+            cache_value = field_cache.get(record_id) or {}
             cache_value[lang] = value
+            if not (field.compute or field.store and record._origin):
+                cache_value.setdefault('en_US', value)
             value = cache_value
-        field_cache[record._ids[0]] = value
+
+        field_cache[record_id] = value
 
         if not check_dirty:
             return
+
         if dirty:
-            assert field.column_type and field.store and record.id
-            self._dirty[field].add(record.id)
+            assert field.column_type and field.store and record_id
+            self._dirty[field].add(record_id)
             if record.pool.field_depends_context[field]:
                 # put the values under conventional context key values {'context_key': None},
                 # in order to ease the retrieval of those values to flush them
                 context_none = dict.fromkeys(record.pool.field_depends_context[field])
                 record = record.with_env(record.env(context=context_none))
                 field_cache = self._set_field_cache(record, field)
-                field_cache[record._ids[0]] = value
-        elif record.id in self._dirty.get(field, ()):
+                field_cache[record_id] = value
+        elif record_id in self._dirty.get(field, ()):
             _logger.error("cache.set() removing flag dirty on %s.%s", record, field.name, stack_info=True)
 
     def update(self, records, field, values, dirty=False, check_dirty=True):
@@ -1023,15 +1061,17 @@ class Cache(object):
         """
         if field.translate:
             # only for model translated fields
-            lang = records.env.lang or 'en_US'
+            lang = (records.env.lang or 'en_US') if dirty else field._lang(records.env)
             field_cache = self._get_field_cache(records, field)
             cache_values = []
-            for id_, value in zip(records._ids, values):
+            for record, value in zip(records, values):
                 if value is None:
                     cache_values.append(None)
                 else:
-                    cache_value = field_cache.get(id_) or {}
+                    cache_value = field_cache.get(record.id) or {}
                     cache_value[lang] = value
+                    if not (field.compute or field.store and record._origin):
+                        cache_value.setdefault('en_US', value)
                     cache_values.append(cache_value)
             values = cache_values
 
@@ -1094,6 +1134,34 @@ class Cache(object):
             for id_, val in zip(records._ids, values):
                 field_cache.setdefault(id_, val)
 
+    def patch(self, records, field, new_id):
+        """ Apply a patch to an x2many field on new records. The patch consists
+        in adding new_id to its value in cache. If the value is not in cache
+        yet, it will be applied once the value is put in cache with method
+        :meth:`patch_and_set`.
+        """
+        assert not new_id, "Cache.patch can only be called with a new id"
+        field_cache = self._set_field_cache(records, field)
+        for id_ in records._ids:
+            assert not id_, "Cache.patch can only be called with new records"
+            if id_ in field_cache:
+                field_cache[id_] = tuple(dict.fromkeys(field_cache[id_] + (new_id,)))
+            else:
+                self._patches[field][id_].append(new_id)
+
+    def patch_and_set(self, record, field, value):
+        """ Set the value of ``field`` for ``record``, like :meth:`set`, but
+        apply pending patches to ``value`` and return the value actually put
+        in cache.
+        """
+        field_patches = self._patches.get(field)
+        if field_patches:
+            ids = field_patches.pop(record.id, ())
+            if ids:
+                value = tuple(dict.fromkeys(value + tuple(ids)))
+        self.set(record, field, value)
+        return value
+
     def remove(self, record, field):
         """ Remove the value of ``field`` for ``record``. """
         assert record.id not in self._dirty.get(field, ())
@@ -1136,7 +1204,7 @@ class Cache(object):
         """ Return the subset of ``records`` that has not ``value`` for ``field``. """
         field_cache = self._get_field_cache(records, field)
         if field.translate:
-            lang = records.env.lang or 'en_US'
+            lang = field._lang(records.env)
 
             def get_value(id_):
                 cache_value = field_cache[id_]
@@ -1151,6 +1219,8 @@ class Cache(object):
             except KeyError:
                 ids.append(record_id)
             else:
+                if field.type == "monetary":
+                    value = field.convert_to_cache(value, records.browse(record_id))
                 if val != value:
                     ids.append(record_id)
         return records.browse(ids)
@@ -1252,6 +1322,7 @@ class Cache(object):
         """ Invalidate the cache and its dirty flags. """
         self._data.clear()
         self._dirty.clear()
+        self._patches.clear()
 
     def check(self, env):
         """ Check the consistency of the cache for the given environment. """
@@ -1319,3 +1390,4 @@ class Starred:
 # keep those imports here in order to handle cyclic dependencies correctly
 from odoo import SUPERUSER_ID
 from odoo.modules.registry import Registry
+from .sql_db import BaseCursor

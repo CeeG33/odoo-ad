@@ -7,6 +7,7 @@ from stdnum.fr import siret
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EAS_MAPPING
+from odoo.addons.account.models.company import PEPPOL_DEFAULT_COUNTRIES
 
 
 class ResPartner(models.Model):
@@ -79,8 +80,12 @@ class ResPartner(models.Model):
             ('0213', "0213 - Finnish Organization Value Add Tax Identifier"),
             ('0215', "0215 - Net service ID"),
             ('0216', "0216 - OVTcode"),
+            ('0218', "0218 - Unified registration number (Latvia)"),
             ('0221', "0221 - The registered number of the qualified invoice issuer (Japan)"),
+            ('0225', "0225 - FRCTC Electronic Address (France)"),
             ('0230', "0230 - National e-Invoicing Framework (Malaysia)"),
+            ('0235', "0235 - UAE Tax Identification Number (TIN)"),
+            ('0240', "0240 - Register of legal persons (France)"),
             ('9901', "9901 - Danish Ministry of the Interior and Health"),
             ('9910', "9910 - Hungary VAT number"),
             ('9913', "9913 - Business Registers Network"),
@@ -119,13 +124,29 @@ class ResPartner(models.Model):
             ('9949', "9949 - Slovenia VAT number"),
             ('9950', "9950 - Slovakia VAT number"),
             ('9951', "9951 - San Marino VAT number"),
-            ('9952', "9952 - Turkey VAT number"),
+            ('9952', "9952 - Türkiye VAT number"),
             ('9953', "9953 - Holy See (Vatican City State) VAT number"),
             ('9955', "9955 - Swedish VAT number"),
             ('9957', "9957 - French VAT number"),
             ('9959', "9959 - Employer Identification Number (EIN, USA)"),
+            ('AN', "AN - O.F.T.P. (ODETTE File Transfer Protocol)"),
+            ('AQ', "AQ - X.400 address for mail text"),
+            ('AS', "AS - AS2 exchange"),
+            ('AU', "AU - File Transfer Protocol"),
+            ('EM', "EM - Electronic mail"),
         ]
     )
+    hide_peppol_fields = fields.Boolean(compute='_compute_hide_peppol_fields')
+
+    @api.constrains('peppol_eas')
+    def _check_peppol_eas(self):
+        for partner in self:
+            if partner.peppol_eas in ('0037', '0212', '0213', '0215'):
+                raise ValidationError(_("Peppol EAS codes 0037, 0212, 0213, 0215 are deprecated. Please use 0216 instead."))
+            elif partner.peppol_eas == '9955':
+                raise ValidationError(_("Peppol EAS code 9955 is deprecated. Please use 0007 instead."))
+            elif partner.peppol_eas == '9901':
+                raise ValidationError(_("Peppol EAS code 9901 is deprecated. Please use a different Danish EAS code instead."))
 
     @api.constrains('peppol_endpoint')
     def _check_peppol_fields(self):
@@ -135,38 +156,49 @@ class ResPartner(models.Model):
                 if error:
                     raise ValidationError(error)
 
-    @api.depends('country_code')
+    @api.model
+    def _get_ubl_cii_formats(self):
+        return {
+            'DE': 'xrechnung',
+            'AU': 'ubl_a_nz',
+            'NZ': 'ubl_a_nz',
+            'NL': 'nlcius',
+            'FR': 'facturx',
+            'SG': 'ubl_sg',
+        }
+
+    def _peppol_eas_endpoint_depends(self):
+        # field dependencies of methods _compute_peppol_endpoint() and _compute_peppol_eas()
+        # because we need to extend depends in l10n modules
+        return ['country_code', 'vat', 'company_registry']
+
+    @api.depends(lambda self: self._peppol_eas_endpoint_depends())
     def _compute_ubl_cii_format(self):
+        format_mapping = self._get_ubl_cii_formats()
         for partner in self:
-            if partner.country_code == 'DE':
-                partner.ubl_cii_format = 'xrechnung'
-            elif partner.country_code in ('AU', 'NZ'):
-                partner.ubl_cii_format = 'ubl_a_nz'
-            elif partner.country_code == 'NL':
-                partner.ubl_cii_format = 'nlcius'
-            elif partner.country_code == 'FR':
-                partner.ubl_cii_format = 'facturx'
-            elif partner.country_code == 'SG':
-                partner.ubl_cii_format = 'ubl_sg'
-            elif partner.country_code in EAS_MAPPING:
+            country_code = partner._deduce_country_code()
+            if country_code in format_mapping:
+                partner.ubl_cii_format = format_mapping[country_code]
+            elif country_code in PEPPOL_DEFAULT_COUNTRIES and country_code in EAS_MAPPING:
                 partner.ubl_cii_format = 'ubl_bis3'
             else:
                 partner.ubl_cii_format = partner.ubl_cii_format
 
-    @api.depends('peppol_eas')
+    @api.depends(lambda self: self._peppol_eas_endpoint_depends() + ['peppol_eas'])
     def _compute_peppol_endpoint(self):
         """ If the EAS changes and a valid endpoint is available, set it. Otherwise, keep the existing value."""
         for partner in self:
             partner.peppol_endpoint = partner.peppol_endpoint
-            if partner.country_code in EAS_MAPPING:
-                field = EAS_MAPPING[partner.country_code].get(partner.peppol_eas)
+            country_code = partner._deduce_country_code()
+            if country_code in EAS_MAPPING:
+                field = EAS_MAPPING[country_code].get(partner.peppol_eas)
                 if field \
                         and field in partner._fields \
                         and partner[field] \
                         and not partner._build_error_peppol_endpoint(partner.peppol_eas, partner[field]):
                     partner.peppol_endpoint = partner[field]
 
-    @api.depends('country_code')
+    @api.depends(lambda self: self._peppol_eas_endpoint_depends())
     def _compute_peppol_eas(self):
         """
         If the country_code changes, recompute the EAS only if there is a country_code, it exists in the
@@ -174,10 +206,11 @@ class ResPartner(models.Model):
         """
         for partner in self:
             partner.peppol_eas = partner.peppol_eas
-            if partner.country_code and partner.country_code in EAS_MAPPING:
-                eas_to_field = EAS_MAPPING[partner.country_code]
+            country_code = partner._deduce_country_code()
+            if country_code in EAS_MAPPING:
+                eas_to_field = EAS_MAPPING[country_code]
                 if partner.peppol_eas not in eas_to_field.keys():
-                    new_eas = list(EAS_MAPPING[partner.country_code].keys())[0]
+                    new_eas = next(iter(EAS_MAPPING[country_code].keys()))
                     # Iterate on the possible EAS until a valid one is found
                     for eas, field in eas_to_field.items():
                         if field and field in partner._fields and partner[field]:
@@ -186,12 +219,22 @@ class ResPartner(models.Model):
                                 break
                     partner.peppol_eas = new_eas
 
+    @api.depends('ubl_cii_format')
+    def _compute_hide_peppol_fields(self):
+        """ Hides the people fields depending on the UBL format. Can be extended to add different hiding conditions. """
+        for partner in self:
+            partner.hide_peppol_fields = not partner.ubl_cii_format or partner.ubl_cii_format == 'facturx'
+
     def _build_error_peppol_endpoint(self, eas, endpoint):
         """ This function contains all the rules regarding the peppol_endpoint."""
         if eas == '0208' and not re.match(r"^\d{10}$", endpoint):
             return _("The Peppol endpoint is not valid. The expected format is: 0239843188")
         if eas == '0009' and not siret.is_valid(endpoint):
             return _("The Peppol endpoint is not valid. The expected format is: 73282932000074")
+        if eas == '0007' and not re.match(r"^\d{10}$", endpoint):
+            return _("The Peppol endpoint is not valid. "
+                     "It should contain exactly 10 digits (Company Registry number)."
+                     "The expected format is: 1234567890")
 
     def _get_edi_builder(self):
         self.ensure_one()

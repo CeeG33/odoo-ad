@@ -52,7 +52,8 @@ export class LinkTools extends Link {
 
     setup() {
         super.setup(...arguments);
-        onWillUpdateProps((newProps) => {
+        onWillUpdateProps(async (newProps) => {
+            await this.mountedPromise;
             this.$link = newProps.link ? $(newProps.link) : this.link;
             this._setSelectOptionFromLink();
             this._updateOptionsUI();
@@ -439,6 +440,9 @@ export class LinkTools extends Link {
         this._setSelectOption($target, true);
         this._updateOptionsUI();
         this._adaptPreview();
+        // Reactivate the snippet to update the Button snippet editor's visibility
+        // if the element type has changed (e.g., from button to link or vice versa).
+        this.props.wysiwyg.snippetsMenu.activateSnippet($(this.linkEl));
     }
     /**
      * Sets the border width on the link.
@@ -532,5 +536,5 @@ export class LinkTools extends Link {
 }
 
 export function shouldUnlink(link, colorCombinationClass) {
-    return !link.getAttribute('href') && !colorCombinationClass;
+    return (!link.getAttribute("href") && !link.matches(".oe_unremovable")) && !colorCombinationClass;
 }

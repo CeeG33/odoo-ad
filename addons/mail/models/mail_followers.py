@@ -349,6 +349,8 @@ class Followers(models.Model):
           share status of partner (returned only if include_pshare is True)
           active flag status of partner (returned only if include_active is True)
         """
+        self.env['mail.followers'].flush_model(['partner_id', 'res_id', 'res_model', 'subtype_ids'])
+        self.env['res.partner'].flush_model(['active', 'partner_share'])
         # base query: fetch followers of given documents
         where_clause = ' OR '.join(['fol.res_model = %s AND fol.res_id IN %s'] * len(doc_data))
         where_params = list(itertools.chain.from_iterable((rm, tuple(rids)) for rm, rids in doc_data))
@@ -517,5 +519,7 @@ GROUP BY fol.id%s%s""" % (
             'display_name': follower.display_name,
             'email': follower.email,
             'is_active': follower.is_active,
-            'partner': follower.partner_id.mail_partner_format()[follower.partner_id],
+            # sudo: res.partner - can read partners of found followers, in particular allows
+            # by-passing multi-company ACL for portal partners
+            'partner': follower.partner_id.sudo().mail_partner_format()[follower.partner_id],
         } for follower in self]

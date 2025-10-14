@@ -4,11 +4,11 @@ import { _t } from "@web/core/l10n/translation";
 import { is24HourFormat } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
 import { renderToString } from "@web/core/utils/render";
-import { useDebounced } from "@web/core/utils/timing";
 import { getColor } from "../colors";
 import { useCalendarPopover, useClickHandler, useFullCalendar } from "../hooks";
 import { CalendarCommonPopover } from "./calendar_common_popover";
 import { browser } from "@web/core/browser/browser";
+import { getWeekNumber } from "../utils";
 
 import { Component, onMounted, useEffect } from "@odoo/owl";
 
@@ -48,7 +48,6 @@ export class CalendarCommonRenderer extends Component {
         this.fc = useFullCalendar("fullCalendar", this.options);
         this.click = useClickHandler(this.onClick, this.onDblClick);
         this.popover = useCalendarPopover(this.constructor.components.Popover);
-        this.onWindowResizeDebounced = useDebounced(this.onWindowResize, 200);
 
         onMounted(() => {
             if (this.props.model.scale === "day" || this.props.model.scale === "week") {
@@ -68,7 +67,7 @@ export class CalendarCommonRenderer extends Component {
 
     get options() {
         return {
-            allDaySlot: this.props.model.hasAllDaySlot,
+            allDaySlot: true,
             allDayText: _t(""),
             columnHeaderFormat: this.env.isSmall
                 ? SHORT_SCALE_TO_HEADER_FORMAT[this.props.model.scale]
@@ -109,13 +108,14 @@ export class CalendarCommonRenderer extends Component {
             slotLabelFormat: is24HourFormat() ? HOUR_FORMATS[24] : HOUR_FORMATS[12],
             snapDuration: { minutes: 15 },
             timeZone: luxon.Settings.defaultZone.name,
+            timeGridEventMinHeight : 15,
             unselectAuto: false,
             weekLabel: this.props.model.scale === "month" && this.env.isSmall ? "" : _t("Week"),
             weekends: this.props.isWeekendVisible,
-            weekNumberCalculation: "ISO",
+            weekNumberCalculation: (date) => getWeekNumber(date, this.props.model.firstDayOfWeek),
             weekNumbers: true,
             weekNumbersWithinDays: !this.env.isSmall,
-            windowResize: this.onWindowResizeDebounced,
+            windowResize: this.onWindowResize,
             columnHeaderHtml: this.getHeaderHtml,
         };
     }
@@ -153,9 +153,9 @@ export class CalendarCommonRenderer extends Component {
             title: record.title,
             start: record.start.toISO(),
             end:
-                ["week", "month"].includes(this.props.model.scale) &&
-                (record.isAllDay ||
-                    (allDay && record.end.toMillis() !== record.end.startOf("day").toMillis()))
+                (["week", "month"].includes(this.props.model.scale) && allDay) ||
+                record.isAllDay ||
+                (allDay && record.end.toMillis() !== record.end.startOf("day").toMillis())
                     ? record.end.plus({ days: 1 }).toISO()
                     : record.end.toISO(),
             allDay: allDay,
@@ -194,11 +194,7 @@ export class CalendarCommonRenderer extends Component {
         this.highlightEvent(info.event, "o_cw_custom_highlight");
     }
     onDateClick(info) {
-        if (this.env.isSmall && this.props.model.scale === "month") {
-            this.props.model.load({
-                date: luxon.DateTime.fromISO(info.dateStr),
-                scale: "day",
-            });
+        if (info?.jsEvent?.defaultPrevented) {
             return;
         }
         this.props.createRecord(this.fcEventToRecord(info));
@@ -268,6 +264,7 @@ export class CalendarCommonRenderer extends Component {
         }
     }
     async onSelect(info) {
+        info.jsEvent.preventDefault();
         this.popover.close();
         await this.props.createRecord(this.fcEventToRecord(info));
         this.fc.api.unselect();
@@ -296,7 +293,20 @@ export class CalendarCommonRenderer extends Component {
             }
         }
         if (id) {
-            res.id = this.props.model.records[id].id;
+            const existingRecord = this.props.model.records[id];
+            if (this.props.model.scale === "month") {
+                res.start = res.start?.set({
+                    hour: existingRecord.start.hour,
+                    minute: existingRecord.start.minute,
+                });
+                if (existingRecord.end) {
+                    res.end = res.end?.set({
+                        hour: existingRecord.end.hour,
+                        minute: existingRecord.end.minute,
+                    });
+                }
+            }
+            res.id = existingRecord.id;
         }
         return res;
     }

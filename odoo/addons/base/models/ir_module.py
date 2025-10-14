@@ -79,6 +79,7 @@ class ModuleCategory(models.Model):
     _name = "ir.module.category"
     _description = "Application"
     _order = 'name'
+    _allow_sudo_commands = False
 
     name = fields.Char(string='Name', required=True, translate=True, index=True)
     parent_id = fields.Many2one('ir.module.category', string='Parent Application', index=True)
@@ -116,7 +117,14 @@ class MyFilterMessages(Transform):
     default_priority = 870
 
     def apply(self):
-        for node in self.document.traverse(nodes.system_message):
+        # Use `findall()` if available (docutils >= 0.20), otherwise fallback to `traverse()`.
+        # This ensures compatibility across environments with different docutils versions.
+        if hasattr(self.document, 'findall'):
+            nodes_iter = self.document.findall(nodes.system_message)
+        else:
+            nodes_iter = self.document.traverse(nodes.system_message)
+
+        for node in nodes_iter:
             _logger.warning("docutils' system message present: %s", str(node))
             node.parent.remove(node)
 
@@ -153,6 +161,7 @@ class Module(models.Model):
     _rec_names_search = ['name', 'shortdesc', 'summary']
     _description = "Module"
     _order = 'application desc,sequence,name'
+    _allow_sudo_commands = False
 
     @classmethod
     def get_module_info(cls, name):
@@ -164,6 +173,13 @@ class Module(models.Model):
 
     @api.depends('name', 'description')
     def _get_desc(self):
+        def _apply_description_images(doc):
+            html = lxml.html.document_fromstring(doc)
+            for element, _attribute, _link, _pos in html.iterlinks():
+                if element.get('src') and not '//' in element.get('src') and not 'static/' in element.get('src'):
+                    element.set('src', "/%s/static/description/%s" % (module.name, element.get('src')))
+            return tools.html_sanitize(lxml.html.tostring(html))
+
         for module in self:
             if not module.name:
                 module.description_html = False
@@ -190,11 +206,7 @@ class Module(models.Model):
                                 f"is not utf-8)",
                                 category=DeprecationWarning,
                             )
-                    html = lxml.html.document_fromstring(doc)
-                    for element, attribute, link, pos in html.iterlinks():
-                        if element.get('src') and not '//' in element.get('src') and not 'static/' in element.get('src'):
-                            element.set('src', "/%s/static/description/%s" % (module.name, element.get('src')))
-                    module.description_html = tools.html_sanitize(lxml.html.tostring(html))
+                    module.description_html = _apply_description_images(doc)
             except FileNotFoundError:
                 overrides = {
                     'embed_stylesheet': False,
@@ -204,7 +216,7 @@ class Module(models.Model):
                     'file_insertion_enabled': False,
                 }
                 output = publish_string(source=module.description if not module.application and module.description else '', settings_overrides=overrides, writer=MyWriter())
-                module.description_html = tools.html_sanitize(output)
+                module.description_html = _apply_description_images(output)
 
     @api.depends('name')
     def _get_latest_version(self):
@@ -246,18 +258,17 @@ class Module(models.Model):
 
     @api.depends('icon')
     def _get_icon_image(self):
+        self.icon_image = ''
         for module in self:
-            module.icon_image = ''
+            if not module.id:
+                continue
             if module.icon:
-                path_parts = module.icon.split('/')
-                path = os.path.join(path_parts[1], *path_parts[2:])
-            elif module.id:
-                path = modules.module.get_module_icon_path(module)
+                path = os.path.join(module.icon.lstrip("/"))
             else:
-                path = ''
+                path = modules.module.get_module_icon_path(module)
             if path:
                 try:
-                    with tools.file_open(path, 'rb') as image_file:
+                    with tools.file_open(path, 'rb', filter_ext=('.png', '.svg', '.gif', '.jpeg', '.jpg')) as image_file:
                         module.icon_image = base64.b64encode(image_file.read())
                 except FileNotFoundError:
                     module.icon_image = ''
@@ -777,11 +788,14 @@ class Module(models.Model):
                 mod = self.create(dict(name=mod_name, state=state, **values))
                 res[1] += 1
 
-            mod._update_dependencies(terp.get('depends', []), terp.get('auto_install'))
-            mod._update_exclusions(terp.get('excludes', []))
-            mod._update_category(terp.get('category', 'Uncategorized'))
+            mod._update_from_terp(terp)
 
         return res
+
+    def _update_from_terp(self, terp):
+        self._update_dependencies(terp.get('depends', []), terp.get('auto_install'))
+        self._update_exclusions(terp.get('excludes', []))
+        self._update_category(terp.get('category', 'Uncategorized'))
 
     def _update_dependencies(self, depends=None, auto_install_requirements=()):
         self.env['ir.module.module.dependency'].flush_model()
@@ -808,9 +822,14 @@ class Module(models.Model):
 
     def _update_category(self, category='Uncategorized'):
         current_category = self.category_id
+        seen = set()
         current_category_path = []
         while current_category:
             current_category_path.insert(0, current_category.name)
+            seen.add(current_category.id)
+            if current_category.parent_id.id in seen:
+                current_category.parent_id = False
+                _logger.warning('category %r ancestry loop has been detected and fixed', current_category)
             current_category = current_category.parent_id
 
         categs = category.split('/')
@@ -919,11 +938,12 @@ class Module(models.Model):
             if not modpath:
                 continue
             for lang in langs:
-                po_paths = get_po_paths(module_name, lang)
-                for po_path in po_paths:
+                is_lang_imported = False
+                for po_path in get_po_paths(module_name, lang):
                     _logger.info('module %s: loading translation file %s for language %s', module_name, po_path, lang)
                     translation_importer.load_file(po_path, lang)
-                if lang != 'en_US' and not po_paths:
+                    is_lang_imported = True
+                if lang != 'en_US' and not is_lang_imported:
                     _logger.info('module %s: no translation for language %s', module_name, lang)
 
         translation_importer.save(overwrite=overwrite)
@@ -935,6 +955,7 @@ class ModuleDependency(models.Model):
     _name = "ir.module.module.dependency"
     _description = "Module dependency"
     _log_access = False  # inserts are done manually, create and write uid, dates are always null
+    _allow_sudo_commands = False
 
     # the dependency name
     name = fields.Char(index=True)
@@ -977,6 +998,7 @@ class ModuleDependency(models.Model):
 class ModuleExclusion(models.Model):
     _name = "ir.module.module.exclusion"
     _description = "Module exclusion"
+    _allow_sudo_commands = False
 
     # the exclusion name
     name = fields.Char(index=True)

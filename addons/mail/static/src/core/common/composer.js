@@ -11,11 +11,13 @@ import { prettifyMessageContent } from "@mail/utils/common/format";
 import { useSelection } from "@mail/utils/common/hooks";
 import { isDragSourceExternalFile } from "@mail/utils/common/misc";
 import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
+import { isMobileOS, hasTouch } from "@web/core/browser/feature_detection";
 
 import {
     Component,
     markup,
     onMounted,
+    onWillUnmount,
     useChildSubEnv,
     useEffect,
     useRef,
@@ -25,6 +27,7 @@ import {
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
+import { escape, sprintf } from "@web/core/utils/strings";
 
 const EDIT_CLICK_TYPE = {
     CANCEL: "cancel",
@@ -59,7 +62,7 @@ export class Composer extends Component {
         className: "",
         sidebar: true,
         showFullComposer: true,
-        allowUpload: true
+        allowUpload: true,
     };
     static props = [
         "composer",
@@ -76,7 +79,7 @@ export class Composer extends Component {
         "sidebar?",
         "type?",
         "showFullComposer?",
-        "allowUpload?"
+        "allowUpload?",
     ];
     static template = "mail.Composer";
 
@@ -118,6 +121,8 @@ export class Composer extends Component {
         });
         this.suggestion = this.store.user ? useSuggestion() : undefined;
         this.markEventHandled = markEventHandled;
+        this.isMobileOS = isMobileOS;
+        this.hasTouch = hasTouch;
         this.onDropFile = this.onDropFile.bind(this);
         if (this.props.dropzoneRef) {
             useDropzone(
@@ -153,7 +158,15 @@ export class Composer extends Component {
         );
         useEffect(
             () => {
+                let wasEmpty = false;
+                if (!this.fakeTextarea.el.value) {
+                    wasEmpty = true;
+                    this.fakeTextarea.el.value = "0";
+                }
                 this.ref.el.style.height = this.fakeTextarea.el.scrollHeight + "px";
+                if (wasEmpty) {
+                    this.fakeTextarea.el.value = "";
+                }
             },
             () => [this.props.composer.textInputContent, this.ref.el]
         );
@@ -170,6 +183,17 @@ export class Composer extends Component {
         onMounted(() => {
             this.ref.el.scrollTo({ top: 0, behavior: "instant" });
         });
+        onWillUnmount(() => {
+            this.props.composer.isFocused = false;
+        });
+        useEffect(
+            (composerThread, replyToThread) => {
+                if (replyToThread && replyToThread !== composerThread) {
+                    this.props.messageToReplyTo.cancel();
+                }
+            },
+            () => [this.props.composer.thread, this.props.messageToReplyTo?.thread]
+        );
     }
 
     get pickerSettings() {
@@ -209,20 +233,57 @@ export class Composer extends Component {
     }
 
     get CANCEL_OR_SAVE_EDIT_TEXT() {
-        return markup(
-            _t(
-                "<samp>%(cancel_keybind)s</samp><i> to <a href='#' data-type='%(cancel_type)s'>cancel</a></i>, <samp>%(save_keybind)s</samp><i> to <a href='#' data-type='%(save_type)s'>save</a></i>",
-                {
-                    cancel_keybind: _t("Escape"),
-                    cancel_type: EDIT_CLICK_TYPE.CANCEL,
-                    save_keybind: this.sendKeybind,
-                    save_type: EDIT_CLICK_TYPE.SAVE,
-                }
-            )
-        );
+        if (this.ui.isSmall) {
+            return markup(
+                sprintf(
+                    escape(
+                        _t(
+                            "%(open_button)s%(icon)s%(open_em)sDiscard editing%(close_em)s%(close_button)s"
+                        )
+                    ),
+                    {
+                        open_button: `<button class='btn px-1 py-0' data-type="${escape(
+                            EDIT_CLICK_TYPE.CANCEL
+                        )}">`,
+                        close_button: "</button>",
+                        icon: `<i class='fa fa-times-circle pe-1' data-type="${escape(
+                            EDIT_CLICK_TYPE.CANCEL
+                        )}"></i>`,
+                        open_em: `<em data-type="${escape(EDIT_CLICK_TYPE.CANCEL)}">`,
+                        close_em: "</em>",
+                    }
+                )
+            );
+        } else {
+            const translation1 = _t(
+                "%(open_samp)sEscape%(close_samp)s %(open_em)sto %(open_cancel)scancel%(close_cancel)s%(close_em)s, %(open_samp)sCTRL-Enter%(close_samp)s %(open_em)sto %(open_save)ssave%(close_save)s%(close_em)s"
+            );
+            const translation2 = _t(
+                "%(open_samp)sEscape%(close_samp)s %(open_em)sto %(open_cancel)scancel%(close_cancel)s%(close_em)s, %(open_samp)sEnter%(close_samp)s %(open_em)sto %(open_save)ssave%(close_save)s%(close_em)s"
+            );
+            return markup(
+                sprintf(escape(this.props.mode === "extended" ? translation1 : translation2), {
+                    open_samp: "<samp>",
+                    close_samp: "</samp>",
+                    open_em: "<em>",
+                    close_em: "</em>",
+                    open_cancel: `<a role="button" href="#" data-type="${escape(
+                        EDIT_CLICK_TYPE.CANCEL
+                    )}">`,
+                    close_cancel: "</a>",
+                    open_save: `<a role="button" href="#" data-type="${escape(
+                        EDIT_CLICK_TYPE.SAVE
+                    )}">`,
+                    close_save: "</a>",
+                })
+            );
+        }
     }
 
     get SEND_TEXT() {
+        if (this.props.composer.message) {
+            return _t("Save editing");
+        }
         return this.props.type === "note" ? _t("Log") : _t("Send");
     }
 
@@ -372,6 +433,9 @@ export class Composer extends Component {
                     ev.preventDefault();
                     return;
                 }
+                if (this.isMobileOS() || ev.isComposing) {
+                    return;
+                }
                 const shouldPost = this.props.mode === "extended" ? ev.ctrlKey : !ev.shiftKey;
                 if (!shouldPost) {
                     return;
@@ -404,17 +468,25 @@ export class Composer extends Component {
     async onClickFullComposer(ev) {
         if (this.props.type !== "note") {
             // auto-create partners of checked suggested partners
-            const emailsWithoutPartners = this.thread.suggestedRecipients
-                .filter((recipient) => recipient.checked && !recipient.persona)
-                .map((recipient) => recipient.email);
-            if (emailsWithoutPartners.length !== 0) {
+            const newPartners = this.thread.suggestedRecipients.filter(
+                (recipient) => recipient.checked && !recipient.persona
+            );
+            if (newPartners.length !== 0) {
+                const recipientEmails = [];
+                const recipientAdditionalValues = {};
+                newPartners.forEach((recipient) => {
+                    recipientEmails.push(recipient.email);
+                    recipientAdditionalValues[recipient.email] =
+                        recipient.defaultCreateValues || {};
+                });
                 const partners = await this.rpc("/mail/partner/from_email", {
-                    emails: emailsWithoutPartners,
+                    emails: recipientEmails,
+                    additional_values: recipientAdditionalValues,
                 });
                 for (const index in partners) {
                     const partnerData = partners[index];
                     const persona = this.store.Persona.insert({ ...partnerData, type: "partner" });
-                    const email = emailsWithoutPartners[index];
+                    const email = recipientEmails[index];
                     const recipient = this.thread.suggestedRecipients.find(
                         (recipient) => recipient.email === email
                     );
@@ -518,6 +590,10 @@ export class Composer extends Component {
     }
 
     async sendMessage() {
+        if (this.props.composer.message) {
+            this.editMessage();
+            return;
+        }
         await this.processMessage(async (value) => {
             const postData = {
                 attachments: this.props.composer.attachments,
@@ -551,7 +627,7 @@ export class Composer extends Component {
             this.notifySendFromMailbox();
         }
         this.suggestion?.clearRawMentions();
-        this.suggestion?.clearCannedReponses();
+        this.suggestion?.clearCannedResponses();
         this.props.messageToReplyTo?.cancel();
     }
 

@@ -19,7 +19,13 @@ class PosConfig(models.Model):
     # NOTE: this funtions acts as a m2m field with loyalty.program model. We do this to handle an excpetional use case:
     # When no PoS is specified at a loyalty program form, this program is applied to every PoS (instead of none)
     def _get_program_ids(self):
-        return self.env['loyalty.program'].search(['&', ('pos_ok', '=', True), '|', ('pos_config_ids', '=', self.id), ('pos_config_ids', '=', False)])
+        today = fields.Date.context_today(self)
+        return self.env['loyalty.program'].search([
+            ('pos_ok', '=', True),
+            '|', ('pos_config_ids', '=', self.id), ('pos_config_ids', '=', False),
+            '|', ('date_from', '=', False), ('date_from', '<=', today),
+            '|', ('date_to', '=', False), ('date_to', '>=', today)
+        ]).filtered(lambda p: not p.limit_usage or p.sudo().total_order_count < p.max_usage)
 
     def _check_before_creating_new_session(self):
         self.ensure_one()
@@ -73,11 +79,11 @@ class PosConfig(models.Model):
 
     def use_coupon_code(self, code, creation_date, partner_id, pricelist_id):
         self.ensure_one()
-        # Ordering by partner id to use the first assigned to the partner in case multiple coupons have the same code
-        #  it could happen with loyalty programs using a code
         # Points desc so that in coupon mode one could use a coupon multiple times
         coupon = self.env['loyalty.card'].search(
-            [('program_id', 'in', self._get_program_ids().ids), ('partner_id', 'in', (False, partner_id)), ('code', '=', code)],
+            [('program_id', 'in', self._get_program_ids().ids),
+             '|', ('partner_id', 'in', (False, partner_id)), ('program_type', '=', 'gift_card'),
+             ('code', '=', code)],
             order='partner_id, points desc', limit=1)
         program = coupon.program_id
         if not coupon or not program.active:

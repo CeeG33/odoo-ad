@@ -3,17 +3,18 @@
 # 	* base_import_module
 # 
 # Translators:
-# Wil Odoo, 2023
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2023
-# Jolien De Paepe, 2023
+# Jolien De Paepe, 2024
+# Manon Rondou, 2024
+# Wil Odoo, 2024
+# Erwin van der Ploeg <erwin@odooexperts.nl>, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"POT-Creation-Date: 2024-11-18 09:37+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2024\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,8 +31,12 @@ msgid ""
 "You may need the Enterprise version to install the data module. Please visit https://www.odoo.com/pricing-plan for more information.\n"
 "If you need Website themes, it can be downloaded from https://github.com/odoo/design-themes.\n"
 msgstr ""
+"\n"
+"Mogelijk heb je de Enterprise-versie nodig om de gegevensmodule te installeren. Ga naar https://www.odoo.com/pricing-plan voor meer informatie.\n"
+"Als je website-thema's nodig hebt, kan je deze downloaden van https://github.com/odoo/design-themes.\n"
 
 #. module: base_import_module
+#: model_terms:ir.ui.view,arch_db:base_import_module.module_form_apps_inherit
 #: model_terms:ir.ui.view,arch_db:base_import_module.module_view_kanban_apps_inherit
 msgid "Activate"
 msgstr "Activeer"
@@ -96,6 +101,21 @@ msgstr "Schermnaam"
 #. module: base_import_module
 #. odoo-python
 #: code:addons/base_import_module/models/ir_module.py:0
+#, python-format
+msgid ""
+"Error while importing module '%(module)s'.\n"
+"\n"
+" %(error_message)s \n"
+"\n"
+msgstr ""
+"Fout tijdens het importeren van de module '%(module)s'.\n"
+"\n"
+" %(error_message)s \n"
+"\n"
+
+#. module: base_import_module
+#. odoo-python
+#: code:addons/base_import_module/models/ir_module.py:0
 #: code:addons/base_import_module/models/ir_module.py:0
 #, python-format
 msgid "File '%s' exceed maximum allowed file size"
@@ -132,11 +152,6 @@ msgid "Import Module"
 msgstr "Importeer module"
 
 #. module: base_import_module
-#: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
-msgid "Import demo data"
-msgstr "Importeer demo gegevens"
-
-#. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__with_demo
 msgid "Import demo data of module"
 msgstr "Importeer demogegevens van de module"
@@ -149,12 +164,19 @@ msgstr "Geïmporteerde module"
 #. module: base_import_module
 #: model:ir.model.fields.selection,name:base_import_module.selection__ir_module_module__module_type__industries
 msgid "Industries"
-msgstr "Bedrijfstakken"
+msgstr "Sectoren"
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
 msgid "Install"
 msgstr "Installeren"
+
+#. module: base_import_module
+#. odoo-python
+#: code:addons/base_import_module/models/ir_module.py:0
+#, python-format
+msgid "Install an Industry"
+msgstr "Installeer een industrie"
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
@@ -172,6 +194,22 @@ msgid "Last Updated on"
 msgstr "Laatst bijgewerkt op"
 
 #. module: base_import_module
+#: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
+msgid "Load demo data"
+msgstr "Laad demo data"
+
+#. module: base_import_module
+#. odoo-python
+#: code:addons/base_import_module/models/ir_module.py:0
+#, python-format
+msgid ""
+"Load demo data to test the industry's features with sample records. Do not "
+"load them if this is your production database."
+msgstr ""
+"Laad demogegevens om de functies van de bedrijfssector te testen met "
+"voorbeeldrecords. Laad ze niet als dit je productiedatabase is."
+
+#. module: base_import_module
 #: model:ir.model,name:base_import_module.model_ir_module_module
 msgid "Module"
 msgstr "Module"
@@ -185,6 +223,11 @@ msgstr "ZIP-bestand module"
 #: model:ir.model.fields,field_description:base_import_module.field_ir_module_module__module_type
 msgid "Module Type"
 msgstr "Soort module"
+
+#. module: base_import_module
+#: model:ir.model,name:base_import_module.model_base_module_uninstall
+msgid "Module Uninstall"
+msgstr "Module verwijderen"
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
@@ -216,6 +259,13 @@ msgstr "Officiële apps"
 
 #. module: base_import_module
 #. odoo-python
+#: code:addons/base_import_module/models/ir_module.py:0
+#, python-format
+msgid "Only administrators can install data modules."
+msgstr "Enkel beheerders kunnen gegevensmodules installeren."
+
+#. module: base_import_module
+#. odoo-python
 #: code:addons/base_import_module/controllers/main.py:0
 #, python-format
 msgid "Only administrators can upload a module"
@@ -237,22 +287,8 @@ msgstr "Status"
 #. odoo-python
 #: code:addons/base_import_module/models/ir_module.py:0
 #, python-format
-msgid "Studio customizations require Studio"
-msgstr "Studio aanpassingen vereisen Studio"
-
-#. module: base_import_module
-#. odoo-python
-#: code:addons/base_import_module/models/ir_module.py:0
-#, python-format
 msgid "Studio customizations require the Odoo Studio app."
 msgstr "Studio aanpassingen vereisen de Odoo Studio app."
-
-#. module: base_import_module
-#. odoo-python
-#: code:addons/base_import_module/models/ir_module.py:0
-#, python-format
-msgid "The following modules will also be installed:\n"
-msgstr ""
 
 #. module: base_import_module
 #. odoo-python
@@ -262,6 +298,8 @@ msgid ""
 "The installation of the data module would fail as the following dependencies"
 " can't be found in the addons-path:\n"
 msgstr ""
+"De installatie van de gegevensmodule zou mislukken omdat de volgende "
+"afhankelijkheden niet kunnen worden gevonden in de addons-path:\n"
 
 #. module: base_import_module
 #. odoo-python
@@ -281,6 +319,14 @@ msgid "The module %s cannot be downloaded"
 msgstr "De module %s kan niet worden gedownload"
 
 #. module: base_import_module
+#. odoo-python
+#: code:addons/base_import_module/models/ir_module.py:0
+#, python-format
+msgid "Unknown module dependencies:"
+msgstr "Onbekende module-afhankelijkheden:"
+
+#. module: base_import_module
+#: model_terms:ir.ui.view,arch_db:base_import_module.module_form_apps_inherit
 #: model_terms:ir.ui.view,arch_db:base_import_module.module_view_kanban_apps_inherit
 msgid "Upgrade"
 msgstr "Upgraden"
@@ -293,7 +339,7 @@ msgstr "Bekijk"
 #. module: base_import_module
 #: model:ir.model.fields.selection,name:base_import_module.selection__base_import_module__state__done
 msgid "done"
-msgstr "gereed"
+msgstr "afgehandeld"
 
 #. module: base_import_module
 #: model:ir.model.fields.selection,name:base_import_module.selection__base_import_module__state__init

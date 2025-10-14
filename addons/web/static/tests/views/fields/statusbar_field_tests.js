@@ -3,10 +3,13 @@
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 import {
     click,
+    clickSave,
     editInput,
     getFixture,
+    getNodesTextContent,
     nextTick,
     patchWithCleanup,
+    selectDropdownItem,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
@@ -458,7 +461,7 @@ QUnit.module("Fields", (hooks) => {
         });
 
         assert.strictEqual(
-            target.querySelector("[aria-label='Current state']").textContent,
+            target.querySelector("[aria-checked='true']").textContent,
             "aaa",
             "default status is 'aaa'"
         );
@@ -473,7 +476,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target, ".o_statusbar_status .dropdown-toggle:not(.d-none)");
         await click(target, ".o-dropdown .dropdown-item");
         assert.strictEqual(
-            target.querySelector("[aria-label='Current state']").textContent,
+            target.querySelector("[aria-checked='true']").textContent,
             "second record",
             "status has changed to the selected dropdown item"
         );
@@ -816,4 +819,121 @@ QUnit.module("Fields", (hooks) => {
             assert.hasClass(button, "o_first");
         }
     );
+
+    QUnit.test("correctly load statusbar when dynamic domain changes", async function (assert) {
+        serverData.models = {
+            stage: {
+                fields: {
+                    name: { string: "Name", type: "char" },
+                    folded: { string: "Folded", type: "boolean", default: false },
+                    project_ids: { string: "Project", type: "many2many", relation: "project" },
+                },
+                records: [
+                    { id: 1, name: "Stage Project 1", project_ids: [1] },
+                    { id: 2, name: "Stage Project 2", project_ids: [2] },
+                ],
+            },
+            project: {
+                fields: {
+                    display_name: { string: "Name", type: "char" },
+                },
+                records: [
+                    { id: 1, display_name: "Project 1" },
+                    { id: 2, display_name: "Project 2" },
+                ],
+            },
+            task: {
+                fields: {
+                    status: { string: "Status", type: "many2one", relation: "stage" },
+                    project_id: { string: "Project", type: "many2one", relation: "project" },
+                },
+                records: [{ id: 1, project_id: 1, status: 1 }],
+            },
+        };
+        serverData.models.task.onchanges = {
+            project_id: (obj) => {
+                obj.status = obj.project_id === 1 ? 1 : 2;
+            },
+        };
+
+        await makeView({
+            type: "form",
+            resModel: "task",
+            resId: 1,
+            serverData,
+            arch: `
+                <form>
+                    <header>
+                    <field name="status" widget="statusbar" domain="[('project_ids', 'in', project_id)]" />
+                    </header>
+                    <field name="project_id"/>
+                </form>`,
+            mockRPC(route, args) {
+                if (args.method === "search_read") {
+                    assert.step(JSON.stringify(args.kwargs.domain));
+                }
+            },
+        });
+
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_statusbar_status button:not(.d-none)")),
+            ["Stage Project 1"]
+        );
+        assert.verifySteps(['["|",["id","=",1],["project_ids","in",1]]']);
+        await selectDropdownItem(target, "project_id", "Project 2");
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_statusbar_status button:not(.d-none)")),
+            ["Stage Project 2"]
+        );
+        assert.verifySteps(['["|",["id","=",2],["project_ids","in",2]]']);
+        await clickSave(target);
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_statusbar_status button:not(.d-none)")),
+            ["Stage Project 2"]
+        );
+        assert.verifySteps([]);
+    });
+
+    QUnit.test('"status" with no stages does not crash command palette', async function (assert) {
+        serverData.models = {
+            stage: {
+                fields: {
+                    name: { string: "Stage Name", type: "char" },
+                },
+                records: [],
+            },
+            task: {
+                fields: {
+                    status: { string: "Stage", type: "many2one", relation: "stage" },
+                },
+                records: [
+                    { id: 1, status: false }, // no stage set
+                ],
+            },
+        };
+
+        await makeView({
+            serverData,
+            type: "form",
+            resModel: "task",
+            arch: `
+                <form>
+                    <header>
+                        <field name="status" widget="statusbar" options="{'withCommand': true, 'clickable': true}"/>
+                    </header>
+                </form>`,
+            resId: 1,
+        });
+
+        // Open the command palette (Ctrl+K)
+        triggerHotkey("control+k");
+        await nextTick();
+
+        const commands = [...target.querySelectorAll(".o_command")].map((el) => el.textContent);
+
+        assert.notOk(
+            commands.some((txt) => txt.includes("Move to next Stage")),
+            "No 'Move to next stage' command available when no stages exist"
+        );
+    });
 });

@@ -31,6 +31,57 @@ export function clickDisplayedProduct(name) {
         },
     ];
 }
+export function clickProductInfo(name) {
+    return [
+        {
+            content: `click info button for product '${name}'`,
+            trigger: `article.product:has(.product-name:contains("${name}")) .product-information-tag`,
+        },
+    ];
+}
+export function priceOnProductInfoIs(amount) {
+    return [
+        {
+            content: `Check if product info price is ${amount}`,
+            trigger: `.product-info-popup`,
+            run: function () {
+                const priceElement = document.querySelector(`.product-info-price-with-tax`);
+                const extractedPrice = parseFloat(priceElement ? priceElement.textContent.replace(/[^\d.]/g, '') : 0);
+                if (extractedPrice !== parseFloat(amount)) {
+                    throw new Error(`Expected price: ${amount}, but found: ${extractedPrice}`);
+                }
+            },
+        },
+    ];
+}
+export function productInfoTaxesAre(tax_amount_arr) {
+    return [
+        {
+            content: `Check if product tax information matches ${tax_amount_arr}`,
+            trigger: ".product-info-popup",
+            run: function () {
+                const taxDivs = document.querySelectorAll('.tax-name-amount');
+                let extractedTaxes = Array.from(taxDivs).map(div => div.textContent.trim());
+                extractedTaxes = JSON.stringify(extractedTaxes).replace(/\s+/g, '')
+                tax_amount_arr = JSON.stringify(tax_amount_arr).replace(/\s+/g, '');
+                const isSame = extractedTaxes === tax_amount_arr;
+                if (!isSame) {
+                    throw new Error(
+                        `Expected tax info: ${tax_amount_arr}, but found: ${extractedTaxes}`
+                    );
+                }
+            },
+        },
+    ];
+}
+export function clickCloseProductInfo() {
+    return [
+        {
+            content: `close product info popup`,
+            trigger: `.product-info-popup .fa-times`,
+        },
+    ];
+}
 export function clickOrderline(productName, quantity = "1.0") {
     return [
         ...clickLine(productName, quantity),
@@ -121,6 +172,26 @@ export function clickCustomer(name) {
         },
     ];
 }
+export function inputCustomerSearchbar(value) {
+    return [
+        {
+            trigger: ".pos-search-bar input",
+            run: `text ${value}`,
+        },
+        {
+            /**
+             * Manually trigger keyup event to show the search field list
+             * because the previous step do not trigger keyup event.
+             */
+            trigger: ".pos-search-bar input",
+            run: function () {
+                document
+                    .querySelector(".pos-search-bar input")
+                    .dispatchEvent(new KeyboardEvent("keyup", { key: "" }));
+            },
+        },
+    ];
+}
 export function clickRefund() {
     return [
         clickReview(),
@@ -205,29 +276,6 @@ export function clickCloseSession() {
         },
     ];
 }
-export function scan_barcode(barcode) {
-    return [
-        {
-            content: `PoS model scan barcode '${barcode}'`,
-            trigger: ".pos", // The element here does not really matter as long as it is present
-            run: () => {
-                window.posmodel.env.services.barcode_reader.scan(barcode);
-            },
-        },
-    ];
-}
-export function scan_ean13_barcode(barcode) {
-    return [
-        {
-            content: `PoS model scan EAN13 barcode '${barcode}'`,
-            trigger: ".pos", // The element here does not really matter as long as it is present
-            run: () => {
-                const barcode_reader = window.posmodel.env.services.barcode_reader;
-                barcode_reader.scan(barcode_reader.parser.sanitize_ean(barcode));
-            },
-        },
-    ];
-}
 export function goBackToMainScreen() {
     return [
         {
@@ -257,6 +305,33 @@ export function enterLotNumber(number) {
             trigger: ".popup .button.confirm",
         },
     ];
+}
+
+export function enterLotNumbers(numbers) {
+    return numbers
+        .map((number) => [
+            {
+                content: "enter lot number",
+                trigger: ".list-line-input:last()",
+                run: "text " + number,
+            },
+            {
+                content: "Press Enter",
+                trigger: ".list-line-input:last()",
+                run() {
+                    this.$anchor[0].dispatchEvent(
+                        new KeyboardEvent("keyup", { key: "Enter", bubbles: true })
+                    );
+                },
+            },
+        ])
+        .flat()
+        .concat([
+            {
+                content: "click validate lot number",
+                trigger: ".popup .button.confirm",
+            },
+        ]);
 }
 
 export function isShown() {
@@ -413,6 +488,24 @@ export function addCustomerNote(note) {
     );
 }
 
+export function addInternalNote(note) {
+    return inLeftSide(
+        [
+            {
+                content: "click more button",
+                trigger: ".mobile-more-button",
+                mobile: true,
+            },
+            {
+                content: "click internal note button",
+                trigger: '.control-buttons .control-button span:contains("Internal Note")',
+            },
+            ...( note ?  TextAreaPopup.inputText(note) : []),
+            TextAreaPopup.clickConfirm(),
+        ].flat()
+    );
+}
+
 export function checkOrderlinesNumber(number) {
     return [
         {
@@ -424,6 +517,34 @@ export function checkOrderlinesNumber(number) {
                     throw new Error(`Expected ${number} orderlines, got ${orderline_amount}`);
                 }
             },
+        },
+    ];
+}
+
+export function checkTaxAmount(number) {
+    return inLeftSide([
+        {
+            content: `check order tax amount`,
+            trigger: `.subentry:contains("${number}")`,
+        },
+    ]);
+}
+
+export function clickOrderMenu() {
+    return [
+        {
+            content: "Click Orders dropdown item",
+            trigger: '.dropdown-item.with-badge.py-2:contains("Orders")',
+        },
+    ];
+}
+
+export function doubleClickOrder(name) {
+    return [
+        {
+            content: `Select order`,
+            trigger: `.order-row:contains("${name}")`,
+            run: 'dblclick',
         },
     ];
 }

@@ -3,18 +3,15 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools import groupby
 
 
 class AccountMove(models.Model):
     _name = 'account.move'
     _inherit = ['account.move', 'utm.mixin']
 
-    @api.model
-    def _get_invoice_default_sale_team(self):
-        return self.env['crm.team']._get_default_team_id()
-
     team_id = fields.Many2one(
-        'crm.team', string='Sales Team', default=_get_invoice_default_sale_team,
+        'crm.team', string='Sales Team',
         compute='_compute_team_id', store=True, readonly=False,
         ondelete="set null", tracking=True,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
@@ -32,14 +29,20 @@ class AccountMove(models.Model):
             downpayment_lines.unlink()
         return res
 
-    @api.depends('invoice_user_id')
+    @api.depends('invoice_user_id', 'partner_id')
     def _compute_team_id(self):
-        for move in self:
-            if not move.invoice_user_id.sale_team_id or not move.is_sale_document(include_receipts=True):
-                continue
-            move.team_id = self.env['crm.team']._get_default_team_id(
-                user_id=move.invoice_user_id.id,
-                domain=[('company_id', '=', move.company_id.id)])
+        sale_moves = self.filtered(lambda move: move.is_sale_document(include_receipts=True))
+        for ((user_id, company_id, partner_team_id), moves) in groupby(
+            sale_moves,
+            key=lambda m: (m.invoice_user_id.id, m.company_id.id, m.partner_id.team_id.id)
+        ):
+            default_team_id = self.env.context.get('default_team_id', False) or partner_team_id
+            self.env['account.move'].concat(*moves).team_id = self.env['crm.team'].with_context(
+                allowed_company_ids=[company_id],
+                default_team_id=default_team_id
+            )._get_default_team_id(
+                user_id=user_id,
+            )
 
     @api.depends('line_ids.sale_line_ids')
     def _compute_origin_so_count(self):
@@ -59,20 +62,19 @@ class AccountMove(models.Model):
         return super()._reverse_moves(default_values_list=default_values_list, cancel=cancel)
 
     def action_post(self):
-        #inherit of the function from account.move to validate a new tax and the priceunit of a downpayment
+        # inherit of the function from account.move to validate a new tax and the priceunit of a downpayment
         res = super(AccountMove, self).action_post()
-        down_payment_lines = self.line_ids.filtered('is_downpayment')
-        for line in down_payment_lines:
-            if not any(sol.display_type for sol in line.sale_line_ids):
-                line.sale_line_ids._compute_name()
 
-            if any(order.locked for order in line.sale_line_ids.order_id):
-                # We cannot change lines content on locked SO, changes on invoices are not
-                # forwarded to the SO if the SO is locked.
-                continue
+        # We cannot change lines content on locked SO, changes on invoices are not forwarded to the SO if the SO is locked
+        dp_lines = self.line_ids.sale_line_ids.filtered(lambda l: l.is_downpayment and not l.display_type)
+        dp_lines._compute_name()  # Update the description of DP lines (Draft -> Posted)
+        downpayment_lines = dp_lines.filtered(lambda sol: not sol.order_id.locked)
+        other_so_lines = downpayment_lines.order_id.order_line - downpayment_lines
+        real_invoices = set(other_so_lines.invoice_lines.move_id)
+        for so_dpl in downpayment_lines:
+            so_dpl.price_unit = so_dpl._get_downpayment_line_price_unit(real_invoices)
+            so_dpl.tax_id = so_dpl.invoice_lines.tax_ids
 
-            line.sale_line_ids.tax_id = line.tax_ids
-            line.sale_line_ids.price_unit = line.price_unit
         return res
 
     def button_draft(self):
@@ -144,6 +146,45 @@ class AccountMove(models.Model):
         # OVERRIDE
         self.ensure_one()
         return self.line_ids.sale_line_ids and all(sale_line.is_downpayment for sale_line in self.line_ids.sale_line_ids) or False
+
+    def _get_sale_order_invoiced_amount(self, order):
+        """
+        Consider all lines on any invoice in self that stem from the sales order `order`. (All those invoices belong to order.company_id)
+        This function returns the sum of the totals of all those lines.
+        Note that this amount may be bigger than `order.amount_total`.
+        """
+        order_amount = 0
+        for invoice in self:
+            prices = sum(invoice.line_ids.filtered(
+                lambda x: x.display_type not in ('line_note', 'line_section') and order in x.sale_line_ids.order_id
+            ).mapped('price_total'))
+            order_amount += invoice.currency_id._convert(
+                prices * -invoice.direction_sign,
+                order.currency_id,
+                invoice.company_id,
+                invoice.date,
+            )
+        return order_amount
+
+    def _get_partner_credit_warning_exclude_amount(self):
+        # EXTENDS module 'account'
+        # Consider the warning on a draft invoice created from a sales order.
+        # After confirming the invoice the (partial) amount (on the invoice)
+        # stemming from sales orders will be substracted from the credit_to_invoice.
+        # This will reduce the total credit of the partner.
+        # The computation should reflect the change of credit_to_invoice from 'res.partner'.
+        # (see _compute_credit_to_invoice and _compute_amount_to_invoice from 'sale.order' )
+        exclude_amount = super()._get_partner_credit_warning_exclude_amount()
+        for order in self.line_ids.sale_line_ids.order_id:
+            order_amount = min(self._get_sale_order_invoiced_amount(order), order.amount_to_invoice)
+            order_amount_company = order.currency_id._convert(
+                max(order_amount, 0),
+                self.company_id.currency_id,
+                self.company_id,
+                fields.Date.context_today(self)
+            )
+            exclude_amount += order_amount_company
+        return exclude_amount
 
     @api.depends('line_ids.sale_line_ids.order_id', 'currency_id', 'tax_totals', 'date')
     def _compute_partner_credit(self):

@@ -143,7 +143,7 @@ class Users(models.Model):
         return write_res
 
     def action_archive(self):
-        activities_to_delete = self.env['mail.activity'].search([('user_id', 'in', self.ids)])
+        activities_to_delete = self.env['mail.activity'].sudo().search([('user_id', 'in', self.ids)])
         activities_to_delete.unlink()
         return super(Users, self).action_archive()
 
@@ -252,6 +252,7 @@ class Users(models.Model):
         self.ensure_one()
         odoobot = self.env.ref('base.partner_root')
         values = {
+            'action_discuss_id': self.env["ir.model.data"]._xmlid_to_res_id("mail.action_discuss"),
             'companyName': self.env.company.name,
             'currentGuest': False,
             'current_partner': self.partner_id.mail_partner_format().get(self.partner_id),

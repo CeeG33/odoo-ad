@@ -1,25 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* sms
-# 
+#
 # Translators:
-# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023
 # Martin Trigaux, 2023
-# Wil Odoo, 2023
-# 
+# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2024
+# Wil Odoo, 2025
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"POT-Creation-Date: 2025-09-04 18:38+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Wil Odoo, 2023\n"
+"Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Ukrainian (https://app.transifex.com/odoo/teams/41243/uk/)\n"
+"Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: uk\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
+"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
+"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
+"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_composer__recipient_invalid_count
@@ -54,10 +57,18 @@ msgid ""
 msgstr "%s з %s обрані SMS було успішно переслано."
 
 #. module: sms
+#. odoo-javascript
+#: code:addons/sms/static/src/components/sms_widget/fields_sms_widget.xml:0
+#, python-format
+msgid ", fits in"
+msgstr ", підходить"
+
+#. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
 msgid ""
 "<span class=\"o_stat_text\">Add</span>\n"
-"                                <span class=\"o_stat_text\">Context Action</span>"
+"                                <span class=\"o_stat_text\">Context Action</"
+"span>"
 msgstr ""
 "<span class=\"o_stat_text\">Додати</span>\n"
 "                                <span class=\"o_stat_text\">Дія змісту</span>"
@@ -71,33 +82,55 @@ msgstr "<span class=\"o_stat_text\">Переглянути</span>"
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
 msgid ""
 "<span class=\"o_stat_text\">Remove</span>\n"
-"                                <span class=\"o_stat_text\">Context Action</span>"
+"                                <span class=\"o_stat_text\">Context Action</"
+"span>"
 msgstr ""
 "<span class=\"o_stat_text\">Видалити</span>\n"
 "                                <span class=\"o_stat_text\">Дія змісту</span>"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
-msgid "<span class=\"text-warning\" invisible=\"not no_record\">No records</span>"
+msgid ""
+"<span class=\"text-warning\" invisible=\"not no_record\">No records</span>"
 msgstr ""
+"<span class=\"text-warning\" invisible=\"not no_record\">Немає записів</span>"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.ir_actions_server_view_form
 msgid ""
 "<span invisible=\"sms_method != 'sms'\">\n"
-"                                The message will be sent as an SMS to the recipients of the template\n"
-"                                and will not appear in the messaging history.\n"
+"                                The message will be sent as an SMS to the "
+"recipients of the template\n"
+"                                and will not appear in the messaging "
+"history.\n"
 "                            </span>\n"
 "                            <span invisible=\"sms_method != 'note'\">\n"
-"                                The SMS will not be sent, it will only be posted as an\n"
+"                                The SMS will not be sent, it will only be "
+"posted as an\n"
 "                                internal note in the messaging history.\n"
 "                            </span>\n"
 "                            <span invisible=\"sms_method != 'comment'\">\n"
-"                                The SMS will be sent as an SMS to the recipients of the\n"
-"                                template and it will also be posted as an internal note\n"
+"                                The SMS will be sent as an SMS to the "
+"recipients of the\n"
+"                                template and it will also be posted as an "
+"internal note\n"
 "                                in the messaging history.\n"
 "                            </span>"
 msgstr ""
+"<span invisible=\"sms_method != 'sms'\">\n"
+"                                Повідомлення буде надіслано як SMS "
+"одержувачам шаблону\n"
+" та не відображатиметься в історії повідомлень.\n"
+"                            </span>\n"
+"                            <span invisible=\"sms_method != 'note'\">\n"
+"                                SMS не буде надіслано, воно лише\n"
+" опубліковано як внутрішня примітка в історії повідомлень.\n"
+"                            </span>\n"
+"                            <span invisible=\"sms_method != 'comment'\">\n"
+"                                SMS буде надіслано як SMS одержувачам\n"
+" шаблону, а також опубліковано як внутрішню примітку\n"
+" в історії повідомлень.\n"
+"                            </span>"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_composer_view_form
@@ -116,7 +149,7 @@ msgstr ""
 #. module: sms
 #: model:ir.model.constraint,message:sms.constraint_sms_tracker_sms_uuid_unique
 msgid "A record for this UUID already exists"
-msgstr ""
+msgstr "Запис для цього UUID вже існує"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_res_partner__message_needaction
@@ -136,13 +169,15 @@ msgstr ""
 #: model:ir.model.fields,help:sms.field_sms_sms__uuid
 msgid "Alternate way to identify a SMS record, used for delivery reports"
 msgstr ""
+"Альтернативний спосіб ідентифікації запису SMS, який використовується для "
+"звітів про доставку"
 
 #. module: sms
 #. odoo-javascript
 #: code:addons/sms/static/src/core/failure_model_patch.js:0
 #, python-format
 msgid "An error occurred when sending an SMS"
-msgstr ""
+msgstr "Під час надсилання SMS виникла помилка"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_template__model_id
@@ -163,6 +198,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:sms.field_res_partner__message_attachment_count
 msgid "Attachment Count"
 msgstr "Підрахунок прикріплення"
+
+#. module: sms
+#: model:ir.model,name:sms.model_base
+msgid "Base"
+msgstr "База"
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__failure_type__sms_blacklist
@@ -228,7 +268,7 @@ msgstr "Оберіть мову:"
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.ir_actions_server_view_form
 msgid "Choose a template..."
-msgstr ""
+msgstr "Оберіть шаблон..."
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
@@ -240,6 +280,11 @@ msgstr "Оберіть приклад"
 #: model_terms:ir.ui.view,arch_db:sms.sms_composer_view_form
 msgid "Close"
 msgstr "Закрити"
+
+#. module: sms
+#: model:ir.model,name:sms.model_res_company
+msgid "Companies"
+msgstr ""
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_composer__composition_mode
@@ -261,20 +306,20 @@ msgstr "Вміст"
 #: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_country_not_supported
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__failure_type__sms_country_not_supported
 msgid "Country Not Supported"
-msgstr ""
+msgstr "Країна не підтримується"
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_registration_needed
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__failure_type__sms_registration_needed
 msgid "Country-specific Registration Required"
-msgstr ""
+msgstr "Потрібна реєстрація для конкретної країни"
 
 #. module: sms
 #. odoo-python
 #: code:addons/sms/tools/sms_api.py:0
 #, python-format
 msgid "Country-specific registration required."
-msgstr ""
+msgstr "Потрібна реєстрація конкретної країни."
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_composer__create_uid
@@ -415,13 +460,12 @@ msgid ""
 "Field used to store sanitized phone number. Helps speeding up searches and "
 "comparisons."
 msgstr ""
-"Поле, яке використовується для зберігання чистого номера телефону. Допомагає"
-" прискорити пошук і порівняння."
+"Поле, яке використовується для зберігання чистого номера телефону. Допомагає "
+"прискорити пошук і порівняння."
 
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_template__template_fs
-msgid ""
-"File from where the template originates. Used to reset broken template."
+msgid "File from where the template originates. Used to reset broken template."
 msgstr ""
 "Файл, з якого походить шаблон. Використовується для скидання зламаного "
 "шаблону."
@@ -520,8 +564,8 @@ msgstr "Якщо позначено, деякі повідомлення маю�
 #. module: sms
 #: model:ir.model.fields,help:sms.field_res_partner__phone_sanitized_blacklisted
 msgid ""
-"If the sanitized phone number is on the blacklist, the contact won't receive"
-" mass mailing sms anymore, from any list"
+"If the sanitized phone number is on the blacklist, the contact won't receive "
+"mass mailing sms anymore, from any list"
 msgstr ""
 "Якщо номер телефону у чорному списку, контакт не буде більше отримувати "
 "розсилку SMS з жодного списку"
@@ -544,8 +588,8 @@ msgid ""
 "mobile and phone field in a model."
 msgstr ""
 "Визначає, чи номер телефону у чорному списку є мобільним номером. Допомагає "
-"розрізнити, який номер у чорному списку, коли в моделі є поле як мобільного,"
-" так і телефону."
+"розрізнити, який номер у чорному списку, коли в моделі є поле як мобільного, "
+"так і телефону."
 
 #. module: sms
 #: model:ir.model.fields,help:sms.field_res_partner__phone_blacklisted
@@ -555,8 +599,8 @@ msgid ""
 "mobile and phone field in a model."
 msgstr ""
 "Визначає, чи номер у чорному списку є номером телефону. Допомагає "
-"розрізнити, який номер є у чорному списку, коли у моделі є поле і мобільного"
-" і телефону."
+"розрізнити, який номер є у чорному списку, коли у моделі є поле і мобільного "
+"і телефону."
 
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_composer__comment_single_recipient
@@ -572,7 +616,7 @@ msgstr "Недостатньо кредиту"
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_invalid_destination
 msgid "Invalid Destination"
-msgstr ""
+msgstr "Недійсна відстань"
 
 #. module: sms
 #. odoo-python
@@ -628,7 +672,7 @@ msgstr "Останнє оновлення"
 #. module: sms
 #: model:ir.model,name:sms.model_sms_tracker
 msgid "Link SMS to mailing/sms tracking models"
-msgstr ""
+msgstr "Підключити SMS до поштової/sms моделі відстеження"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_sms__mail_message_id
@@ -638,7 +682,7 @@ msgstr "Повідомлення листа"
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_tracker__mail_notification_id
 msgid "Mail Notification"
-msgstr ""
+msgstr "Сповіщення на пошту"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_ir_model__is_mail_thread_sms
@@ -648,7 +692,7 @@ msgstr "Тема листа SMS"
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_sms__to_delete
 msgid "Marked for deletion"
-msgstr ""
+msgstr "Позначено для видалення"
 
 #. module: sms
 #: model:ir.model,name:sms.model_mail_message
@@ -707,7 +751,7 @@ msgstr "Не доставлено"
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__sms_method__note
 msgid "Note only"
-msgstr ""
+msgstr "Лише примітка"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_resend_recipient__notification_id
@@ -752,8 +796,8 @@ msgstr "Кількість повідомлень з помилковою дст
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_composer__res_ids_count
 msgid ""
-"Number of recipients that will receive the SMS if sent in mass mode, without"
-" applying the Active Domain value"
+"Number of recipients that will receive the SMS if sent in mass mode, without "
+"applying the Active Domain value"
 msgstr ""
 "Номер одержувача, який отримає SMS при надсиланні в масовій розсилці, без "
 "застосування значення активації домену"
@@ -768,8 +812,8 @@ msgstr "Відмовився"
 msgid ""
 "Optional translation language (ISO code) to select when sending out an "
 "email. If not set, the english version will be used. This should usually be "
-"a placeholder expression that provides the appropriate language, e.g. {{ "
-"object.partner_id.lang }}."
+"a placeholder expression that provides the appropriate language, e.g. "
+"{{ object.partner_id.lang }}."
 msgstr ""
 "Додаткова мова перекладу (код ISO), яку можна вибрати під час надсилання "
 "електронного листа. Якщо не встановлено, використовуватиметься англійська "
@@ -886,7 +930,7 @@ msgstr "Референс запису"
 #: code:addons/sms/tools/sms_api.py:0
 #, python-format
 msgid "Register now."
-msgstr ""
+msgstr "Зареєструйтеся зараз."
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_rejected
@@ -958,12 +1002,12 @@ msgstr "SMS ("
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__sms_method__comment
 msgid "SMS (with note)"
-msgstr ""
+msgstr "SMS (з приміткою)"
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__sms_method__sms
 msgid "SMS (without note)"
-msgstr ""
+msgstr "SMS (без примітки)"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_account_analytic_account__message_has_sms_error
@@ -1025,7 +1069,6 @@ msgstr "Попередній перегляд SMS"
 #. module: sms
 #. odoo-javascript
 #: code:addons/sms/static/src/components/sms_widget/fields_sms_widget.xml:0
-#: code:addons/sms/static/src/components/sms_widget/fields_sms_widget.xml:0
 #, python-format
 msgid "SMS Pricing"
 msgstr "Ціна SMS"
@@ -1076,7 +1119,7 @@ msgstr "Шаблони SMS скинуто"
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_mail_notification__sms_tracker_ids
 msgid "SMS Trackers"
-msgstr ""
+msgstr "SMS трекери"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
@@ -1088,17 +1131,17 @@ msgstr "Зміст SMS "
 #: code:addons/sms/models/ir_actions_server.py:0
 #, python-format
 msgid "SMS template model of %(action_name)s does not match action model."
-msgstr ""
+msgstr "Модель шаблону SMS %(action_name)s не відповідає моделі дії."
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_sms__sms_tracker_id
 msgid "SMS trackers"
-msgstr ""
+msgstr "SMS трекери"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_tracker__sms_uuid
 msgid "SMS uuid"
-msgstr ""
+msgstr "SMS uuid"
 
 #. module: sms
 #: model:ir.actions.server,name:sms.ir_cron_sms_scheduler_action_ir_actions_server
@@ -1146,7 +1189,7 @@ msgstr "Надіслати SMS (%s)"
 #: model:ir.model.fields,field_description:sms.field_ir_actions_server__sms_method
 #: model:ir.model.fields,field_description:sms.field_ir_cron__sms_method
 msgid "Send SMS As"
-msgstr ""
+msgstr "Надіслати SMS як"
 
 #. module: sms
 #. odoo-javascript
@@ -1192,10 +1235,8 @@ msgstr "Помилки надсилання"
 #. odoo-python
 #: code:addons/sms/models/ir_actions_server.py:0
 #, python-format
-msgid "Sending SMS can only be done on a mail.thread or a transient model"
+msgid "Sending SMS can only be done on a not transient mail.thread model"
 msgstr ""
-"Відправлення SMS може бути виконане лише на mail.thread або на транзитній "
-"моделі"
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__state__pending
@@ -1297,13 +1338,14 @@ msgstr "SMS не вдалося переслати."
 #, python-format
 msgid "The content of the message violates rules applied by our providers."
 msgstr ""
+"Зміст повідомлення порушує правила, які застосовуються нашими провайдерами."
 
 #. module: sms
 #. odoo-python
 #: code:addons/sms/tools/sms_api.py:0
 #, python-format
 msgid "The destination country is not supported."
-msgstr ""
+msgstr "Країна призначення не підтримується."
 
 #. module: sms
 #. odoo-python
@@ -1330,15 +1372,15 @@ msgstr "Немає SMS для повторного надсилання."
 #: code:addons/sms/tools/sms_api.py:0
 #, python-format
 msgid "This SMS has been removed as the number was already used."
-msgstr ""
+msgstr "Це SMS вилучене, оскільки номер вже використовувався."
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.res_partner_view_form
 msgid ""
 "This phone number is blacklisted for SMS Marketing. Click to unblacklist."
 msgstr ""
-"Цей номер телефону у чорному списку для SMS-маркетингу. Натисніть на забрати"
-" з чорного списку."
+"Цей номер телефону у чорному списку для SMS-маркетингу. Натисніть на забрати "
+"з чорного списку."
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_resend_recipient__resend
@@ -1361,12 +1403,29 @@ msgid ""
 "- 'Update a Record': update the values of a record\n"
 "- 'Create Activity': create an activity (Discuss)\n"
 "- 'Send Email': post a message, a note or send an email (Discuss)\n"
-"- 'Send SMS': send SMS, log them on documents (SMS)- 'Add/Remove Followers': add or remove followers to a record (Discuss)\n"
+"- 'Send SMS': send SMS, log them on documents (SMS)- 'Add/Remove Followers': "
+"add or remove followers to a record (Discuss)\n"
 "- 'Create Record': create a new record with new values\n"
 "- 'Execute Code': a block of Python code that will be executed\n"
-"- 'Send Webhook Notification': send a POST request to an external system, also known as a Webhook\n"
-"- 'Execute Existing Actions': define an action that triggers several other server actions\n"
+"- 'Send Webhook Notification': send a POST request to an external system, "
+"also known as a Webhook\n"
+"- 'Execute Existing Actions': define an action that triggers several other "
+"server actions\n"
 msgstr ""
+"Тип дії на сервері. Доступні наступні значення:\n"
+"- 'Оновити запис': оновити значення запису\n"
+"- 'Створити дію': створити дію (Обговорення)\n"
+"- 'Надіслати Email': опублікувати повідомлення, примітку або надіслати email "
+"(Обговорення)\n"
+"- 'Надіслати SMS': надіслати SMS, записати їх на документі (SMS)- 'Додати/"
+"Вилучити підписників': додати або вилучити підписників на записі "
+"(Обговорення)\n"
+"- 'Створити запис': створити новий запис з новими значеннями\n"
+"- 'Виконати код': блок коду Python, що буде виконано\n"
+"- 'Надіслати сповіщення Webhook': надіслати запит POST до зовнішньої "
+"системи, також відомий як Webhook\n"
+"- 'Виконати існуючі дії': визначити дію, що запускає дію, що запускає "
+"декілька інших дій на сервері\n"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_sms__uuid
@@ -1376,7 +1435,7 @@ msgstr "UUID"
 #. module: sms
 #: model:ir.model.constraint,message:sms.constraint_sms_sms_uuid_unique
 msgid "UUID must be unique"
-msgstr ""
+msgstr "UUID повинен бути унікальним"
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__failure_type__unknown
@@ -1408,9 +1467,18 @@ msgid ""
 "'comment': generated by user input e.g. through discuss or composer\n"
 "'email_outgoing': generated by a mailing\n"
 "'notification': generated by system e.g. tracking messages\n"
-"'auto_comment': generated by automated notification mechanism e.g. acknowledgment\n"
+"'auto_comment': generated by automated notification mechanism e.g. "
+"acknowledgment\n"
 "'user_notification': generated for a specific recipient"
 msgstr ""
+"Використовується для категоризації створення повідомлень\n"
+"'email': свторюється вхідним листом, наприклад, mailgateway\n"
+"'comment': створюється введенням користувача через обговорення або композер\n"
+"'email_outgoing': створюється листуванням\n"
+"'notification': створюється системою, наприклад, відстеження повідомлень\n"
+"'auto_comment': створюється механізмом автоматичних сповіщень, наприклад, "
+"підтвердження\n"
+"'user_notification': створюється для конкретного одержувача"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_composer__res_ids_count
@@ -1445,6 +1513,7 @@ msgid ""
 "Will automatically be deleted, while notifications will not be deleted in "
 "any case."
 msgstr ""
+"Буде видалено автоматично, але сповіщення ні в якому разі не будуть видалені."
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_number_format
@@ -1486,8 +1555,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/sms/static/src/components/sms_widget/fields_sms_widget.xml:0
 #, python-format
-msgid "characters, fits in"
-msgstr "знаків, вписується в"
+msgid "characters"
+msgstr "символи"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_composer_view_form

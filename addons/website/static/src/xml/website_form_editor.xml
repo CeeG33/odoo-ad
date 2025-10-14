@@ -35,7 +35,8 @@
     <t t-name="website.form_field">
         <div t-attf-class="s_website_form_field mb-3 #{field.formatInfo.col or 'col-12'} #{field.custom and 's_website_form_custom' or ''} #{(field.required and 's_website_form_required' or '') or (field.modelRequired and 's_website_form_model_required' or '')} #{field.hidden and 's_website_form_field_hidden' or ''} #{field.dnone and 's_website_form_dnone' or ''}"
             t-att-data-type="field.type"
-            data-name="Field">
+            data-name="Field"
+            t-att-data-translated-name="defaultName">
             <div t-if="field.formatInfo.labelPosition != 'none' and field.formatInfo.labelPosition != 'top'" class="row s_col_no_resize s_col_no_bgcolor">
                 <label t-attf-class="#{!field.isCheck and 'col-form-label' or ''} col-sm-auto s_website_form_label #{field.formatInfo.labelPosition == 'right' and 'text-end' or ''}" t-attf-style="width: #{field.formatInfo.labelWidth or '200px'}" t-att-for="field.id">
                      <t t-call="website.form_label_content"/>
@@ -68,6 +69,16 @@
     <t t-name="website.form_field_description">
         <!-- The actual value for this case is handled in JS as it can be -->
         <!-- edited with formatting by the user -->
+        <!--
+            TODO using "small" alongside with the "form-text" class is actually
+            a mistake in current Bootstrap version: it has no effect since the
+            "form-text" class already enforces the default "small" behavior of
+            Bootstrap. In master, remove "small" on all of these.
+
+            TODO changing "font style" (tag) should also be disabled on those
+            form descriptions as the behavior is kinda weird (but it mainly does
+            not make sense to try and change it over there anyway).
+        -->
         <div t-if="default_description" class="s_website_form_field_description small form-text text-muted" contenteditable="true">
             <t t-esc="default_description"/>
         </div>
@@ -80,7 +91,7 @@
                 type="hidden"
                 class="form-control s_website_form_input"
                 t-att-name="field.name"
-                t-att-value="field.value"
+                t-attf-value="#{field.value}"
                 t-att-id="field.id"
             />
         </t>
@@ -94,7 +105,7 @@
                 class="form-control s_website_form_input"
                 t-att-name="field.name"
                 t-att-required="field.required || field.modelRequired || None"
-                t-att-value="field.value"
+                t-attf-value="#{field.value}"
                 t-att-data-fill-with="field.fillWith"
                 t-att-placeholder="field.placeholder"
                 t-att-id="field.id"
@@ -150,7 +161,7 @@
                 t-att-name="field.name"
                 step="1"
                 t-att-required="field.required || field.modelRequired || None"
-                t-att-value="field.value"
+                t-attf-value="#{field.value}"
                 t-att-placeholder="field.placeholder"
                 t-att-id="field.id"
             />
@@ -166,7 +177,7 @@
                 t-att-name="field.name"
                 step="any"
                 t-att-required="field.required || field.modelRequired || None"
-                t-att-value="field.value"
+                t-attf-value="#{field.value}"
                 t-att-placeholder="field.placeholder"
                 t-att-id="field.id"
             />
@@ -182,7 +193,7 @@
                         class="form-control datetimepicker-input s_website_form_input"
                         t-att-name="field.name"
                         t-att-required="field.required || field.modelRequired || None"
-                        t-att-value="field.value"
+                        t-attf-value="#{field.value}"
                         t-att-placeholder="field.placeholder"
                         t-att-id="field.id"
                 />
@@ -200,7 +211,7 @@
                         class="form-control datetimepicker-input s_website_form_input"
                         t-att-name="field.name"
                         t-att-required="field.required || field.modelRequired || None"
-                        t-att-value="field.value"
+                        t-attf-value="#{field.value}"
                         t-att-placeholder="field.placeholder"
                         t-att-id="field.id"
                 />
@@ -218,7 +229,7 @@
                     value="Yes"
                     class="s_website_form_input form-check-input"
                     t-att-name="field.name"
-                    t-att-checked="field.value and 'checked' or None"
+                    t-att="{checked: field.value and 'checked' or None}"
                     t-att-required="field.required || field.modelRequired || None"
                     t-att-id="field.id"
                 />
@@ -257,7 +268,7 @@
                     class="s_website_form_input form-check-input"
                     t-att-id="recordId"
                     t-att-name="field.name"
-                    t-att-checked="record.selected and 'checked' or None"
+                    t-att="{checked: record.selected and 'checked' or None}"
                     t-att-value="record.id"
                     t-att-required="field.required || field.modelRequired || None"
                 />
@@ -279,7 +290,7 @@
             <t t-call="website.form_field">
                 <select class="form-select s_website_form_input" t-att-name="field.name" t-att-required="field.required || field.modelRequired || None" t-att-id="field.id" style="display: none">
                     <t t-foreach="field.records" t-as="record" t-key="record_index">
-                        <option t-esc="record.display_name" t-att-value="record.id" t-att-selected="record.selected and 'selected' or None"/>
+                        <option t-esc="record.display_name" t-att-value="record.id" t-att="{selected: record.selected and 'selected' or None}"/>
                     </t>
                 </select>
                 <div id="editable_select" class="form-control s_website_form_input">

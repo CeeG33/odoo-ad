@@ -548,6 +548,13 @@ class WebsiteSlides(WebsiteProfile):
                     'invite_partner_id': invite_partner_id
                 }
 
+        if channel_id < 0:
+            # the string part of the channel "slugification" can be blank
+            # meaning it can be "/slides/taking-care-of-trees-2" OR just "/slides/-2" if the first part is blank
+            # as we use a IntConverter on the route definition, this will pick up a negative ID
+            # (the IntConverter is necessary as we want a custom page in case the user can't access the course)
+            channel_id = abs(channel_id)
+
         # Check access rights
         if channel_id and not channel:
             channel = request.env['slide.channel'].browse(channel_id).exists()
@@ -561,10 +568,6 @@ class WebsiteSlides(WebsiteProfile):
 
         if category_id and not category:
             category = channel.slide_category_ids.filtered(lambda category: category.id == category_id)
-
-        # retro-compatibility for older links, 'slide_category' field was previously named 'slide_type'
-        # can be safely removed after 15.3 (I swear though, don't be afraid, remove it!)
-        slide_category = slide_category or kw.get('slide_type')
 
         domain = self._get_channel_slides_base_domain(channel)
         pager_url = "/slides/%s" % (channel.id)
@@ -938,7 +941,12 @@ class WebsiteSlides(WebsiteProfile):
 
     @http.route(['/slides/channel/subscribe'], type='json', auth='user', website=True)
     def slide_channel_subscribe(self, channel_id):
-        return request.env['slide.channel'].browse(channel_id).message_subscribe(partner_ids=[request.env.user.partner_id.id])
+        # Presentation Published subtype
+        subtype = request.env.ref("website_slides.mt_channel_slide_published", raise_if_not_found=False)
+        if subtype:
+            return request.env['slide.channel'].browse(channel_id).message_subscribe(
+                partner_ids=[request.env.user.partner_id.id], subtype_ids=subtype.ids)
+        return True
 
     @http.route(['/slides/channel/unsubscribe'], type='json', auth='user', website=True)
     def slide_channel_unsubscribe(self, channel_id):
@@ -1027,7 +1035,7 @@ class WebsiteSlides(WebsiteProfile):
         if field not in ('image_128', 'image_256', 'image_512', 'image_1024', 'image_1920'):
             return werkzeug.exceptions.Forbidden()
 
-        slide = request.env['slide.slide'].sudo().browse(slide_id).exists()
+        slide = request.env['slide.slide'].search([('id', '=', int(slide_id))])
         if not slide:
             raise werkzeug.exceptions.NotFound()
 

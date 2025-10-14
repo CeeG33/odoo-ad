@@ -29,10 +29,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
             raise AccessError(_("The POS session is not opened."))
 
     def _get_partner_sudo(self, user_sudo):
-        partner_sudo = user_sudo.partner_id
-        if not partner_sudo and user_sudo._is_public():
-            partner_sudo = self.env.ref('base.public_user')
-        return partner_sudo
+        return user_sudo.partner_id
 
     def _redirect_login(self):
         return request.redirect('/web/login?' + url_encode({'redirect': request.httprequest.full_path}))
@@ -98,8 +95,10 @@ class PaymentPortal(payment_portal.PaymentPortal):
         self._ensure_session_open(pos_order_sudo)
 
         user_sudo = request.env.user
+        if not pos_order_sudo.partner_id:
+            user_sudo = pos_order_sudo.company_id._get_public_user()
         logged_in = not user_sudo._is_public()
-        partner_sudo = self._get_partner_sudo(user_sudo)
+        partner_sudo = pos_order_sudo.partner_id or self._get_partner_sudo(user_sudo)
         if not partner_sudo:
             return self._redirect_login()
 
@@ -178,8 +177,10 @@ class PaymentPortal(payment_portal.PaymentPortal):
         self._ensure_session_open(pos_order_sudo)
         exit_route = request.httprequest.args.get('exit_route')
         user_sudo = request.env.user
+        if not pos_order_sudo.partner_id:
+            user_sudo = pos_order_sudo.company_id._get_public_user()
         logged_in = not user_sudo._is_public()
-        partner_sudo = self._get_partner_sudo(user_sudo)
+        partner_sudo = pos_order_sudo.partner_id or self._get_partner_sudo(user_sudo)
         if not partner_sudo:
             return self._redirect_login()
 
@@ -194,6 +195,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
         # Avoid tokenization for the public user.
         kwargs.update({
             'partner_id': partner_sudo.id,
+            'partner_phone': partner_sudo.phone,
             'custom_create_values': {
                 'pos_order_id': pos_order_sudo.id,
             },
@@ -287,6 +289,8 @@ class PaymentPortal(payment_portal.PaymentPortal):
         tx_sudo._process_pos_online_payment()
 
         rendering_context['state'] = 'success'
+        if exit_route:
+            return request.redirect(exit_route)
         return self._render_pay_confirmation(rendering_context)
 
     def _render_pay_confirmation(self, rendering_context):

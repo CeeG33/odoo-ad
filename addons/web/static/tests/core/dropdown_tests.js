@@ -17,6 +17,7 @@ import {
     click,
     getFixture,
     makeDeferred,
+    mockTimeout,
     mount,
     mouseEnter,
     mouseLeave,
@@ -266,6 +267,36 @@ QUnit.module("Components", ({ beforeEach }) => {
         await mouseLeave(target, ".dropdown-menu");
         const menuBox3 = target.querySelector(".dropdown-menu").getBoundingClientRect();
         assert.strictEqual(menuBox3.top - menuBox1.top, 100);
+    });
+
+    QUnit.test("unlock position after close", async (assert) => {
+        class Parent extends Component {
+            static template = xml`
+                <div style="margin-left: 200px;">
+                    <Dropdown holdOnHover="true" position="'bottom-end'">
+                    </Dropdown>
+                </div>
+            `;
+            static components = { Dropdown };
+        }
+        env = await makeTestEnv();
+        await mount(Parent, target, { env });
+        assert.containsNone(target, ".dropdown-menu");
+        await click(target, "button.dropdown-toggle");
+        assert.containsOnce(target, ".dropdown-menu");
+        const menuBox1 = target.querySelector(".dropdown-menu").getBoundingClientRect();
+
+        // Pointer enter the dropdown menu to lock the menu
+        await mouseEnter(target, ".dropdown-menu");
+        // close the menu
+        await click(target);
+        assert.containsNone(target, ".dropdown-menu");
+
+        // and reopen it
+        await click(target, "button.dropdown-toggle");
+        assert.containsOnce(target, ".dropdown-menu");
+        const menuBox2 = target.querySelector(".dropdown-menu").getBoundingClientRect();
+        assert.strictEqual(menuBox2.left - menuBox1.left, 0);
     });
 
     QUnit.test("payload received on item selection", async (assert) => {
@@ -870,6 +901,7 @@ QUnit.module("Components", ({ beforeEach }) => {
 
     QUnit.test("multi-level dropdown: keynav", async (assert) => {
         assert.expect(213);
+        const { execRegisteredTimeouts } = mockTimeout();
         class Parent extends Component {
             onItemSelected(value) {
                 assert.step(value);
@@ -947,6 +979,7 @@ QUnit.module("Components", ({ beforeEach }) => {
 
         for (const [stepIndex, step] of scenarioSteps.entries()) {
             triggerHotkey(step.hotkey);
+            execRegisteredTimeouts();
             await nextTick();
             if (step.highlighted !== undefined) {
                 let index = 0;
@@ -1447,5 +1480,58 @@ QUnit.module("Components", ({ beforeEach }) => {
         assert.containsN(target, ".dropdown-menu", 1);
         await click(target, ".outside_parent");
         assert.containsNone(target, ".dropdown-menu");
+    });
+
+    QUnit.test("multi-level dropdown is well positioned", async (assert) => {
+        class Parent extends Component {}
+        Parent.template = xml`
+           <Dropdown class="'parent'" menuClass="'border-0'">
+                <DropdownItem>A</DropdownItem>
+                <Dropdown class="'first'" menuClass="'border-0'">
+                    <t t-set-slot="toggler">
+                        B
+                    </t>
+                    <DropdownItem>B A</DropdownItem>
+                    <DropdownItem>B C</DropdownItem>
+                </Dropdown>
+                <Dropdown class="'second'" menuClass="'border-0'">
+                    <t t-set-slot="toggler">
+                        C
+                    </t>
+                    <DropdownItem>C A</DropdownItem>
+                    <DropdownItem>C B</DropdownItem>
+                </Dropdown>
+            </Dropdown>
+        `;
+        Parent.components = { Dropdown, DropdownItem };
+        env = await makeTestEnv();
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle:last-child");
+        const parentMenu = target.querySelector(".parent .dropdown-menu");
+        const parentMenuBox = parentMenu.getBoundingClientRect();
+
+        // Hover first sub-dropdown
+        await mouseEnter(target, ".o-dropdown.first > button");
+        await nextTick();
+        let currentDropdown = target.querySelector(".first .dropdown-menu");
+        let currentDropdownBox = currentDropdown.getBoundingClientRect();
+        //Check X position of the first subdropdown, should not overlap parent dropdown
+        assert.ok(currentDropdownBox.x >= parentMenuBox.x + parentMenuBox.width);
+        //Check Y position of the first subdropdown, should not overlap parent dropdown
+        let parentTogglerBox = parentMenu.querySelector(".show").getBoundingClientRect();
+        let currentTogglerBox = currentDropdown.querySelector(".focus").getBoundingClientRect();
+        assert.ok(Math.abs(parentTogglerBox.y - currentTogglerBox.y) < 5);
+
+        // Hover second sub-dropdown
+        await mouseEnter(target, ".o-dropdown.second > button");
+        await nextTick();
+        currentDropdown = target.querySelector(".second .dropdown-menu");
+        currentDropdownBox = currentDropdown.getBoundingClientRect();
+        //Check X position of the second subdropdown, should not overlap parent dropdown
+        assert.ok(currentDropdownBox.x >= parentMenuBox.x + parentMenuBox.width);
+        //Check Y position of the first subdropdown, should not overlap parent dropdown
+        parentTogglerBox = parentMenu.querySelector(".show").getBoundingClientRect();
+        currentTogglerBox = currentDropdown.querySelector(".focus").getBoundingClientRect();
+        assert.ok(Math.abs(parentTogglerBox.y - currentTogglerBox.y) < 5);
     });
 });

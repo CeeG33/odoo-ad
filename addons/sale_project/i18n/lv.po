@@ -3,21 +3,21 @@
 # 	* sale_project
 # 
 # Translators:
+# Konstantins Zabogonskis <inculin4ik@gmail.com>, 2023
 # InfernalLV <karlisdreizis@gmail.com>, 2023
-# Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2023
 # Arnis Putniņš <arnis@allegro.lv>, 2023
 # ievaputnina <ievai.putninai@gmail.com>, 2023
-# Will Sensors, 2023
 # Martin Trigaux, 2023
-# Konstantins Zabogonskis <inculin4ik@gmail.com>, 2023
+# Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2025
+# Will Sensors, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"POT-Creation-Date: 2025-06-06 18:38+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Konstantins Zabogonskis <inculin4ik@gmail.com>, 2023\n"
+"Last-Translator: Will Sensors, 2025\n"
 "Language-Team: Latvian (https://app.transifex.com/odoo/teams/41243/lv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -89,7 +89,7 @@ msgstr ""
 #. module: sale_project
 #: model_terms:ir.ui.view,arch_db:sale_project.project_milestone_view_form
 msgid "<span>)</span>"
-msgstr ""
+msgstr "<span>)</span>"
 
 #. module: sale_project
 #: model:ir.model.fields,help:sale_project.field_sale_order_line__qty_delivered_method
@@ -100,6 +100,11 @@ msgid ""
 "  - Timesheet: the quantity is the sum of hours recorded on tasks linked to this sale line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
+"Atbilstoši produkta konfigurācijai piegādājamo daudzumu var automātiski aprēķināt ar mehānisma palīdzību:\n"
+"  - Manuāli: daudzums tiek iestatīts manuāli uz līnijas\n"
+"  - Analītisks No izdevumiem: daudzums ir iegrāmatoto izdevumu daudzuma summa\n"
+"  - Laika grafiks: daudzums ir to stundu summa, kas reģistrētas uzdevumos, kuri saistīti ar šo pārdošanas pozīciju\n"
+"  - Krājumu pārvietošana: daudzums tiek iegūts no apstiprinātās komplektācijas\n"
 
 #. module: sale_project
 #. odoo-python
@@ -133,6 +138,20 @@ msgstr "Atcelts"
 #: model:ir.model,name:sale_project.model_res_config_settings
 msgid "Config Settings"
 msgstr "Konfigurācijas uzstādījumi"
+
+#. module: sale_project
+#. odoo-python
+#: code:addons/sale_project/models/project.py:0
+#, python-format
+msgid "Cost of Goods Sold"
+msgstr "Pārdoto preču izmaksas"
+
+#. module: sale_project
+#. odoo-python
+#: code:addons/sale_project/models/project.py:0
+#, python-format
+msgid "Cost of Goods Sold Items"
+msgstr ""
 
 #. module: sale_project
 #: model_terms:ir.ui.view,arch_db:sale_project.view_order_form_inherit_sale_project
@@ -394,12 +413,12 @@ msgstr ""
 #: code:addons/sale_project/models/project.py:0
 #, python-format
 msgid "Materials"
-msgstr ""
+msgstr "Materiāli"
 
 #. module: sale_project
 #: model:ir.model.fields,field_description:sale_project.field_sale_order_line__qty_delivered_method
 msgid "Method to update delivered qty"
-msgstr ""
+msgstr "Piegādātā daudzuma atjaunināšanas metode"
 
 #. module: sale_project
 #: model:ir.model.fields,field_description:sale_project.field_sale_order__milestone_count
@@ -459,13 +478,6 @@ msgstr ""
 
 #. module: sale_project
 #. odoo-python
-#: code:addons/sale_project/models/sale_order.py:0
-#, python-format
-msgid "Operation not supported"
-msgstr "Operācija netiek atbalstīta"
-
-#. module: sale_project
-#. odoo-python
 #: code:addons/sale_project/models/project.py:0
 #, python-format
 msgid "Other Services"
@@ -476,6 +488,13 @@ msgstr "Citi pakalpojumi"
 msgid ""
 "Percentage of the ordered quantity that will automatically be delivered once"
 " the milestone is reached."
+msgstr ""
+
+#. module: sale_project
+#. odoo-python
+#: code:addons/sale_project/models/project.py:0
+#, python-format
+msgid "Portal Sale Order"
 msgstr ""
 
 #. module: sale_project
@@ -632,8 +651,8 @@ msgid ""
 msgstr ""
 
 #. module: sale_project
-#. odoo-python
 #. odoo-javascript
+#. odoo-python
 #: code:addons/sale_project/models/project.py:0
 #: code:addons/sale_project/models/project.py:0
 #: code:addons/sale_project/static/src/components/project_right_side_panel/project_right_side_panel.xml:0
@@ -796,7 +815,7 @@ msgstr ""
 #: code:addons/sale_project/models/sale_order_line.py:0
 #, python-format
 msgid "This task has been created from: %s (%s)"
-msgstr ""
+msgstr "Šis uzdevums tika izveidots no: %s (%s)"
 
 #. module: sale_project
 #. odoo-python
@@ -831,7 +850,7 @@ msgstr "Mērvienība"
 #. module: sale_project
 #: model:ir.model.fields,field_description:sale_project.field_project_project__vendor_bill_count
 msgid "Vendor Bill Count"
-msgstr ""
+msgstr "Izmaksu skaits"
 
 #. module: sale_project
 #. odoo-python
@@ -839,7 +858,7 @@ msgstr ""
 #: code:addons/sale_project/models/project.py:0
 #, python-format
 msgid "Vendor Bills"
-msgstr "Pārdevēja Rēķini"
+msgstr "Iepirkumu rēķini"
 
 #. module: sale_project
 #: model_terms:ir.ui.view,arch_db:sale_project.project_milestone_view_tree

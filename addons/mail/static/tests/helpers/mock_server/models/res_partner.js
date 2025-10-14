@@ -239,6 +239,9 @@ patch(MockServer.prototype, {
             ).values(),
         ];
     },
+    _mockResPartnerComputeImStatus(partner) {
+        return partner.im_status;
+    },
     /**
      * Simulates `mail_partner_format` on `res.partner`.
      *
@@ -268,7 +271,7 @@ patch(MockServer.prototype, {
                         active: partner.active,
                         email: partner.email,
                         id: partner.id,
-                        im_status: partner.im_status,
+                        im_status: this._mockResPartnerComputeImStatus(partner),
                         is_company: partner.is_company,
                         name: partner.name,
                         type: "partner",
@@ -296,6 +299,11 @@ patch(MockServer.prototype, {
         if (search_term) {
             search_term = search_term.toLowerCase(); // simulates ILIKE
         }
+        const memberPartnerIds = new Set(
+            this.getRecords("discuss.channel.member", [["channel_id", "=", channel_id]]).map(
+                (member) => member.partner_id
+            )
+        );
         // simulates domain with relational parts (not supported by mock server)
         const matchingPartners = [
             ...this._mockResPartnerMailPartnerFormat(
@@ -308,8 +316,8 @@ patch(MockServer.prototype, {
                         if (!partner) {
                             return false;
                         }
-                        // not current partner
-                        if (partner.id === this.pyEnv.currentPartnerId) {
+                        // user should not already be a member of the channel
+                        if (memberPartnerIds.has(partner.id)) {
                             return false;
                         }
                         // no name is considered as return all

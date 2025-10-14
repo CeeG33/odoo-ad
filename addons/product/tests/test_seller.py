@@ -116,6 +116,21 @@ class TestSeller(TransactionCase):
         msg = "Wrong cost price: LCD Monitor if more than 3 Unit.should be 785 instead of %s" % price
         self.assertEqual(float_compare(price, 785, precision_digits=2), 0, msg)
 
+    def test_31_select_seller(self):
+        """Check that the right seller is selected, even when the decimal precision of
+        Product Price is higher than the precision of the currency.
+        """
+        self.env.ref('product.decimal_price').digits = 3
+        partner = self.asustec
+        product = self.product_consu
+        self.env['product.supplierinfo'].create([{
+            'partner_id': partner.id,
+            'product_tmpl_id': product.product_tmpl_id.id,
+            'price': price,
+        } for price in (0.025, 0.022, 0.020)])
+        price = product._select_seller(partner_id=partner, quantity=201).price
+        self.assertAlmostEqual(price, 0.02, places=3, msg="Lowest price should be returned")
+
     def test_40_seller_min_qty_precision(self):
         """Test that the min_qty has the precision of Product UoM."""
         # Arrange: Change precision digits
@@ -135,3 +150,17 @@ class TestSeller(TransactionCase):
 
         # Assert: The set value is kept
         self.assertEqual(supplier_info.min_qty, precise_value)
+
+    def test_50_seller_ids(self):
+        vendors = self.env['product.supplierinfo'].create([{
+            'partner_id': self.asustec.id,
+            'product_tmpl_id': self.product_consu.product_tmpl_id.id,
+        }, {
+            'partner_id': self.camptocamp.id,
+            'product_id': self.product_consu.id,
+        }])
+        self.assertEqual(vendors, self.product_consu.seller_ids,
+            "Sellers of a product should be listed in the product's seller_ids")
+        vendors.write({'product_id': False})
+        self.assertEqual(vendors, self.product_consu.seller_ids,
+            "Setting the product_id to False shouldn't affect seller_ids.")

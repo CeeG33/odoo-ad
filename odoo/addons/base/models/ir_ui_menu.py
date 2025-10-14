@@ -21,6 +21,7 @@ class IrUiMenu(models.Model):
     _description = 'Menu'
     _order = "sequence,id"
     _parent_store = True
+    _allow_sudo_commands = False
 
     name = fields.Char(string='Menu', required=True, translate=True)
     active = fields.Boolean(default=True)
@@ -52,7 +53,7 @@ class IrUiMenu(models.Model):
         if level <= 0:
             return '...'
         if self.parent_id:
-            return self.parent_id._get_full_name(level - 1) + MENU_ITEM_SEPARATOR + (self.name or "")
+            return (self.parent_id._get_full_name(level - 1) or "") + MENU_ITEM_SEPARATOR + (self.name or "")
         else:
             return self.name
 
@@ -62,7 +63,7 @@ class IrUiMenu(models.Model):
         path_info = path.split(',')
         icon_path = opj(path_info[0], path_info[1])
         try:
-            with tools.file_open(icon_path, 'rb', filter_ext=('.png',)) as icon_file:
+            with tools.file_open(icon_path, 'rb', filter_ext=('.png', '.gif', '.ico', '.jfif', '.jpeg', '.jpg', '.svg', '.webp')) as icon_file:
                 return base64.encodebytes(icon_file.read())
         except FileNotFoundError:
             return False

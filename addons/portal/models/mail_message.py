@@ -96,8 +96,10 @@ class MailMessage(models.Model):
             if 'author_avatar_url' in properties_names:
                 if options and 'token' in options:
                     values['author_avatar_url'] = f'/mail/avatar/mail.message/{message.id}/author_avatar/50x50?access_token={options["token"]}'
+                elif options and options.keys() >= {"hash", "pid"}:
+                    values['author_avatar_url'] = f'/mail/avatar/mail.message/{message.id}/author_avatar/50x50?_hash={options["hash"]}&pid={options["pid"]}'
                 else:
-                    values['author_avatar_url'] = f'/mail/avatar/mail.message/{message.id}/author_avatar/50x50'
+                    values['author_avatar_url'] = f'/web/image/mail.message/{message.id}/author_avatar/50x50'
             if 'is_message_subtype_note' in properties_names:
                 values['is_message_subtype_note'] = (values.get('subtype_id') or [False, ''])[0] == note_id
             if 'published_date_str' in properties_names:

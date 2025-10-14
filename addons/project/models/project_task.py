@@ -113,7 +113,7 @@ class Task(models.Model):
     @api.model
     def _read_group_stage_ids(self, stages, domain, order):
         search_domain = [('id', 'in', stages.ids)]
-        if 'default_project_id' in self.env.context and not self._context.get('subtask_action'):
+        if 'default_project_id' in self.env.context and not self._context.get('subtask_action') and 'project_kanban' in self.env.context:
             search_domain = ['|', ('project_ids', '=', self.env.context['default_project_id'])] + search_domain
 
         stage_ids = stages._search(search_domain, order=order, access_rights_uid=SUPERUSER_ID)
@@ -150,7 +150,7 @@ class Task(models.Model):
     date_end = fields.Datetime(string='Ending Date', index=True, copy=False)
     date_assign = fields.Datetime(string='Assigning Date', copy=False, readonly=True,
         help="Date on which this task was last assigned (or unassigned). Based on this, you can get statistics on the time it usually takes to assign tasks.")
-    date_deadline = fields.Datetime(string='Deadline', index=True, copy=False, tracking=True)
+    date_deadline = fields.Datetime(string='Deadline', index=True, tracking=True)
 
     date_last_stage_update = fields.Datetime(string='Last Stage Update',
         index=True,
@@ -167,7 +167,7 @@ class Task(models.Model):
         help="Sum of the hours allocated for all the sub-tasks (and their own sub-tasks) linked to this task. Usually less than or equal to the allocated hours of this task.")
     # Tracking of this field is done in the write function
     user_ids = fields.Many2many('res.users', relation='project_task_user_rel', column1='task_id', column2='user_id',
-        string='Assignees', context={'active_test': False}, tracking=True, default=_default_user_ids)
+        string='Assignees', context={'active_test': False}, tracking=True, default=_default_user_ids, domain="[('share', '=', False), ('active', '=', True)]")
     # User names displayed in project sharing views
     portal_user_names = fields.Char(compute='_compute_portal_user_names', compute_sudo=True, search='_search_portal_user_names')
     # Second Many2many containing the actual personal stage for the current user
@@ -208,7 +208,7 @@ class Task(models.Model):
     working_days_open = fields.Float(compute='_compute_elapsed', string='Working Days to Assign', store=True, group_operator="avg")
     working_days_close = fields.Float(compute='_compute_elapsed', string='Working Days to Close', store=True, group_operator="avg")
     # customer portal: include comment and (incoming/outgoing) emails in communication history
-    website_message_ids = fields.One2many(domain=lambda self: [('model', '=', self._name), ('message_type', 'in', ['email', 'comment', 'email_outgoing'])])
+    website_message_ids = fields.One2many(domain=lambda self: [('model', '=', self._name), ('message_type', 'in', ['email', 'comment', 'email_outgoing', 'auto_comment'])])
     allow_milestones = fields.Boolean(related='project_id.allow_milestones')
     milestone_id = fields.Many2one(
         'project.milestone',
@@ -297,7 +297,7 @@ class Task(models.Model):
         for task in self:
             task.analytic_account_id = task.project_id.analytic_account_id
 
-    @api.depends('stage_id', 'depend_on_ids.state', 'project_id.allow_task_dependencies')
+    @api.depends('stage_id', 'depend_on_ids.state')
     def _compute_state(self):
         for task in self:
             dependent_open_tasks = []
@@ -386,7 +386,7 @@ class Task(models.Model):
     def message_subscribe(self, partner_ids=None, subtype_ids=None):
         """ Set task notification based on project notification preference if user follow the project"""
         if not subtype_ids:
-            project_followers = self.project_id.message_follower_ids.filtered(lambda f: f.partner_id.id in partner_ids)
+            project_followers = self.project_id.sudo().message_follower_ids.filtered(lambda f: f.partner_id.id in partner_ids)
             for project_follower in project_followers:
                 project_subtypes = project_follower.subtype_ids
                 task_subtypes = (project_subtypes.mapped('parent_id') | project_subtypes.filtered(lambda sub: sub.internal or sub.default)).ids if project_subtypes else None
@@ -651,6 +651,9 @@ class Task(models.Model):
                         extract_data(task)
                 task.name = task.display_name.strip()
 
+    def _portal_get_parent_hash_token(self, pid):
+        return self.project_id._sign_token(pid)
+
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         if default is None:
@@ -665,6 +668,7 @@ class Task(models.Model):
         default['child_ids'] = [child.copy({'name': child.name}).id for child in self.child_ids]
         self_with_mail_context = self.with_context(mail_auto_subscribe_no_notify=True, mail_create_nosubscribe=True)
         task_copy = super(Task, self_with_mail_context).copy(default)
+        original_task_state = self.state
         if self.allow_task_dependencies:
             task_mapping = self.env.context.get('task_mapping')
             task_mapping[self.id] = task_copy.id
@@ -673,6 +677,8 @@ class Task(models.Model):
             self.write({'dependent_ids': [Command.unlink(t.id) for t in self.dependent_ids if t.id in new_tasks]})
             task_copy.write({'depend_on_ids': [Command.link(task_mapping.get(t.id, t.id)) for t in self.depend_on_ids]})
             task_copy.write({'dependent_ids': [Command.link(task_mapping.get(t.id, t.id)) for t in self.dependent_ids]})
+        if self.state != original_task_state:
+            self.write({'state': original_task_state})
         if self.allow_milestones:
             milestone_mapping = self.env.context.get('milestone_mapping', {})
             task_copy.milestone_id = milestone_mapping.get(task_copy.milestone_id.id, task_copy.milestone_id.id)
@@ -767,12 +773,33 @@ class Task(models.Model):
             project = self.env['project.project'].browse(project_id)
             if project.analytic_account_id:
                 vals['analytic_account_id'] = project.analytic_account_id.id
+            if 'company_id' in default_fields and 'default_project_id' not in self.env.context:
+                vals['company_id'] = project.sudo().company_id.id
         elif 'default_user_ids' not in self.env.context and 'user_ids' in default_fields:
             user_ids = vals.get('user_ids', [])
             user_ids.append(Command.link(self.env.user.id))
             vals['user_ids'] = user_ids
 
         return vals
+
+    def _ensure_fields_write(self, vals, check_group_user=True, defaults=False):
+        # First check if the fields are accessible
+        self._ensure_fields_are_accessible(vals.keys(), operation='write', check_group_user=check_group_user)
+
+        if defaults:
+            vals = {
+                **{
+                    key[8:]: value
+                    for key, value in self.env.context.items()
+                    if key.startswith("default_") and key[8:] in self._fields
+                },
+                **vals
+            }
+
+        for fname, value in vals.items():
+            field = self._fields[fname]
+            if field.type == 'many2one':
+                self.env[field.comodel_name].browse(value).check_access_rule('read')
 
     def _ensure_fields_are_accessible(self, fields, operation='read', check_group_user=True):
         """" ensure all fields are accessible by the current user
@@ -795,6 +822,33 @@ class Task(models.Model):
                 else:
                     error_message = _('You cannot write on %s fields in task.', ', '.join(unauthorized_fields))
                 raise AccessError(error_message)
+
+    def _get_portal_sudo_vals(self, vals, defaults=False):
+        """ returns the values which must be written without and with sudo when a portal user creates / writes a task.
+            :param vals: dict of {field: value}, the values to create/write
+            :return: a tuple with 2 dicts:
+                - the first with the values to write without sudo
+                - the second with the values to write with sudo
+        """
+        vals_no_sudo = {key: val for key, val in vals.items() if self._fields[key].type in ('one2many', 'many2many')}
+        if defaults:
+            vals_no_sudo.update({
+                key[8:]: value
+                for key, value in self.env.context.items()
+                if key.startswith('default_') and key[8:] in self.SELF_WRITABLE_FIELDS and self._fields[key[8:]].type in ('one2many', 'many2many')
+            })
+        vals_sudo = {key: val for key, val in vals.items() if key not in vals_no_sudo}
+        return vals_no_sudo, vals_sudo
+
+    @api.model
+    def _get_portal_sudo_context(self):
+        return {
+            key: value for key, value in self.env.context.items()
+            if key == 'default_project_id'
+            or key == 'default_user_ids' and value is False
+            or not key.startswith('default_')
+            or key[8:] in (field for field in self.SELF_WRITABLE_FIELDS if self._fields[field].type not in ('one2many', 'many2many'))
+        }
 
     def read(self, fields=None, load='_classic_read'):
         self._ensure_fields_are_accessible(fields)
@@ -857,16 +911,6 @@ class Task(models.Model):
 
         return tasks
 
-    @api.model
-    def _get_portal_sudo_context(self):
-        return {
-            key: value for key, value in self.env.context.items()
-            if key == 'default_project_id'
-            or key == 'default_user_ids' and value is False
-            or not key.startswith('default_')
-            or key[8:] in self.SELF_WRITABLE_FIELDS
-        }
-
     @api.model_create_multi
     def create(self, vals_list):
         new_context = dict(self.env.context)
@@ -885,6 +929,14 @@ class Task(models.Model):
                     user_ids = self._fields['user_ids'].convert_to_cache(vals.get('user_ids', []), self)
                     if self.env.user.id not in list(user_ids) + [SUPERUSER_ID]:
                         vals['user_ids'] = [Command.set(list(user_ids) + [self.env.user.id])]
+
+            if default_personal_stage and 'personal_stage_type_id' not in vals:
+                vals['personal_stage_type_id'] = default_personal_stage[0]
+            if not vals.get('name') and vals.get('display_name'):
+                vals['name'] = vals['display_name']
+            if is_portal_user:
+                self._ensure_fields_write(vals, check_group_user=False, defaults=True)
+
             if project_id:
                 # set the project => "I want to display the task in the project"
                 #                 => => set `display_in_project` to True
@@ -900,13 +952,7 @@ class Task(models.Model):
                     'display_in_project': False,
                 })
 
-            if default_personal_stage and 'personal_stage_type_id' not in vals:
-                vals['personal_stage_type_id'] = default_personal_stage[0]
-            if not vals.get('name') and vals.get('display_name'):
-                vals['name'] = vals['display_name']
-            if is_portal_user:
-                self._ensure_fields_are_accessible(vals.keys(), operation='write', check_group_user=False)
-
+            project_id = project_id or self.env.context.get('default_project_id')
             if project_id and not "company_id" in vals:
                 vals["company_id"] = self.env["project.project"].browse(
                     project_id
@@ -939,8 +985,12 @@ class Task(models.Model):
         # in order to compute the field tracking
         was_in_sudo = self.env.su
         if is_portal_user:
-            self = self.sudo().with_context(self._get_portal_sudo_context())
+            vals_list_no_sudo, vals_list = zip(*(self._get_portal_sudo_vals(vals, defaults=True) for vals in vals_list))
+            self_no_sudo, self = self, self.sudo().with_context(self._get_portal_sudo_context())
         tasks = super(Task, self.with_context(mail_create_nosubscribe=True)).create(vals_list)
+        if is_portal_user:
+            for task, vals in zip(tasks.with_env(self_no_sudo.env), vals_list_no_sudo):
+                task.write(vals)
         tasks._populate_missing_personal_stages()
         self._task_message_auto_subscribe_notify({task: task.user_ids - self.env.user for task in tasks})
 
@@ -967,7 +1017,7 @@ class Task(models.Model):
         portal_can_write = False
         if self.env.user.has_group('base.group_portal') and not self.env.su:
             # Check if all fields in vals are in SELF_WRITABLE_FIELDS
-            self._ensure_fields_are_accessible(vals.keys(), operation='write', check_group_user=False)
+            self._ensure_fields_write(vals, check_group_user=False, defaults=False)
             self.check_access_rights('write')
             self.check_access_rule('write')
             portal_can_write = True
@@ -1086,7 +1136,8 @@ class Task(models.Model):
         # requires the write access on others models, as rating.rating
         # in order to keep the same name than the task.
         if portal_can_write:
-            self = self.sudo().with_context(self._get_portal_sudo_context())
+            self_no_sudo, self = self, self.sudo().with_context(self._get_portal_sudo_context())
+            vals_no_sudo, vals = self._get_portal_sudo_vals(vals)
 
         # Track user_ids to send assignment notifications
         old_user_ids = {t: t.user_ids for t in self.sudo()}
@@ -1095,6 +1146,8 @@ class Task(models.Model):
             del vals['personal_stage_type_id']
 
         result = super().write(vals)
+        if portal_can_write:
+            super(Task, self_no_sudo).write(vals_no_sudo)
 
         if 'user_ids' in vals:
             self._populate_missing_personal_stages()
@@ -1140,7 +1193,12 @@ class Task(models.Model):
         return {'date_end': False}
 
     def _search_on_comodel(self, domain, field, comodel, order=None, additional_domain=None):
-
+        """ This method is called by `group_expand` methods, whose purpose is to add empty groups to the `read_group`
+            (which otherwise returns groups containing records that match the domain).
+            When specifically filtering on a comodel's field, the result of the `read_group` should contain all matching groups.
+            However, if the search isn't filtered on any comodel's field, the result shouldn't be affected,
+            which explains why we return `False` if `filtered_domain` is empty.
+        """
         def _change_operator(domain):
             new_domain = []
             for dom in domain:
@@ -1171,9 +1229,11 @@ class Task(models.Model):
             f"{field}.name": "name",
         })
         filtered_domain = _change_operator(filtered_domain)
+        if not filtered_domain:
+            return self.env[comodel]
         if additional_domain:
             filtered_domain = expression.AND([filtered_domain, additional_domain])
-        return self.env[comodel].search(filtered_domain, order=order) if filtered_domain else False
+        return self.env[comodel].search(filtered_domain, order=order)
 
     # ---------------------------------------------------
     # Subtasks
@@ -1401,6 +1461,7 @@ class Task(models.Model):
         # found.
         create_context = dict(self.env.context or {})
         create_context['default_user_ids'] = False
+        create_context['mail_notify_author'] = True  # Allows sending stage updates to the author
         if custom_values is None:
             custom_values = {}
         # Auto create partner if not existant when the task is created from email
@@ -1455,7 +1516,12 @@ class Task(models.Model):
                 self.displayed_image_id = image_attachments[0]
 
         # use the sanitized body of the email from the message thread to populate the task's description
-        if not self.description and message.subtype_id == self._creation_subtype() and self.partner_id == message.author_id:
+        if (
+           not self.description
+           and message.subtype_id == self._creation_subtype()
+           and self.partner_id == message.author_id
+           and msg_vals['message_type'] == 'email'
+        ):
             self.description = message.body
         return super(Task, self)._message_post_after_hook(message, msg_vals)
 
@@ -1542,6 +1608,7 @@ class Task(models.Model):
             'search_view_ref': 'project.project_sharing_project_task_view_search',
         }).action_open_parent_task()
         action['views'] = [(self.env.ref('project.project_sharing_project_task_view_form').id, 'form')]
+        action['search_view_id'] = self.env.ref("project.project_sharing_project_task_view_search").id
         return action
 
     # ------------

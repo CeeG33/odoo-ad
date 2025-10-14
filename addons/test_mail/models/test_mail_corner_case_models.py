@@ -121,6 +121,7 @@ class MailTestTrackAll(models.Model):
     date_field = fields.Date('Date', tracking=3)
     datetime_field = fields.Datetime('Datetime', tracking=4)
     float_field = fields.Float('Float', tracking=5)
+    float_field_with_digits = fields.Float('Precise Float', digits=(10, 8), tracking=5)
     html_field = fields.Html('Html', tracking=False)
     integer_field = fields.Integer('Integer', tracking=7)
     many2many_field = fields.Many2many(
@@ -150,6 +151,16 @@ class MailTestTrackCompute(models.Model):
     partner_name = fields.Char(related='partner_id.name', store=True, tracking=True)
     partner_email = fields.Char(related='partner_id.email', store=True, tracking=True)
     partner_phone = fields.Char(related='partner_id.phone', tracking=True)
+
+
+class MailTestTrackGroups(models.Model):
+    _name = 'mail.test.track.groups'
+    _description = "Test tracking with groups"
+    _inherit = ['mail.thread']
+
+    name = fields.Char(tracking=1)
+    partner_id = fields.Many2one('res.partner', tracking=2, groups="base.group_user")
+    secret = fields.Char(tracking=3, groups="base.group_user")
 
 
 class MailTestTrackMonetary(models.Model):

@@ -4,7 +4,7 @@
 from lxml import etree
 
 from odoo.fields import Command
-from odoo.tests.common import TransactionCase, Form
+from odoo.tests.common import TransactionCase, Form, new_test_user
 from odoo.exceptions import AccessError, RedirectWarning, UserError, ValidationError
 
 
@@ -93,6 +93,24 @@ class TestCommonTimesheet(TransactionCase):
             'user_id': cls.user_manager.id,
             'employee_type': 'freelance',
         })
+        cls.project = cls.env['project.project'].create({
+            'name': 'Test Project',
+            'privacy_visibility': 'followers',
+            'task_ids': [Command.create({
+                'name': 'Test Task',
+            })],
+        })
+        cls.timesheet = cls.env['account.analytic.line'].create({
+            'name': 'Test Timesheet',
+            'project_id': cls.project.id,
+            'task_id': cls.project.task_ids[0].id,
+            'employee_id':   cls.empl_employee.id,
+        })
+        cls.timesheet_manager_no_project_user = new_test_user(
+            cls.env,
+            login='no_project_user',
+            groups='hr_timesheet.group_timesheet_manager'
+        )
 
     def assert_get_view_timesheet_encode_uom(self, expected):
         companies = self.env['res.company'].create([
@@ -407,6 +425,14 @@ class TestTimesheet(TestCommonTimesheet):
 
         self.assertEqual(timesheet.project_id, project, 'The project_id of timesheet shouldn\'t have changed')
 
+    def test_compute_display_name(self):
+        self.timesheet.with_user(self.timesheet_manager_no_project_user)._compute_display_name()
+        self.assertEqual(
+            self.timesheet.display_name,
+            "Test Project - Test Task",
+            "Display name should be correctly computed without raising AccessError."
+        )
+
     def test_create_timesheet_employee_not_in_company(self):
         ''' ts.employee_id only if the user has an employee in the company or one employee for all companies.
         '''
@@ -460,9 +486,10 @@ class TestTimesheet(TestCommonTimesheet):
     def test_create_timesheet_with_multi_company(self):
         """ Always set the current company in the timesheet, not the employee company """
         company_4 = self.env['res.company'].create({'name': 'Company 4'})
-        empl_employee = self.env['hr.employee'].with_company(company_4).create({
-            'name': 'Employee 3',
-        })
+        empl_employee, archived_employee = self.env['hr.employee'].with_company(company_4).create([
+            {'name': 'Employee 3'},
+            {'name': 'Employee 4', 'active': False},
+        ])
 
         Timesheet = self.env['account.analytic.line'].with_context(allowed_company_ids=[company_4.id, self.env.company.id])
 
@@ -473,8 +500,16 @@ class TestTimesheet(TestCommonTimesheet):
             'unit_amount': 4,
             'employee_id': empl_employee.id,
         })
-
         self.assertEqual(timesheet.company_id.id, self.env.company.id)
+
+        with self.assertRaises(UserError, msg="The employee must be active to encode a timesheet"):
+            Timesheet.create({
+                'project_id': self.project_customer.id,
+                'task_id': self.task1.id,
+                'name': 'my first timesheet',
+                'unit_amount': 4,
+                'employee_id': archived_employee.id,
+            })
 
     def test_subtask_log_timesheet(self):
         """ Test parent task takes into account the timesheets of its sub-tasks.
@@ -594,6 +629,14 @@ class TestTimesheet(TestCommonTimesheet):
         self.assertEqual(timesheet_with_task.product_uom_id, self.task1.company_id.project_time_mode_id,
                          "The product_uom_id of the timesheet should be equal to the task's company uom "
                          "if the project's analytic account has no company_id")
+        # Remove the company also on the project to be sure we find a UoM
+        self.project_customer.company_id = False
+        timesheet_with_project.with_user(self.user_employee).write(
+            {'unit_amount': 2.0, 'project_id': self.project_customer.id})
+        self.assertEqual(timesheet_with_project.product_uom_id, self.env.company.project_time_mode_id,
+                         "The product_uom_id of the timesheet should be equal to the company uom "
+                         "if the project's analytic account and the project have no company_id")
+
 
     def test_create_timesheet_with_default_employee_in_context(self):
         timesheet = self.env['account.analytic.line'].with_context(default_employee_id=self.empl_employee.id).create({
@@ -686,3 +729,96 @@ class TestTimesheet(TestCommonTimesheet):
             },
         ])
         self.assertEqual(self.task1.progress, 100, 'The percentage of allocated hours should be 100%.')
+
+    def test_analytic_plan_setting(self):
+        analytic_plan = self.env['account.analytic.plan'].create({
+            'name': 'Departments 2',
+            'complete_name': 'Departments 2',
+            'default_applicability': 'optional',
+        })
+        self.env['ir.config_parameter'].set_param('analytic.analytic_plan_projects', 1)
+        project_1 = self.env['project.project'].create({
+            'name': "Project with plan setting 1",
+            'allow_timesheets': True,
+            'partner_id': self.partner.id,
+        })
+        self.assertEqual(project_1.analytic_account_id.plan_id.id, 1)
+
+        self.env['ir.config_parameter'].set_param('analytic.analytic_plan_projects', analytic_plan.id)
+        project_2 = self.env['project.project'].create({
+            'name': "Project with plan setting 2",
+            'allow_timesheets': True,
+            'partner_id': self.partner.id,
+        })
+        self.assertEqual(project_2.analytic_account_id.plan_id.id, analytic_plan.id)
+
+    def test_timesheet_update_user_on_employee(self):
+        timesheet = self.env['account.analytic.line'].create({
+            'project_id': self.project_customer.id,
+            'task_id': self.task1.id,
+            'name': 'my first timesheet',
+            'employee_id': self.empl_employee.id,
+        })
+        self.assertEqual(timesheet.user_id, self.empl_employee.user_id)
+        new_user = self.env['res.users'].create({
+            'name': 'Test user',
+            'login': 'test',
+        })
+        self.empl_employee.user_id = new_user
+        self.assertEqual(timesheet.user_id, new_user)
+
+    def test_analytic_plan_timesheet_creation(self):
+        child_analytic_plan = self.env['account.analytic.plan'].create({
+            'name': 'Child Analytic Plan',
+            'parent_id': self.analytic_plan.id,
+        })
+        child_analytic_account = self.env['account.analytic.account'].create({
+            'name': 'Analytic Account for Child Analytic Plan',
+            'partner_id': self.partner.id,
+            'plan_id': child_analytic_plan.id,
+            'code': 'TEST',
+        })
+        self.task1.analytic_account_id = child_analytic_account
+        timesheet = self.env['account.analytic.line'].create({
+            'name': 'Timesheet',
+            'unit_amount': 1,
+            'project_id': self.project_customer.id,
+            'task_id': self.task1.id,
+            'employee_id': self.empl_employee.id,
+        })
+        self.assertEqual(child_analytic_account, timesheet.account_id)
+        self.assertEqual(child_analytic_account, timesheet[f'{self.analytic_plan._column_name()}'])
+
+    def test_analytic_plan_timesheet_change_analytic_account(self):
+        timesheet = self.env['account.analytic.line'].create({
+            'name': 'Timesheet',
+            'unit_amount': 1,
+            'project_id': self.project_customer.id,
+            'task_id': self.task1.id,
+            'employee_id': self.empl_employee.id,
+        })
+        analytic_plan = self.env['account.analytic.plan'].create({
+            'name': 'Analytic Plan'
+        })
+        analytic_account = self.env['account.analytic.account'].create({
+            'name': 'Analytic Account',
+            'partner_id': self.partner.id,
+            'plan_id': analytic_plan.id,
+            'code': 'TEST',
+        })
+        self.task2.analytic_account_id = analytic_account
+        timesheet.task_id = self.task2
+        self.assertEqual(analytic_account, timesheet.account_id)
+        self.assertEqual(analytic_account, timesheet[f'{analytic_plan._column_name()}'])
+
+    def test_log_timesheet_with_user_has_two_employees_from_different_companies(self):
+        company_2 = self.env['res.company'].create({'name': 'Company 2'})
+        self.env['hr.employee'].with_company(company_2).create({
+            'name': 'Employee 2',
+            'user_id': self.user_manager.id,
+        })
+        timesheet = self.env['account.analytic.line'].create({
+            'project_id': self.project.id,
+            'user_id': self.user_manager.id,
+        })
+        self.assertEqual(timesheet.company_id, self.env.company)

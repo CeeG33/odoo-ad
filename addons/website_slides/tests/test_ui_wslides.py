@@ -1,15 +1,18 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
+import logging
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import tests
+from odoo import http, tests
 from odoo.addons.base.tests.common import HttpCaseWithUserPortal
 from odoo.addons.gamification.tests.common import HttpCaseGamification
-from odoo.fields import Datetime
+from odoo.fields import Command, Datetime
 from odoo.tools import mute_logger
 from odoo.tools.misc import file_open
+
+_logger = logging.getLogger(__name__)
 
 
 class TestUICommon(HttpCaseGamification, HttpCaseWithUserPortal):
@@ -121,7 +124,7 @@ class TestUi(TestUICommon):
         )
         for url in urls:
             response = self.url_open(url, allow_redirects=False)
-            self.assertTrue(response.headers.get("Location", "").endswith("/slides?invite_error=no_rights"))
+            self.assertURLEqual(response.headers.get("Location"), "/slides?invite_error=no_rights")
 
         # auth="user" has priority
         urls = (
@@ -130,7 +133,8 @@ class TestUi(TestUICommon):
         )
         for url in urls:
             response = self.url_open(url, allow_redirects=False)
-            self.assertIn("/web/login", response.headers.get("Location", ""))
+            location = self.parse_http_location(response.headers.get("Location"))
+            self.assertEqual(location.path, "/web/login")
 
     def test_course_member_employee(self):
         user_demo = self.user_demo
@@ -189,9 +193,29 @@ class TestUi(TestUICommon):
 
         self.start_tour('/slides', 'course_reviews', login=user_demo.login)
 
+    def test_fullscreen_slide_text_highlights(self):
+        slide = self.env['slide.slide'].create({
+            'name': 'Article test',
+            'channel_id': self.channel.id,
+            'slide_type': 'article',
+            'slide_category': 'article',
+            'is_published': True,
+            'html_content': "<section class=\"s_text_block\" data-snippet=\"s_text_block\"><p>Hello World!</p></section>"
+        })
+
+        self.start_tour(slide.website_url + '?enable_editor=1', 'fullscreen_slide_text_highlights', login='admin')
+
 
 @tests.common.tagged('post_install', '-at_install')
 class TestUiPublisher(HttpCaseGamification):
+
+    def fetch_proxy(self, url):
+        if url.endswith('ThreeTimeAKCGoldWinnerPembrookeWelshCorgi.jpg'):
+            _logger.info('External chrome request during tests: Sending dummy image for %s', url)
+            with file_open('base/tests/odoo.jpg', 'rb') as f:
+                content = f.read()
+            return self.make_fetch_proxy_response(content)
+        return super().fetch_proxy(url)
 
     def test_course_publisher_elearning_manager(self):
         user_demo = self.user_demo
@@ -202,6 +226,11 @@ class TestUiPublisher(HttpCaseGamification):
                 (4, self.env.ref('website_slides.group_website_slides_manager').id)
             ],
         })
+        self.env['slide.channel.tag.group'].create([{
+            'name': 'Your Favorite Role',
+            'tag_ids': [Command.create({'name': 'Gardening'})]}
+        ])
+        self.env['slide.tag'].create({'name': 'Practice'})
 
         self.start_tour(self.env['website'].get_client_action_url('/slides'), 'course_publisher_standard', login=user_demo.login)
 
@@ -264,3 +293,18 @@ class TestUiPublisherYoutube(HttpCaseGamification):
         })
 
         self.start_tour(self.env['website'].get_client_action_url('/slides'), 'course_publisher', login=user_demo.login)
+
+
+@tests.common.tagged('external', 'post_install', '-standard', '-at_install')
+class TestPortalComposer(TestUICommon):
+    def test_portal_composer_attachment(self):
+        """Check that the access token is returned when we upload an attachment."""
+        self.authenticate('demo', 'demo')
+        response = self.url_open('/portal/attachment/add', data={
+            'name': 'image.png',
+            'res_id': self.channel.id,
+            'res_model': 'slide.channel',
+            'csrf_token': http.WebRequest.csrf_token(self),
+        }, files={'file': ('image.png', '', 'image/png')})
+        self.assertTrue(response.ok)
+        self.assertTrue(response.json().get('access_token'))

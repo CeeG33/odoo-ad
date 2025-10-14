@@ -6,6 +6,7 @@
 # Jakub Smolka, 2023
 # Ivana Bartonkova, 2023
 # Wil Odoo, 2023
+# Katerina Horylova, 2024
 # Aleš Fiala <f.ales1@seznam.cz>, 2024
 # 
 msgid ""
@@ -25,14 +26,12 @@ msgstr ""
 #. module: spreadsheet_dashboard_event_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Attendees"
 msgstr "Účastníci"
 
 #. module: spreadsheet_dashboard_event_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Current"
@@ -76,11 +75,6 @@ msgstr ""
 #. module: spreadsheet_dashboard_event_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #: model:spreadsheet.dashboard,name:spreadsheet_dashboard_event_sale.spreadsheet_dashboard_events
 #, python-format
 msgid "Events"
@@ -98,7 +92,7 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "KPI"
-msgstr ""
+msgstr "KPI"
 
 #. module: spreadsheet_dashboard_event_sale
 #: model:spreadsheet.dashboard.group,name:spreadsheet_dashboard_event_sale.spreadsheet_dashboard_group_marketing
@@ -108,14 +102,12 @@ msgstr "Marketing"
 #. module: spreadsheet_dashboard_event_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Organizer"
 msgstr "Organizátor"
 
 #. module: spreadsheet_dashboard_event_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Previous"
@@ -130,7 +122,6 @@ msgstr "Stav registrace"
 
 #. module: spreadsheet_dashboard_event_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Revenue"
@@ -153,7 +144,6 @@ msgstr "Štítky"
 #. module: spreadsheet_dashboard_event_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Template"
 msgstr "Předloha"
@@ -170,7 +160,7 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Top Tags"
-msgstr ""
+msgstr "Nejdůležitější štítky"
 
 #. module: spreadsheet_dashboard_event_sale
 #. odoo-javascript
@@ -188,7 +178,6 @@ msgstr ""
 
 #. module: spreadsheet_dashboard_event_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Venue"
@@ -225,11 +214,9 @@ msgstr ""
 #. module: spreadsheet_dashboard_event_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "since last period"
-msgstr ""
+msgstr "od posledního období"
 
 #. module: spreadsheet_dashboard_event_sale
 #. odoo-javascript

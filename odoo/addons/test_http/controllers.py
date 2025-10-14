@@ -33,7 +33,7 @@ class TestHttp(http.Controller):
     # =====================================================
     # Greeting
     # =====================================================
-    @http.route(['/test_http/greeting', '/test_http/greeting-none'], type='http', auth='none')
+    @http.route(('/test_http/greeting', '/test_http/greeting-none'), type='http', auth='none')
     def greeting_none(self):
         return "Tek'ma'te"
 
@@ -130,7 +130,7 @@ class TestHttp(http.Controller):
     def cors_http(self):
         return "Hello"
 
-    @http.route('/test_http/cors_http_methods', type='http', auth='none', methods=['GET', 'PUT'], cors='*')
+    @http.route('/test_http/cors_http_methods', type='http', auth='none', methods=('GET', 'PUT'), cors='*')
     def cors_http_verbs(self, **kwargs):
         return "Hello"
 
@@ -210,3 +210,14 @@ class TestHttp(http.Controller):
             raise SerializationFailureError()
 
         return data.decode()
+
+    # =====================================================
+    # Security
+    # =====================================================
+    @http.route('/test_http/httprequest_attrs', type='http', auth='none')
+    def request_attrs(self):
+        return json.dumps(dir(request.httprequest))
+
+    @http.route('/test_http/httprequest_environ', type='http', auth='none')
+    def request_environ(self):
+        return json.dumps(list(request.httprequest.environ.keys()))

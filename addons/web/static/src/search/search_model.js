@@ -266,6 +266,9 @@ export class SearchModel extends EventBus {
             this.searchViewId = searchViewDescription.viewId;
         }
 
+        const { searchDefaults, searchPanelDefaults } =
+            this._extractSearchDefaultsFromGlobalContext();
+
         if (config.state) {
             this._importState(config.state);
             this.__legacyParseSearchPanelArchAnyway(searchViewDescription, searchViewFields);
@@ -284,26 +287,6 @@ export class SearchModel extends EventBus {
         this.nextId = 1;
         this.nextGroupId = 1;
         this.nextGroupNumber = 1;
-
-        const searchDefaults = {};
-        const searchPanelDefaults = {};
-
-        for (const key in this.globalContext) {
-            const defaultValue = this.globalContext[key];
-            const searchDefaultMatch = /^search_default_(.*)$/.exec(key);
-            if (searchDefaultMatch) {
-                if (defaultValue) {
-                    searchDefaults[searchDefaultMatch[1]] = defaultValue;
-                }
-                delete this.globalContext[key];
-                continue;
-            }
-            const searchPanelDefaultMatch = /^searchpanel_default_(.*)$/.exec(key);
-            if (searchPanelDefaultMatch) {
-                searchPanelDefaults[searchPanelDefaultMatch[1]] = defaultValue;
-                delete this.globalContext[key];
-            }
-        }
 
         const parser = new SearchArchParser(
             searchViewDescription,
@@ -388,6 +371,8 @@ export class SearchModel extends EventBus {
         this.globalComparison = comparison;
         this.globalGroupBy = groupBy || [];
         this.globalOrderBy = orderBy || [];
+
+        this._extractSearchDefaultsFromGlobalContext();
 
         await this._reloadSections();
     }
@@ -825,7 +810,8 @@ export class SearchModel extends EventBus {
         }
 
         const tree = treeFromDomain(domain, { distributeNot: !this.isDebugMode });
-        const trees = !tree.negate && tree.value === "&" ? tree.children : [tree];
+        const containsChildren = !tree.negate && tree.type === "connector" && tree.value == "&";
+        const trees = containsChildren ? tree.children : [tree];
         const promises = trees.map(async (tree) => {
             const description = await this.getDomainTreeDescription(this.resModel, tree);
             const preFilter = {
@@ -1453,6 +1439,28 @@ export class SearchModel extends EventBus {
         if (!valueIds.includes(category.activeValueId)) {
             category.activeValueId = valueIds[0];
         }
+    }
+
+    _extractSearchDefaultsFromGlobalContext() {
+        const searchDefaults = {};
+        const searchPanelDefaults = {};
+        for (const key in this.globalContext) {
+            const defaultValue = this.globalContext[key];
+            const searchDefaultMatch = /^search_default_(.*)$/.exec(key);
+            if (searchDefaultMatch) {
+                if (defaultValue) {
+                    searchDefaults[searchDefaultMatch[1]] = defaultValue;
+                }
+                delete this.globalContext[key];
+                continue;
+            }
+            const searchPanelDefaultMatch = /^searchpanel_default_(.*)$/.exec(key);
+            if (searchPanelDefaultMatch) {
+                searchPanelDefaults[searchPanelDefaultMatch[1]] = defaultValue;
+                delete this.globalContext[key];
+            }
+        }
+        return { searchDefaults, searchPanelDefaults };
     }
 
     /**

@@ -50,6 +50,7 @@ class ir_cron(models.Model):
     _name = "ir.cron"
     _order = 'cron_name'
     _description = 'Scheduled Actions'
+    _allow_sudo_commands = False
 
     ir_actions_server_id = fields.Many2one(
         'ir.actions.server', 'Server action',
@@ -57,7 +58,7 @@ class ir_cron(models.Model):
     cron_name = fields.Char('Name', compute='_compute_cron_name', store=True)
     user_id = fields.Many2one('res.users', string='Scheduler User', default=lambda self: self.env.user, required=True)
     active = fields.Boolean(default=True)
-    interval_number = fields.Integer(default=1, help="Repeat every x.")
+    interval_number = fields.Integer(default=1, group_operator=None, help="Repeat every x.")
     interval_type = fields.Selection([('minutes', 'Minutes'),
                                       ('hours', 'Hours'),
                                       ('days', 'Days'),
@@ -67,7 +68,7 @@ class ir_cron(models.Model):
     doall = fields.Boolean(string='Repeat Missed', help="Specify if missed occurrences should be executed when the server restarts.")
     nextcall = fields.Datetime(string='Next Execution Date', required=True, default=fields.Datetime.now, help="Next planned execution date for this job.")
     lastcall = fields.Datetime(string='Last Execution Date', help="Previous time the cron ran successfully, provided to the job through the context on the `lastcall` key")
-    priority = fields.Integer(default=5, help='The priority of the job, as an integer: 0 means higher priority, 10 means lower priority.')
+    priority = fields.Integer(default=5, group_operator=None, help='The priority of the job, as an integer: 0 means higher priority, 10 means lower priority.')
 
     @api.depends('ir_actions_server_id.name')
     def _compute_cron_name(self):
@@ -89,10 +90,23 @@ class ir_cron(models.Model):
             self = self.with_context(default_state='code')
         return super(ir_cron, self).default_get(fields_list)
 
+    @api.onchange('active', 'interval_number', 'interval_type')
+    def _onchange_interval_number(self):
+        if self.active and (self.interval_number <= 0 or not self.interval_type):
+            self.active = False
+            return {'warning': {
+                'title': _("Scheduled action disabled"),
+                'message': _("This scheduled action has been disabled because its interval number is not a strictly positive value.")}
+            }
+
     def method_direct_trigger(self):
         self.check_access_rights('write')
         for cron in self:
+            cron._try_lock()
+            _logger.info('Manually starting job `%s`.', cron.name)
             cron.with_user(cron.user_id).with_context({'lastcall': cron.lastcall}).ir_actions_server_id.run()
+            self.env.flush_all()
+            _logger.info('Job `%s` done.', cron.name)
             cron.lastcall = fields.Datetime.now()
         return True
 
@@ -121,8 +135,9 @@ class ir_cron(models.Model):
                         continue
                     _logger.debug("job %s acquired", job_id)
                     # take into account overridings of _process_job() on that database
-                    registry = odoo.registry(db_name)
+                    registry = odoo.registry(db_name).check_signaling()
                     registry[cls._name]._process_job(db, cron_cr, job)
+                    cron_cr.commit()
                     _logger.debug("job %s updated and released", job_id)
 
         except BadVersion:
@@ -298,6 +313,11 @@ class ir_cron(models.Model):
         # 3: now
         # 4: future_nextcall, the cron nextcall as seen from now
 
+        if job['interval_number'] <= 0:
+            _logger.error("Job %s %r has been disabled because its interval number is null or negative.", job['id'], job['cron_name'])
+            cron_cr.execute("UPDATE ir_cron SET active=false WHERE id=%s", [job['id']])
+            return
+
         with cls.pool.cursor() as job_cr:
             lastcall = fields.Datetime.to_datetime(job['lastcall'])
             interval = _intervalTypes[job['interval_type']](job['interval_number'])
@@ -355,8 +375,6 @@ class ir_cron(models.Model):
               AND call_at < (now() at time zone 'UTC')
         """, [job['id']])
 
-        cron_cr.commit()
-
     @api.model
     def _callback(self, cron_name, server_action_id, job_id):
         """ Run the method associated to a given job. It takes care of logging
@@ -370,14 +388,13 @@ class ir_cron(models.Model):
 
             log_depth = (None if _logger.isEnabledFor(logging.DEBUG) else 1)
             odoo.netsvc.log(_logger, logging.DEBUG, 'cron.object.execute', (self._cr.dbname, self._uid, '*', cron_name, server_action_id), depth=log_depth)
-            start_time = False
             _logger.info('Starting job `%s`.', cron_name)
-            if _logger.isEnabledFor(logging.DEBUG):
-                start_time = time.time()
+            start_time = time.time()
             self.env['ir.actions.server'].browse(server_action_id).run()
-            _logger.info('Job `%s` done.', cron_name)
+            self.env.flush_all()
+            end_time = time.time()
+            _logger.info('Job done: `%s` (%.3fs).', cron_name, end_time - start_time)
             if start_time and _logger.isEnabledFor(logging.DEBUG):
-                end_time = time.time()
                 _logger.debug('%.3fs (cron %s, server action %d with uid %d)', end_time - start_time, cron_name, server_action_id, self.env.uid)
             self.pool.signal_changes()
         except Exception as e:
@@ -528,10 +545,15 @@ class ir_cron_trigger(models.Model):
     _name = 'ir.cron.trigger'
     _description = 'Triggered actions'
     _rec_name = 'cron_id'
+    _allow_sudo_commands = False
 
     cron_id = fields.Many2one("ir.cron", index=True)
-    call_at = fields.Datetime()
+    call_at = fields.Datetime(index=True)
 
     @api.autovacuum
     def _gc_cron_triggers(self):
-        self.search([('call_at', '<', datetime.now() + relativedelta(weeks=-1))]).unlink()
+        domain = [('call_at', '<', datetime.now() + relativedelta(weeks=-1))]
+        records = self.search(domain, limit=models.GC_UNLINK_LIMIT)
+        if len(records) >= models.GC_UNLINK_LIMIT:
+            self.env.ref('base.autovacuum_job')._trigger()
+        return records.unlink()

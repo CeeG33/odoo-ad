@@ -10,6 +10,7 @@ import unicodedata
 import werkzeug.exceptions
 import werkzeug.routing
 import werkzeug.urls
+import urllib.parse
 from werkzeug.exceptions import HTTPException, NotFound
 
 # optional python-slugify import (https://github.com/un33k/python-slugify)
@@ -23,7 +24,7 @@ from odoo import api, models, exceptions, tools, http
 from odoo.addons.base.models import ir_http
 from odoo.addons.base.models.ir_http import RequestUID
 from odoo.addons.base.models.ir_qweb import QWebException
-from odoo.http import request, Response
+from odoo.http import request, HTTPRequest, Response
 from odoo.osv import expression
 from odoo.tools import config, ustr, pycompat
 
@@ -142,9 +143,9 @@ def url_lang(path_or_uri, lang_code=None):
     location = pycompat.to_text(path_or_uri).strip()
     force_lang = lang_code is not None
     try:
-        url = werkzeug.urls.url_parse(location)
+        url = urllib.parse.urlparse(location)
     except ValueError:
-        # e.g. Invalid IPv6 URL, `werkzeug.urls.url_parse('http://]')`
+        # e.g. Invalid IPv6 URL, `urllib.parse.urlparse('http://]')`
         url = False
     # relative URL with either a path or a force_lang
     if url and not url.netloc and not url.scheme and (url.path or force_lang):
@@ -349,6 +350,8 @@ class IrHttp(models.AbstractModel):
             return lang_code
 
         short = lang_code.partition('_')[0]
+        if not short:
+            return None
         return next((code for code in lang_codes if code.startswith(short)), None)
 
     @classmethod
@@ -527,16 +530,14 @@ class IrHttp(models.AbstractModel):
             query_string = request.httprequest.environ['QUERY_STRING']
 
         # Change the WSGI environment
-        environ = request.httprequest.environ.copy()
+        environ = request.httprequest._HTTPRequest__environ.copy()
         environ['PATH_INFO'] = path
         environ['QUERY_STRING'] = query_string
         environ['RAW_URI'] = f'{path}?{query_string}'
         # REQUEST_URI left as-is so it still contains the original URI
 
         # Create and expose a new request from the modified WSGI env
-        httprequest = werkzeug.wrappers.Request(environ)
-        httprequest.parameter_storage_class = (
-            werkzeug.datastructures.ImmutableOrderedMultiDict)
+        httprequest = HTTPRequest(environ)
         threading.current_thread().url = httprequest.url
         request.httprequest = httprequest
 
@@ -564,8 +565,8 @@ class IrHttp(models.AbstractModel):
             if request.httprequest.method in ('GET', 'HEAD'):
                 try:
                     _, path = rule.build(args)
-                except odoo.exceptions.MissingError:
-                    raise werkzeug.exceptions.NotFound()
+                except odoo.exceptions.MissingError as exc:
+                    raise werkzeug.exceptions.NotFound() from exc
                 assert path is not None
                 generated_path = werkzeug.urls.url_unquote_plus(path)
                 current_path = werkzeug.urls.url_unquote_plus(request.httprequest.path)
@@ -671,9 +672,10 @@ class IrHttp(models.AbstractModel):
         router = http.root.get_db_router(request.db).bind('')
         endpoint = False
         try:
-            endpoint = router.match(path, method='POST', query_args=query_args)
-        except werkzeug.exceptions.MethodNotAllowed:
-            endpoint = router.match(path, method='GET', query_args=query_args)
+            try:
+                endpoint = router.match(path, method='POST', query_args=query_args)
+            except werkzeug.exceptions.MethodNotAllowed:
+                endpoint = router.match(path, method='GET', query_args=query_args)
         except werkzeug.routing.RequestRedirect as e:
             new_url = e.new_url.split('?')[0][7:]  # remove scheme
             _, endpoint = self.url_rewrite(new_url, query_args)

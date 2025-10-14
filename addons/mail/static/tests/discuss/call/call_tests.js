@@ -7,7 +7,7 @@ import { mockGetMedia, start } from "@mail/../tests/helpers/test_utils";
 
 import { browser } from "@web/core/browser/browser";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
-import { click, contains, triggerEvents } from "@web/../tests/utils";
+import { assertSteps, click, contains, step, triggerEvents } from "@web/../tests/utils";
 
 QUnit.module("call");
 
@@ -77,7 +77,7 @@ QUnit.test("show call UI in chat window when in call", async () => {
     await contains(".o-mail-ChatWindow-command[title='Start a Call']", { count: 0 });
 });
 
-QUnit.test("should disconnect when closing page while in call", async (assert) => {
+QUnit.test("should disconnect when closing page while in call", async () => {
     mockGetMedia();
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
@@ -88,10 +88,9 @@ QUnit.test("should disconnect when closing page while in call", async (assert) =
             ...browser.navigator,
             sendBeacon: async (route, data) => {
                 if (data instanceof Blob && route === "/mail/rtc/channel/leave_call") {
-                    assert.step("sendBeacon_leave_call");
                     const blobText = await data.text();
                     const blobData = JSON.parse(blobText);
-                    assert.strictEqual(blobData.params.channel_id, channelId);
+                    step(`sendBeacon_leave_call:${blobData.params.channel_id}`);
                 }
             },
         },
@@ -101,10 +100,10 @@ QUnit.test("should disconnect when closing page while in call", async (assert) =
     await contains(".o-discuss-Call");
     // simulate page close
     window.dispatchEvent(new Event("pagehide"), { bubble: true });
-    assert.verifySteps(["sendBeacon_leave_call"]);
+    await assertSteps([`sendBeacon_leave_call:${channelId}`]);
 });
 
-QUnit.test("should display invitations", async (assert) => {
+QUnit.test("should display invitations", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     const partnerId = pyEnv["res.partner"].create({ name: "InvitationSender" });
@@ -119,11 +118,11 @@ QUnit.test("should display invitations", async (assert) => {
     const { env } = await start();
     patchWithCleanup(env.services["mail.sound_effects"], {
         play(name) {
-            assert.step(`play - ${name}`);
+            step(`play - ${name}`);
             super.play(...arguments);
         },
         stop(name) {
-            assert.step(`stop - ${name}`);
+            step(`stop - ${name}`);
             super.stop(...arguments);
         },
     });
@@ -135,7 +134,7 @@ QUnit.test("should display invitations", async (assert) => {
         },
     });
     await contains(".o-discuss-CallInvitation");
-    assert.verifySteps(["play - incoming-call"]);
+    await assertSteps(["play - incoming-call"]);
     // Simulate stop receiving call invitation
     pyEnv["bus.bus"]._sendone(pyEnv.currentPartner, "mail.record/insert", {
         Thread: {
@@ -145,7 +144,7 @@ QUnit.test("should display invitations", async (assert) => {
         },
     });
     await contains(".o-discuss-CallInvitation", { count: 0 });
-    assert.verifySteps(["stop - incoming-call"]);
+    await assertSteps(["stop - incoming-call"]);
 });
 
 QUnit.test("can share screen", async () => {
@@ -224,7 +223,7 @@ QUnit.test("Click on inset card should replace the inset and active stream toget
     await contains("video[type='camera']:not(.o-inset)");
 });
 
-QUnit.test("join/leave sounds are only played on main tab", async (assert) => {
+QUnit.test("join/leave sounds are only played on main tab", async () => {
     mockGetMedia();
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
@@ -232,12 +231,12 @@ QUnit.test("join/leave sounds are only played on main tab", async (assert) => {
     const tab2 = await start({ asTab: true });
     patchWithCleanup(tab1.env.services["mail.sound_effects"], {
         play(name) {
-            assert.step(`tab1 - play - ${name}`);
+            step(`tab1 - play - ${name}`);
         },
     });
     patchWithCleanup(tab2.env.services["mail.sound_effects"], {
         play(name) {
-            assert.step(`tab2 - play - ${name}`);
+            step(`tab2 - play - ${name}`);
         },
     });
     await tab1.openDiscuss(channelId);
@@ -245,9 +244,62 @@ QUnit.test("join/leave sounds are only played on main tab", async (assert) => {
     await click("[title='Start a Call']", { target: tab1.target });
     await contains(".o-discuss-Call", { target: tab1.target });
     await contains(".o-discuss-Call", { target: tab2.target });
-    assert.verifySteps(["tab1 - play - channel-join"]);
+    await assertSteps(["tab1 - play - channel-join"]);
     await click("[title='Disconnect']:not([disabled])", { target: tab1.target });
     await contains(".o-discuss-Call", { target: tab1.target, count: 0 });
     await contains(".o-discuss-Call", { target: tab2.target, count: 0 });
-    assert.verifySteps(["tab1 - play - channel-leave"]);
+    await assertSteps(["tab1 - play - channel-leave"]);
+});
+
+QUnit.test("should also invite to the call when inviting to the channel", async () => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({
+        email: "testpartner@odoo.com",
+        name: "TestPartner",
+    });
+    pyEnv["res.users"].create({ partner_id: partnerId });
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "TestChanel",
+        channel_member_ids: [Command.create({ partner_id: pyEnv.currentPartnerId })],
+        channel_type: "channel",
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
+    await click("[title='Start a Call']");
+    await contains(".o-discuss-Call");
+    await click(".o-mail-Discuss-header button[title='Add Users']");
+    await contains(".o-discuss-ChannelInvitation");
+    await click(".o-discuss-ChannelInvitation-selectable", { text: "TestPartner" });
+    await click("[title='Invite to Channel']:enabled");
+    await contains(".o-discuss-CallParticipantCard.o-isInvitation");
+});
+
+QUnit.test("should not show context menu on participant card when not in a call", async () => {
+    mockGetMedia();
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "General",
+    });
+    pyEnv["discuss.channel.rtc.session"].create([
+        {
+            channel_member_id: pyEnv["discuss.channel.member"].create({
+                channel_id: channelId,
+                partner_id: pyEnv["res.partner"].create({ name: "Awesome Partner" }),
+            }),
+            channel_id: channelId,
+        },
+    ]);
+    const { openDiscuss } = await start();
+    openDiscuss(channelId);
+    await contains(".o-discuss-CallParticipantCard[title='Awesome Partner']");
+    await contains(
+        ".o-discuss-CallParticipantCard[title='Awesome Partner'] .o-discuss-CallParticipantCard-contextMenuAnchor",
+        { count: 0 }
+    );
+    await click("[title='Join Call']");
+    await contains(
+        ".o-discuss-CallParticipantCard[title='Awesome Partner'] .o-discuss-CallParticipantCard-contextMenuAnchor"
+    );
+    await triggerEvents(".o-discuss-CallParticipantCard[title='Awesome Partner']", ["contextmenu"]);
+    await contains(".o-discuss-CallContextMenu");
 });

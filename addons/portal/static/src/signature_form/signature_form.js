@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Component, onMounted, useRef, useState } from "@odoo/owl";
+import dom from "@web/legacy/js/core/dom";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { redirect } from "@web/core/utils/urls";
@@ -12,7 +13,7 @@ import { useService } from "@web/core/utils/hooks";
  * @see NameAndSignature for the input fields, adds a submit
  * button, and handles the RPC to save the result.
  */
-class SignatureForm extends Component {
+export class SignatureForm extends Component {
     static template = "portal.SignatureForm"
     static components = { NameAndSignature }
 
@@ -25,7 +26,11 @@ class SignatureForm extends Component {
             error: false,
             success: false,
         });
-        this.signature = useState({ name: this.props.defaultName });
+        this.signature = useState({
+            name: this.props.defaultName,
+            getSignatureImage: () => "",
+            resetSignature: () => {},
+        });
         this.nameAndSignatureProps = {
             signature: this.signature,
             fontColor: this.props.fontColor || "black",
@@ -42,10 +47,18 @@ class SignatureForm extends Component {
 
         // Correctly set up the signature area if it is inside a modal
         onMounted(() => {
-            this.rootRef.el.closest('.modal').addEventListener('shown.bs.modal', () => {
-                this.signature.resetSignature();
-            });
+            const modal_el = this.rootRef.el.closest('.modal');
+            if (modal_el !== null) {
+                modal_el.addEventListener('shown.bs.modal', () => {
+                    this.signature.resetSignature();
+                    this.toggleSignatureFormVisibility();
+                });
+            }
         });
+    }
+
+    toggleSignatureFormVisibility() {
+        this.rootRef.el.classList.toggle('d-none', document.querySelector('.editor_enable'));
     }
 
     get sendLabel() {
@@ -62,10 +75,16 @@ class SignatureForm extends Component {
      * @returns {Promise}
      */
     async onClickSubmit() {
+        const button = document.querySelector('.o_portal_sign_submit')
+        const icon = button.removeChild(button.firstChild)
+        const restoreBtnLoading = dom.addButtonLoadingEffect(button);
+
         const name = this.signature.name;
         const signature = this.signature.getSignatureImage()[1];
         const data = await this.rpc(this.props.callUrl, { name, signature });
         if (data.force_refresh) {
+            restoreBtnLoading();
+            button.prepend(icon)
             if (data.redirect_url) {
                 redirect(data.redirect_url);
             } else {

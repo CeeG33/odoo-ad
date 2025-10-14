@@ -43,9 +43,11 @@ class MailingSMSController(http.Controller):
             return request.redirect('/web')
         # parse and validate number
         sms_number = post.get('sms_number', '').strip(' ')
+        country = request.env['res.country'].search([('code', '=', request.geoip.country_code)], limit=1)
         sanitized = phone_validation.phone_format(
             sms_number,
-            request.geoip.country_code,
+            country.code,
+            country.phone_code,
             force_format='E164',
             raise_exception=False,
         )
@@ -96,12 +98,13 @@ class MailingSMSController(http.Controller):
         else:
             trace_id = False
 
-        request.env['link.tracker.click'].sudo().add_click(
-            code,
-            ip=request.httprequest.remote_addr,
-            country_code=request.geoip.country_code,
-            mailing_trace_id=trace_id
-        )
+        if not request.env['ir.http'].is_a_bot():
+            request.env['link.tracker.click'].sudo().add_click(
+                code,
+                ip=request.httprequest.remote_addr,
+                country_code=request.geoip.country_code,
+                mailing_trace_id=trace_id
+            )
         redirect_url = request.env['link.tracker'].get_url_from_code(code)
         if not redirect_url:
             raise NotFound()

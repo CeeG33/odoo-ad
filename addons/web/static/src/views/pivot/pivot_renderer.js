@@ -166,7 +166,7 @@ export class PivotRenderer extends Component {
         const table = this.model.exportData();
         download({
             url: "/web/pivot/export_xlsx",
-            data: { data: JSON.stringify(table) },
+            data: { data: new Blob([JSON.stringify(table)], { type: "application/json" }) },
         });
     }
     /**
@@ -241,4 +241,7 @@ export class PivotRenderer extends Component {
 }
 PivotRenderer.template = "web.PivotRenderer";
 PivotRenderer.components = { Dropdown, DropdownItem, CheckBox, PivotGroupByMenu };
-PivotRenderer.props = ["model"];
+PivotRenderer.props = ["model", "buttonTemplate?"];
+PivotRenderer.defaultProps = {
+    buttonTemplate: "web.PivotView.Buttons",
+};

@@ -3,35 +3,33 @@
 # 	* hr
 # 
 # Translators:
-# Андрей Гусев <gaussgss@gmail.com>, 2023
-# Viktor Scorpion <victorscorpion2000@gmail.com>, 2023
-# Vitalius Sharkhun <al070572sva@gmail.com>, 2023
-# Максим Дронь <dronmax@gmail.com>, 2023
-# Иван Дроздов <hiraetari@gmail.com>, 2023
-# sergeiruzkiicode <sergei.ruzki@icode.by>, 2023
-# Gennady Marchenko <gennadym@gmail.com>, 2023
-# Collex100, 2023
-# Диляра Дельтаева <dilya.kz93@gmail.com>, 2023
-# Ekaterina <nawsikaya@bk.ru>, 2023
-# Evgeniia Kotova, 2023
-# Sergey Vilizhanin, 2023
-# ILMIR <karamov@it-projects.info>, 2023
-# Irina Fedulova <istartlin@gmail.com>, 2023
 # Alexandr U <ural-gorets@yandex.ru>, 2023
-# alenafairy, 2023
+# Андрей Гусев <gaussgss@gmail.com>, 2023
+# Collex100, 2023
+# Максим Дронь <dronmax@gmail.com>, 2023
+# ILMIR <karamov@it-projects.info>, 2023
+# Gennady Marchenko <gennadym@gmail.com>, 2023
+# Диляра Дельтаева <dilya.kz93@gmail.com>, 2023
+# Evgeniia Kotova, 2023
+# Ekaterina <nawsikaya@bk.ru>, 2023
+# Sergey Vilizhanin, 2023
+# Ivan Kropotkin <yelizariev@itpp.dev>, 2023
 # Vasiliy Korobatov <korobatov@gmail.com>, 2023
 # Alena Vlasova, 2023
-# Ivan Kropotkin <yelizariev@itpp.dev>, 2023
-# Сергей Шебанин <sergey@shebanin.ru>, 2023
 # Martin Trigaux, 2023
+# Сергей Шебанин <sergey@shebanin.ru>, 2023
+# Nadia Martynova, 2024
+# Wil Odoo, 2025
+# Ilya Rozhkov, 2025
+# Anastasiia Koroleva, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"POT-Creation-Date: 2025-02-10 10:33+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Martin Trigaux, 2023\n"
+"Last-Translator: Anastasiia Koroleva, 2025\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -43,7 +41,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr.field_res_company__hr_presence_control_email_amount
 #: model:ir.model.fields,field_description:hr.field_res_config_settings__hr_presence_control_email_amount
 msgid "# emails to send"
-msgstr "# электронных писем на отправку"
+msgstr "# электронная почта для отправки"
 
 #. module: hr
 #. odoo-python
@@ -60,7 +58,7 @@ msgstr "&amp;nbsp;"
 #. module: hr
 #: model:ir.actions.report,print_report_name:hr.hr_employee_print_badge
 msgid "'Badge - %s' % (object.name).replace('/', '')"
-msgstr ""
+msgstr "'Значок - %s' % (object.name).replace('/', '')"
 
 #. module: hr
 #: model_terms:hr.job,job_details:hr.job_ceo
@@ -71,7 +69,7 @@ msgstr ""
 #: model_terms:hr.job,job_details:hr.job_marketing
 #: model_terms:hr.job,job_details:hr.job_trainee
 msgid "1 Onsite Interview"
-msgstr ""
+msgstr "1 Собеседование на месте"
 
 #. module: hr
 #: model_terms:hr.job,job_details:hr.job_ceo
@@ -82,7 +80,7 @@ msgstr ""
 #: model_terms:hr.job,job_details:hr.job_marketing
 #: model_terms:hr.job,job_details:hr.job_trainee
 msgid "1 Phone Call"
-msgstr ""
+msgstr "1 Телефонный звонок"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -93,12 +91,7 @@ msgstr ""
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "12 days / year, including <br>6 of your choice."
-msgstr "12 дней/ год, включая<br>6 по выбору."
-
-#. module: hr
-#: model_terms:ir.ui.view,arch_db:hr.print_employee_badge
-msgid "12345678901"
-msgstr ""
+msgstr "12 дней в году, включая <br>6 по вашему выбору."
 
 #. module: hr
 #: model_terms:hr.job,job_details:hr.job_ceo
@@ -109,7 +102,7 @@ msgstr ""
 #: model_terms:hr.job,job_details:hr.job_marketing
 #: model_terms:hr.job,job_details:hr.job_trainee
 msgid "2 open days"
-msgstr ""
+msgstr "2 дня открытых дверей"
 
 #. module: hr
 #: model_terms:hr.job,job_details:hr.job_ceo
@@ -120,7 +113,7 @@ msgstr ""
 #: model_terms:hr.job,job_details:hr.job_marketing
 #: model_terms:hr.job,job_details:hr.job_trainee
 msgid "4 Days after Interview"
-msgstr ""
+msgstr "через 4 дня после собеседования"
 
 #. module: hr
 #. odoo-python
@@ -130,27 +123,25 @@ msgid ""
 "<b>Congratulations!</b> May I recommend you to setup an <a "
 "href=\"%s\">onboarding plan?</a>"
 msgstr ""
-"<b>Поздравляю!</b> Могу предложить вам запустить <a href=\"%s\">процесс по "
-"введению в должность?</a>"
+"<b>Поздравляю!</b> Могу ли я порекомендовать вам разработать <a "
+"href=\"%s\">план по введению в должность?</a>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_department_view_kanban
 msgid "<i class=\"fa fa-building-o\" role=\"img\" aria-label=\"Company\" title=\"Company\"/>"
-msgstr ""
-"<i class=\"fa fa-building-o\" role=\"img\" aria-label=\"Компания\" "
-"title=\"Компания\"/>"
+msgstr "<i class=\"fa fa-building-o\" role=\"img\" aria-label=\"Company\" title=\"Company\"/>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_kanban
 #: model_terms:ir.ui.view,arch_db:hr.hr_kanban_view_employees
 msgid "<i class=\"fa fa-fw me-2 fa-envelope text-primary\" title=\"Email\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-fw me-2 fa-envelope text-primary\" title=\"Email\"/>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_kanban
 #: model_terms:ir.ui.view,arch_db:hr.hr_kanban_view_employees
 msgid "<i class=\"fa fa-fw me-2 fa-phone text-primary\" title=\"Phone\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-fw me-2 fa-phone text-primary\" title=\"Телефон\"/>"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -168,6 +159,8 @@ msgstr "<small><b>ЧИТАТЬ</b></small>"
 msgid ""
 "<span class=\"flex-shrink-0 ml8 me-2\">IP Addresses (comma-separated)</span>"
 msgstr ""
+"<span class=\"flex-shrink-0 ml8 me-2\">IP-адреса (разделенные "
+"запятыми)</span>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
@@ -175,11 +168,13 @@ msgid ""
 "<span class=\"flex-shrink-0 ml8 me-2\">Minimum number of emails to "
 "send</span>"
 msgstr ""
+"<span class=\"flex-shrink-0 ml8 me-2\">Минимальное количество писем для "
+"отправки</span>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_department_view_kanban
 msgid "<span class=\"fw-bolder\">Reporting</span>"
-msgstr ""
+msgstr "<span class=\"fw-bolder\">Отчетность</span>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_departure_wizard_view_form
@@ -187,6 +182,8 @@ msgid ""
 "<span class=\"o_form_label o_hr_form_label cursor-default\">Close "
 "Activities</span>"
 msgstr ""
+"<span class=\"o_form_label o_hr_form_label cursor-default\">Близкие "
+"мероприятия</span>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_departure_wizard_view_form
@@ -194,11 +191,14 @@ msgid ""
 "<span class=\"o_form_label o_hr_form_label cursor-default\">Detailed "
 "Reason</span>"
 msgstr ""
+"<span class=\"o_form_label o_hr_form_label cursor-default\">Подробная "
+"причина</span>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_departure_wizard_view_form
 msgid "<span class=\"o_form_label o_hr_form_label cursor-default\">HR Info</span>"
 msgstr ""
+"<span class=\"o_form_label o_hr_form_label cursor-default\">HR Info</span>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -208,18 +208,18 @@ msgid ""
 "                                </span>"
 msgstr ""
 "<span class=\"o_stat_text\">\n"
-"                                    Не подключен\n"
+"                                    Не подключено\n"
 "                                </span>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 msgid "<span class=\"o_stat_text\">Connected Since</span>"
-msgstr "<span class=\"o_stat_text\">Подключен с</span>"
+msgstr "<span class=\"o_stat_text\" >Включен с тех пор как</span>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_partner_view_form
 msgid "<span class=\"o_stat_text\">Employee</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">Сотрудник</span>"
 
 #. module: hr
 #: model_terms:hr.job,job_details:hr.job_ceo
@@ -230,7 +230,7 @@ msgstr ""
 #: model_terms:hr.job,job_details:hr.job_marketing
 #: model_terms:hr.job,job_details:hr.job_trainee
 msgid "<span class=\"text-muted small\">Days to get an Offer</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Дни для получения предложения</span>"
 
 #. module: hr
 #: model_terms:hr.job,job_details:hr.job_ceo
@@ -241,7 +241,7 @@ msgstr ""
 #: model_terms:hr.job,job_details:hr.job_marketing
 #: model_terms:hr.job,job_details:hr.job_trainee
 msgid "<span class=\"text-muted small\">Process</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Процесс</span>"
 
 #. module: hr
 #: model_terms:hr.job,job_details:hr.job_ceo
@@ -252,7 +252,7 @@ msgstr ""
 #: model_terms:hr.job,job_details:hr.job_marketing
 #: model_terms:hr.job,job_details:hr.job_trainee
 msgid "<span class=\"text-muted small\">Time to Answer</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Время отвечать</span>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
@@ -262,7 +262,7 @@ msgstr "<span>Км</span>"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_hr_job_form
 msgid "<span>new Employees</span>"
-msgstr ""
+msgstr "<span>новые сотрудники</span>"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -279,8 +279,7 @@ msgstr "Полная занятость <br>Привлекательный па�
 #: model:ir.model.constraint,message:hr.constraint_hr_employee_user_uniq
 msgid "A user cannot be linked to multiple employees in the same company."
 msgstr ""
-"Пользователь не может быть привязан к нескольким работникам в одной "
-"компании."
+"Пользователь не может быть связан с несколькими сотрудниками одной компании."
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__hr_icon_display__presence_absent
@@ -290,7 +289,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee_public__hr_icon_display__presence_absent
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee_public__hr_presence_state__absent
 msgid "Absent"
-msgstr "Отсутствует"
+msgstr "Нет"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -301,14 +300,14 @@ msgstr "Отсутствует"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Achieve monthly sales objectives"
-msgstr "Достигать ежемесячных целей по продажам"
+msgstr "Достижение ежемесячных целей по продажам"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__message_needaction
 #: model:ir.model.fields,field_description:hr.field_hr_employee__message_needaction
 #: model:ir.model.fields,field_description:hr.field_hr_job__message_needaction
 msgid "Action Needed"
-msgstr "Требует внимания"
+msgstr "Требуются действия"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__active
@@ -318,12 +317,12 @@ msgstr "Требует внимания"
 #: model:ir.model.fields,field_description:hr.field_hr_job__active
 #: model:ir.model.fields,field_description:hr.field_hr_work_location__active
 msgid "Active"
-msgstr "Активно"
+msgstr "Активный"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_ids
 msgid "Activities"
-msgstr "Деятельность"
+msgstr "Активность"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_exception_decoration
@@ -333,37 +332,37 @@ msgstr "Оформление исключения активности"
 #. module: hr
 #: model:ir.model,name:hr.model_mail_activity_plan
 msgid "Activity Plan"
-msgstr ""
+msgstr "План деятельности"
 
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_config_plan
 msgid "Activity Planning"
-msgstr "Планирование действий"
+msgstr "Планирование деятельности"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_state
 msgid "Activity State"
-msgstr "Статус активности"
+msgstr "Состояние активности"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Иконка типа действия"
+msgstr "Значок типа активности"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_tree
 msgid "Activity by"
-msgstr "Действие за"
+msgstr "Деятельность по"
 
 #. module: hr
 #: model:ir.model,name:hr.model_mail_activity_plan_template
 msgid "Activity plan template"
-msgstr ""
+msgstr "Шаблон плана деятельности"
 
 #. module: hr
 #: model:ir.model,name:hr.model_mail_activity_schedule
 msgid "Activity schedule plan Wizard"
-msgstr ""
+msgstr "План-график деятельности Мастер"
 
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.act_employee_from_department
@@ -375,7 +374,7 @@ msgstr "Добавить нового сотрудника"
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.mail_activity_plan_action
 msgid "Add a new plan"
-msgstr "Добавить новый процесс"
+msgstr "Добавить новый план"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_departure_wizard__departure_description
@@ -391,6 +390,8 @@ msgid ""
 "Additional Information: \n"
 " %(description)s"
 msgstr ""
+"Дополнительная информация:\n"
+" %(description)s"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__additional_note
@@ -407,7 +408,7 @@ msgstr "Дополнительное примечание"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Additional languages"
-msgstr "Доп. языки"
+msgstr "Дополнительные языки"
 
 #. module: hr
 #: model:hr.department,name:hr.dep_administration
@@ -444,22 +445,23 @@ msgstr "Расширенное присутствие сотрудников"
 #: model:ir.model.fields,field_description:hr.field_mail_alias__alias_contact
 #: model:ir.model.fields,field_description:hr.field_maintenance_equipment_category__alias_contact
 msgid "Alias Contact Security"
-msgstr "Безопасность псевдонима"
+msgstr "Безопасность контакта с псевдонимом"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
 msgid "Allow employees to update their own data"
-msgstr "Разрешить сотрудникам обновлять свои данные"
+msgstr ""
+"Предоставьте сотрудникам возможность самостоятельно обновлять свои данные"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
 msgid "Allow employees to update their own data."
-msgstr "Разрешить сотрудникам обновлять свои данные"
+msgstr "Позволить сотрудникам обновлять свои данные."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Application Settings"
-msgstr ""
+msgstr "Настройки приложения"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_departure_wizard_view_form
@@ -471,7 +473,7 @@ msgstr "Применить"
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Approvers"
-msgstr "Согласующие"
+msgstr "Утвердители"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
@@ -502,18 +504,18 @@ msgid ""
 "                                We expect the candidate to be proactive and have a \"get it done\" spirit. To be successful,\n"
 "                                you will have solid solving problem skills."
 msgstr ""
-"Как сотрудник нашей компании, вы будете <b>сотрудничать с каждым отделом для создания и развертывания\n"
-"                                прорывных продуктов.</b> Приходите работать в растущую компанию, которая предлагает большие возможности\n"
-"                                 двигаться вперед и учиться вместе с опытными лидерами. Мы ищем опытного и выдающегося сотрудника.\n"
-"                                <br><br>\n"
-"                                Эта позиция одновременно <b>творческая и строгая</b> по своей природе, вам нужно мыслить нестандартно.\n"
-"                                Мы ожидаем, что кандидат будет проактивен и настроен на то, чтобы «довести дело до конца». Чтобы быть успешным,\n"
-"                                вы обретёте надёжные навыки решения проблем."
+"Как сотрудник нашей компании, вы будете <b>сотрудничать с каждым отделом для создания и внедрения\n"
+"                                революционных продуктов.</b> Приходите работать в растущую компанию, которая предлагает отличные льготы и возможности для\n"
+"                                двигаться вперед и учиться вместе с опытными лидерами. Мы ищем опытного и выдающегося сотрудника.\n"
+"                               <br><br>\n"
+"                                Эта должность является одновременно <b>творческой и строгой</b> по своей природе, вам необходимо мыслить нестандартно.\n"
+"                                Мы ожидаем от кандидата проактивности и стремления \"довести дело до конца\". Чтобы быть успешным,\n"
+"                                вы должны обладать прочными навыками решения проблем."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_mail_activity_plan_template__responsible_type
 msgid "Assignment"
-msgstr ""
+msgstr "Назначение"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__message_attachment_count
@@ -525,27 +527,27 @@ msgstr "Количество вложений"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 msgid "Attendance"
-msgstr "Присутствие"
+msgstr "Посещаемость"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Attendance/Point of Sale"
-msgstr "Посещаемость/точка продажи"
+msgstr "Посещаемость/Точки продаж"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__mail_alias__alias_contact__employees
 msgid "Authenticated Employees"
-msgstr "Авторизованные сотрудники"
+msgstr "Аутентифицированные сотрудники"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.discuss_channel_view_form
 msgid "Auto Subscribe Departments"
-msgstr "Отделы автоматической подписки"
+msgstr "Отделы автоподписки"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_discuss_channel__subscription_department_ids
 msgid "Automatically subscribe members of those departments to the channel."
-msgstr "Автоматически подписывать членов этих отделов на канал."
+msgstr "Автоматически подписывайте сотрудников этих отделов на канал."
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -562,6 +564,11 @@ msgstr "Автономия"
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 msgid "Available"
 msgstr "Доступно"
+
+#. module: hr
+#: model_terms:ir.ui.view,arch_db:hr.mail_activity_plan_view_form
+msgid "Available for all Departments"
+msgstr "Доступно для всех отделов"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__avatar_1920
@@ -596,7 +603,7 @@ msgstr "Аватар 512"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 msgid "Away"
-msgstr "Далеко"
+msgstr "Нет на месте"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__certificate__bachelor
@@ -612,28 +619,33 @@ msgstr "Бакалавр"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Bachelor Degree or Higher"
-msgstr "Бакалавриат или выше"
+msgstr "Степень бакалавра или выше"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__barcode
 #: model:ir.model.fields,field_description:hr.field_res_users__barcode
 msgid "Badge ID"
-msgstr "ID Бейджа"
+msgstr "ID бейджа"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__bank_account_id
 msgid "Bank Account Number"
-msgstr "Номер банковского счёта"
+msgstr "Номер банковского счета"
+
+#. module: hr
+#: model:ir.model,name:hr.model_res_partner_bank
+msgid "Bank Accounts"
+msgstr "Банковские Счета"
 
 #. module: hr
 #: model:ir.model,name:hr.model_base
 msgid "Base"
-msgstr "Базовый"
+msgstr "База"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_config_settings__hr_presence_control_ip
 msgid "Based on IP Address"
-msgstr "Основано на IP адресе"
+msgstr "На основе IP-адреса"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_config_settings__module_hr_attendance
@@ -643,7 +655,7 @@ msgstr "На основе посещаемости"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_config_settings__hr_presence_control_email
 msgid "Based on number of emails sent"
-msgstr "На основе количества отправленных писем"
+msgstr "В зависимости от количества отправленных писем"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_config_settings__hr_presence_control_login
@@ -653,24 +665,24 @@ msgstr "На основе статуса пользователя в систе�
 #. module: hr
 #: model:ir.model,name:hr.model_hr_employee_base
 msgid "Basic Employee"
-msgstr "Сотрудник"
+msgstr "Основной сотрудник"
 
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/components/background_image/background_image.xml:0
 #, python-format
 msgid "Binary file"
-msgstr "Двоичный файл"
+msgstr "Бинарный файл"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__can_edit
 msgid "Can Edit"
-msgstr "Можно отредактировать"
+msgstr "Можно редактировать"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_users_simple_form
 msgid "Cancel"
-msgstr "Отмена"
+msgstr "Отменить"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__certificate
@@ -693,17 +705,17 @@ msgstr "Чат"
 #. module: hr
 #: model:hr.job,name:hr.job_ceo
 msgid "Chief Executive Officer"
-msgstr "Директор компании"
+msgstr "Генеральный директор"
 
 #. module: hr
 #: model:hr.job,name:hr.job_cto
 msgid "Chief Technical Officer"
-msgstr "Главный инженер"
+msgstr "Главный технический специалист"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__child_ids
 msgid "Child Departments"
-msgstr "Подчинённые подразделения"
+msgstr "Детские отделы"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -724,14 +736,14 @@ msgstr "Город"
 #: model:ir.model.fields,field_description:hr.field_res_users__coach_id
 #: model:ir.model.fields.selection,name:hr.selection__mail_activity_plan_template__responsible_type__coach
 msgid "Coach"
-msgstr "Тренер"
+msgstr "Куратор"
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/mail_activity_plan_template.py:0
 #, python-format
 msgid "Coach of employee %s is not set."
-msgstr "Наставник сотрудника%s не выбран."
+msgstr "Куратор сотрудника %s не установлен."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_contract_type__code
@@ -751,7 +763,7 @@ msgstr "Цвет"
 #: model:ir.model.fields,field_description:hr.field_hr_employee_category__color
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__color
 msgid "Color Index"
-msgstr "Цветовая палитра"
+msgstr "Цветовой индекс"
 
 #. module: hr
 #: model:ir.model,name:hr.model_res_company
@@ -784,7 +796,7 @@ msgstr "Логотип компании"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_config_settings__resource_calendar_id
 msgid "Company Working Hours"
-msgstr "Рабочие часы компании"
+msgstr "Часы работы компании"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__employee_id
@@ -794,18 +806,18 @@ msgstr "Сотрудник компании"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__complete_name
 msgid "Complete Name"
-msgstr "Полное название"
+msgstr "Полное имя"
 
 #. module: hr
 #: model:ir.model,name:hr.model_res_config_settings
 msgid "Config Settings"
-msgstr "Конфигурационные настройки"
+msgstr "Параметры конфигурации"
 
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_human_resources_configuration
 #: model_terms:ir.ui.view,arch_db:hr.hr_department_view_kanban
 msgid "Configuration"
-msgstr "Настройки"
+msgstr "Конфигурация"
 
 #. module: hr
 #: model:hr.job,name:hr.job_consultant
@@ -815,7 +827,7 @@ msgstr "Консультант"
 #. module: hr
 #: model:ir.model,name:hr.model_res_partner
 msgid "Contact"
-msgstr "Контакт"
+msgstr "Контакты"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -826,18 +838,18 @@ msgstr "Контактная информация"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__emergency_contact
 #: model:ir.model.fields,field_description:hr.field_res_users__emergency_contact
 msgid "Contact Name"
-msgstr "Имя контакта"
+msgstr "Контактное лицо"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__emergency_phone
 #: model:ir.model.fields,field_description:hr.field_res_users__emergency_phone
 msgid "Contact Phone"
-msgstr ""
+msgstr "Контактный телефон"
 
 #. module: hr
 #: model:ir.model,name:hr.model_hr_contract_type
 msgid "Contract Type"
-msgstr "Тип договора"
+msgstr "Тип контракта"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_contract_type_view_tree
@@ -870,7 +882,7 @@ msgstr "Страна рождения"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_work_location__location_type
 msgid "Cover Image"
-msgstr "Обложка"
+msgstr "Изображение обложки"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__create_date
@@ -880,7 +892,7 @@ msgstr "Дата создания"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_users_simple_form_inherit_hr
 msgid "Create Employee"
-msgstr "Создать сотрудника"
+msgstr "Создать Сотрудника"
 
 #. module: hr
 #. odoo-python
@@ -894,17 +906,17 @@ msgstr "Создать пользователя"
 #: model_terms:ir.actions.act_window,help:hr.hr_department_kanban_action
 #: model_terms:ir.actions.act_window,help:hr.hr_department_tree_action
 msgid "Create a new department"
-msgstr "Создать новый отдел"
+msgstr "Создать новое подразделение"
 
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.hr_contract_type_action
 msgid "Create a new employment type"
-msgstr ""
+msgstr "Создайте новый тип занятости"
 
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.hr_work_location_action
 msgid "Create a new work location"
-msgstr ""
+msgstr "Создайте новое рабочее место"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -916,12 +928,12 @@ msgstr ""
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Create content that will help our users on a daily basis"
 msgstr ""
-"Создавайте контент, который будет помогать нашим пользователям каждый день"
+"Создавайте контент, который будет ежедневно помогать нашим пользователям"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form
 msgid "Create employee"
-msgstr "Создать сотрудника"
+msgstr "Создание сотрудника"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_contract_type__create_uid
@@ -946,7 +958,7 @@ msgstr "Создано"
 #: model:ir.model.fields,field_description:hr.field_hr_job__create_date
 #: model:ir.model.fields,field_description:hr.field_hr_work_location__create_date
 msgid "Created on"
-msgstr "Дата создания"
+msgstr "Создано"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__currency_id
@@ -980,7 +992,7 @@ msgstr "Дата рождения"
 #: code:addons/hr/models/hr_departure_reason.py:0
 #, python-format
 msgid "Default departure reasons cannot be deleted."
-msgstr "Причины увольнения по умолчанию нельзя удалить."
+msgstr "Причины отъезда по умолчанию не могут быть удалены."
 
 #. module: hr
 #: model_terms:hr.job,description:hr.job_ceo
@@ -995,8 +1007,19 @@ msgid ""
 "Building strong relationships with clients / customers for business growth profitability.\n"
 "Keep regular interaction with key clients for better extraction and expansion."
 msgstr ""
+"Демонстрация различных сервисов Odoo для каждого клиента и убеждение клиента в функциональности приложения.\n"
+"Кандидат должен обладать отличными коммуникативными навыками.\n"
+"Навыки построения отношений и влияния\n"
+"Опыт в привлечении новых клиентов (NCA) и управлении взаимоотношениями.\n"
+"Сбор информации о рынке и клиентах.\n"
+"Координация действий с отделом продаж и службой поддержки для принятия различных стратегий\n"
+"Анализ прогресса и выявление возможностей и новых областей для развития.\n"
+"Выстраивание прочных отношений с клиентами/заказчиками для обеспечения роста рентабельности бизнеса.\n"
+"Поддерживать регулярное взаимодействие с ключевыми клиентами для лучшего извлечения и расширения."
 
 #. module: hr
+#. odoo-javascript
+#: code:addons/hr/static/src/components/avatar_card/avatar_card_popover_patch.xml:0
 #: model:ir.model,name:hr.model_hr_department
 #: model:ir.model.fields,field_description:hr.field_hr_employee__department_id
 #: model:ir.model.fields,field_description:hr.field_hr_employee_base__department_id
@@ -1009,20 +1032,21 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr.view_department_filter
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
 #: model_terms:ir.ui.view,arch_db:hr.view_job_filter
+#, python-format
 msgid "Department"
-msgstr "Подразделение"
+msgstr "Отдел"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__name
 msgid "Department Name"
-msgstr "Наименование подразделения"
+msgstr "Название отдела"
 
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/components/department_chart/department_chart.xml:0
 #, python-format
 msgid "Department Organization"
-msgstr ""
+msgstr "Организация департамента"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.hr_department_kanban_action
@@ -1031,41 +1055,41 @@ msgstr ""
 #: model:ir.ui.menu,name:hr.menu_hr_department_tree
 #: model_terms:ir.ui.view,arch_db:hr.view_department_filter
 msgid "Departments"
-msgstr "Подразделения"
+msgstr "Отделения"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Departure"
-msgstr "Увольнение"
+msgstr "Отъезд"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_departure_wizard__departure_date
 #: model:ir.model.fields,field_description:hr.field_hr_employee__departure_date
 msgid "Departure Date"
-msgstr "Дата увольнения"
+msgstr "Дата отъезда"
 
 #. module: hr
 #: model:ir.model,name:hr.model_hr_departure_reason
 #: model:ir.model.fields,field_description:hr.field_hr_departure_wizard__departure_reason_id
 #: model:ir.model.fields,field_description:hr.field_hr_employee__departure_reason_id
 msgid "Departure Reason"
-msgstr "Причина увольнения"
+msgstr "Причина отъезда"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.hr_departure_reason_action
 #: model:ir.ui.menu,name:hr.menu_hr_departure_reason_tree
 msgid "Departure Reasons"
-msgstr "Причины увольнения"
+msgstr "Причины отъезда"
 
 #. module: hr
 #: model:ir.model,name:hr.model_hr_departure_wizard
 msgid "Departure Wizard"
-msgstr "Мастер увольнения"
+msgstr "Мастер Ухода"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 msgid "Dependant"
-msgstr "Иждивенцы"
+msgstr "Зависимый"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__child_ids
@@ -1076,7 +1100,7 @@ msgstr "Прямые подчиненные"
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_hr_employee
 msgid "Directory"
-msgstr "Директория"
+msgstr "Каталог"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_departure_wizard_view_form
@@ -1092,12 +1116,12 @@ msgstr "Отменить"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Discover our products."
-msgstr "Узнайте о наших продуктах."
+msgstr "Откройте для себя нашу продукцию."
 
 #. module: hr
 #: model:ir.model,name:hr.model_discuss_channel
 msgid "Discussion Channel"
-msgstr "Канал обсуждения"
+msgstr "Дискуссионный канал"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_contract_type__display_name
@@ -1110,7 +1134,7 @@ msgstr "Канал обсуждения"
 #: model:ir.model.fields,field_description:hr.field_hr_job__display_name
 #: model:ir.model.fields,field_description:hr.field_hr_work_location__display_name
 msgid "Display Name"
-msgstr "Показывать название"
+msgstr "Отображаемое имя"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
@@ -1118,6 +1142,9 @@ msgid ""
 "Display remote work settings for each employee and dedicated reports. "
 "Presence icons will be updated with remote work location."
 msgstr ""
+"Отображение настроек удаленной работы для каждого сотрудника и специальные "
+"отчеты. Значки присутствия будут обновляться с учетом местоположения "
+"удаленной работы."
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__marital__divorced
@@ -1127,12 +1154,12 @@ msgstr "В разводе"
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__certificate__doctor
 msgid "Doctor"
-msgstr "Доктор"
+msgstr "Врач"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__driving_license
 msgid "Driving License"
-msgstr "Driving License"
+msgstr "Водительское удостоверение"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1149,11 +1176,11 @@ msgid ""
 "                        Several activities are often organized all over the year, such as weekly\n"
 "                        sports sessions, team building events, monthly drink, and much more"
 msgstr ""
-"Каждый сотрудник имеет возможность увидеть результат своей работы.\n"
+"У каждого сотрудника есть шанс увидеть отдачу от своей работы.\n"
 "                        Вы можете внести реальный вклад в успех компании.\n"
-"                        <br>\n"
-"                        В течение всего года мы часто организуем различные мероприятия, например, еженедельные\n"
-"                         спортивные тренировки, командообразующие мероприятия, ежемесячная выпивка, и многое другое"
+"                       <br>\n"
+"                        В течение года часто организуются различные мероприятия, такие как еженедельные\n"
+"                        еженедельные спортивные занятия, мероприятия по сплочению коллектива, ежемесячные пьянки и многое другое"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1187,7 +1214,7 @@ msgstr "Псевдонимы электронной почты"
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Emergency"
-msgstr "Чрезвычайные обстоятельства"
+msgstr "Аварийный"
 
 #. module: hr
 #. odoo-python
@@ -1211,7 +1238,7 @@ msgstr "Сотрудник"
 #. module: hr
 #: model:ir.model,name:hr.model_hr_employee_category
 msgid "Employee Category"
-msgstr "Категория сотрудника"
+msgstr "Категория сотрудников"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__employee_count
@@ -1231,25 +1258,25 @@ msgstr "Изображение сотрудника"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__private_lang
 msgid "Employee Lang"
-msgstr "Язык сотрудника"
+msgstr "Сотрудник Лэнг"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__name
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
 msgid "Employee Name"
-msgstr "Имя сотрудника"
+msgstr "ФИО сотрудника"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_company__employee_properties_definition
 msgid "Employee Properties"
-msgstr ""
+msgstr "Свойства сотрудников"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.open_view_categ_form
 #: model:ir.model.fields,field_description:hr.field_res_users__category_ids
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_category_form
 msgid "Employee Tags"
-msgstr "Теги сотрудника"
+msgstr "Метки сотрудников"
 
 #. module: hr
 #. odoo-javascript
@@ -1267,13 +1294,13 @@ msgstr "Тип сотрудника"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
 msgid "Employee Update Rights"
-msgstr "Права на изменение сотрудников"
+msgstr "Права сотрудников на обновление информации"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__bank_account_id
 #: model:ir.model.fields,help:hr.field_res_users__employee_bank_account_id
 msgid "Employee bank account to pay salaries"
-msgstr ""
+msgstr "Банковский счет сотрудника для выплаты зарплаты"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__employee_bank_account_id
@@ -1296,7 +1323,7 @@ msgstr "Имя сотрудника"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__employee_resource_calendar_id
 msgid "Employee's Working Hours"
-msgstr ""
+msgstr "Рабочее время сотрудника"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.act_employee_from_department
@@ -1335,13 +1362,13 @@ msgstr "Структура сотрудников"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_category_list
 msgid "Employees Tags"
-msgstr "Теги сотрудников"
+msgstr "Теги Сотрудники"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_job__contract_type_id
 #: model_terms:ir.ui.view,arch_db:hr.view_job_filter
 msgid "Employment Type"
-msgstr "Вид занятости"
+msgstr "Тип занятости"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.hr_contract_type_action
@@ -1352,7 +1379,7 @@ msgstr "Виды занятости"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
 msgid "Enrich employee profiles with skills and resumes"
-msgstr "Дополняйте профили сотрудников навыками и резюме"
+msgstr "Дополните профили сотрудников навыками и резюме"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1370,8 +1397,7 @@ msgstr "Расширьте свои знания о различных отра�
 msgid ""
 "Expected number of employees for this job position after new recruitment."
 msgstr ""
-"Планируемое количество сотрудников на данной должности по окончании нового "
-"набора сотрудников."
+"Ожидаемое количество сотрудников на этой должности после нового набора."
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1392,7 +1418,7 @@ msgstr "Опытный разработчик"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Family Status"
-msgstr ""
+msgstr "Семейное положение"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__gender__female
@@ -1403,7 +1429,7 @@ msgstr "Женский"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__study_field
 #: model:ir.model.fields,field_description:hr.field_res_users__study_field
 msgid "Field of Study"
-msgstr "Поле образования"
+msgstr "Область изучения"
 
 #. module: hr
 #: model:hr.departure.reason,name:hr.departure_fired
@@ -1422,12 +1448,12 @@ msgstr "Подписчики"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__message_partner_ids
 #: model:ir.model.fields,field_description:hr.field_hr_job__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Подписчики (Партнеры)"
+msgstr "Подписчики"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Иконка со шрифтом Font awesome, например, fa-tasks"
+msgstr "Шрифт, отличный значок, например. к.-а.-задачи"
 
 #. module: hr
 #. odoo-python
@@ -1437,11 +1463,13 @@ msgid ""
 "For %(channels)s, channel_type should be 'channel' to have the department "
 "auto-subscription."
 msgstr ""
+"Для %(channels)s тип_канала должен быть 'channel', чтобы отдел имел "
+"автоподписку."
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__employee_type__freelance
 msgid "Freelancer"
-msgstr "Фрилансер"
+msgstr "Исполнитель"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1452,17 +1480,17 @@ msgstr "Фрилансер"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Fruit, coffee and <br>snacks provided."
-msgstr "Предоставляются фрукты, кофе и легкие закуски."
+msgstr "Предоставляются фрукты, кофе и закуски <br>."
 
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_full_time
 msgid "Full-Time"
-msgstr ""
+msgstr "Постоянно"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
 msgid "Future Activities"
-msgstr "Будущие действия"
+msgstr "Планируемые действия"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__gender
@@ -1478,7 +1506,7 @@ msgstr "Генерировать"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_departure_wizard_view_form
 msgid "Give more details about the reason of archiving the employee."
-msgstr ""
+msgstr "Укажите более подробную причину архивирования сотрудника."
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1489,7 +1517,7 @@ msgstr ""
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Google Adwords experience"
-msgstr "Опыт Google Adwords"
+msgstr "Опыт работы с Google Adwords"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__certificate__graduate
@@ -1505,38 +1533,37 @@ msgstr "Выпускник"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Great team of smart people, in a friendly and open culture"
-msgstr "Отличная команда умных людей c дружелюбной и открытой культурой"
+msgstr "Отличная команда умных людей, дружелюбная и открытая культура"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_search
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
 #: model_terms:ir.ui.view,arch_db:hr.view_job_filter
 msgid "Group By"
-msgstr "Группировка"
+msgstr "Группировать по"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_discuss_channel__subscription_department_ids
 msgid "HR Departments"
-msgstr "Отделы кадров"
+msgstr "Отдел кадров"
 
 #. module: hr
 #: model:ir.actions.server,name:hr.ir_cron_data_check_work_permit_validity_ir_actions_server
 msgid "HR Employee: check work permit validity"
-msgstr ""
-"Сотрудник отдела кадров: проверьте действительность разрешения на работу"
+msgstr "Сотрудник HR: проверьте действительность разрешения на работу"
 
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/components/hr_presence_status/hr_presence_status.js:0
 #, python-format
 msgid "HR Presence Status"
-msgstr ""
+msgstr "Статус присутствия HR"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "HR Settings"
-msgstr "HR установки"
+msgstr "Настройки HR"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__has_message
@@ -1554,12 +1581,12 @@ msgstr "Есть сообщение"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Highly creative and autonomous"
-msgstr "Очень творческий и автономный"
+msgstr "Высокая креативность и самостоятельность"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_job__no_of_hired_employee
 msgid "Hired Employees"
-msgstr "Существующие сотрудники"
+msgstr "Наемные работники"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_work_location__location_type__home
@@ -1570,14 +1597,14 @@ msgstr "Главная"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__km_home_work
 #: model:ir.model.fields,field_description:hr.field_res_users__km_home_work
 msgid "Home-Work Distance"
-msgstr "Расстояние от офиса до дома"
+msgstr "Расстояние до дома"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__hr_icon_display
 #: model:ir.model.fields,field_description:hr.field_hr_employee_base__hr_icon_display
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__hr_icon_display
 msgid "Hr Icon Display"
-msgstr "Отображение значка HR"
+msgstr "Отображение значков часов"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__hr_presence_state
@@ -1585,12 +1612,12 @@ msgstr "Отображение значка HR"
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__hr_presence_state
 #: model:ir.model.fields,field_description:hr.field_res_users__hr_presence_state
 msgid "Hr Presence State"
-msgstr "Статус присутствия"
+msgstr "Hr Presence State"
 
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_hr_main
 msgid "Human Resources"
-msgstr "Управление персоналом"
+msgstr "HR"
 
 #. module: hr
 #: model:hr.job,name:hr.job_hrm
@@ -1608,12 +1635,12 @@ msgstr "Менеджер по персоналу"
 #: model:ir.model.fields,field_description:hr.field_hr_job__id
 #: model:ir.model.fields,field_description:hr.field_hr_work_location__id
 msgid "ID"
-msgstr "Идентификатор"
+msgstr "ID"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__id_card
 msgid "ID Card Copy"
-msgstr "Копия карты ID"
+msgstr "Копия удостоверения личности"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__barcode
@@ -1629,13 +1656,13 @@ msgstr "Иконка"
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr "Значок, обозначающий действие исключения."
+msgstr "Значок, обозначающий исключение Дела."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__identification_id
 #: model:ir.model.fields,field_description:hr.field_res_users__identification_id
 msgid "Identification No"
-msgstr "Табельный номер"
+msgstr "Идентификация Нет"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_department__message_needaction
@@ -1643,14 +1670,14 @@ msgstr "Табельный номер"
 #: model:ir.model.fields,help:hr.field_hr_job__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr ""
-"Если флажок установлен, новые сообщения будут требовать вашего внимания."
+"Если флажок установлен, значит, новые сообщения требуют вашего внимания."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_department__message_has_error
 #: model:ir.model.fields,help:hr.field_hr_employee__message_has_error
 #: model:ir.model.fields,help:hr.field_hr_job__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Если флажок установлен, некоторые сообщения имеют ошибку доставки."
+msgstr "Если отмечено, некоторые сообщения имеют ошибку доставки."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__active
@@ -1658,13 +1685,13 @@ msgid ""
 "If the active field is set to False, it will allow you to hide the resource "
 "record without removing it."
 msgstr ""
-"Если для поля Активно установлено значение НЕТ, это позволит скрыть запись "
+"Если значение активного поля \"ложно\", это позволит вам скрыть запись "
 "ресурса, не удаляя ее."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__private_car_plate
 msgid "If you have more than one car, just separate the plates by a space."
-msgstr ""
+msgstr "Если у вас несколько автомобилей, просто разделите номера пробелом."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__image_1920
@@ -1701,41 +1728,41 @@ msgstr "Изображение 512"
 #: code:addons/hr/models/hr_employee.py:0
 #, python-format
 msgid "Import Template for Employees"
-msgstr "Импортировать шаблон для сотрудников"
+msgstr "Шаблон импорта для сотрудников"
 
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_interim
 msgid "Interim"
-msgstr "Исполняющий обязанности"
+msgstr "Переход"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__message_is_follower
 #: model:ir.model.fields,field_description:hr.field_hr_employee__message_is_follower
 #: model:ir.model.fields,field_description:hr.field_hr_job__message_is_follower
 msgid "Is Follower"
-msgstr "Подписчик"
+msgstr "Является подписчиком"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__is_manager
 msgid "Is Manager"
-msgstr ""
+msgstr "Менеджер"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__is_system
 msgid "Is System"
-msgstr "Системный"
+msgstr "Система"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
 #: model_terms:ir.ui.view,arch_db:hr.view_hr_job_form
 #: model_terms:ir.ui.view,arch_db:hr.view_hr_job_tree
 msgid "Job"
-msgstr "Должность"
+msgstr "Работа"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_job__description
 msgid "Job Description"
-msgstr "Описание работы"
+msgstr "Описание вакансии"
 
 #. module: hr
 #: model:ir.model,name:hr.model_hr_job
@@ -1753,12 +1780,12 @@ msgstr "Должность"
 #: model:ir.actions.act_window,name:hr.action_hr_job
 #: model:ir.ui.menu,name:hr.menu_view_hr_job
 msgid "Job Positions"
-msgstr "Должностные позиции"
+msgstr "Положения вакансии"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_hr_job_form
 msgid "Job Summary"
-msgstr "Описание работы"
+msgstr "Краткое описание вакансии"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__job_title
@@ -1767,7 +1794,7 @@ msgstr "Описание работы"
 #: model:ir.model.fields,field_description:hr.field_res_users__job_title
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
 msgid "Job Title"
-msgstr "Название должности"
+msgstr "Название работы"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__jobs_ids
@@ -1813,7 +1840,7 @@ msgstr "Время последней активности"
 #: model:ir.model.fields,field_description:hr.field_hr_job__write_uid
 #: model:ir.model.fields,field_description:hr.field_hr_work_location__write_uid
 msgid "Last Updated by"
-msgstr "Последний раз обновил"
+msgstr "Последнее обновление"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_contract_type__write_date
@@ -1831,14 +1858,14 @@ msgstr "Последнее обновление"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
 msgid "Late Activities"
-msgstr "Просроченные действия"
+msgstr "Поздние Мероприятия"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.plan_wizard_action
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_tree
 msgid "Launch Plan"
-msgstr "Запустить процесс"
+msgstr "План запуска"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1849,7 +1876,7 @@ msgstr "Запустить процесс"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Lead the entire sales cycle"
-msgstr "Ведение всего цикла продаж"
+msgstr "Руководите всем циклом продаж"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__marital__cohabitant
@@ -1866,17 +1893,17 @@ msgstr "Давайте создадим вакансию."
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Location"
-msgstr "Место хранения"
+msgstr "Местоположение"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_work_location__location_number
 msgid "Location Number"
-msgstr "Номер места"
+msgstr "код месторасположения "
 
 #. module: hr
 #: model:hr.department,name:hr.dep_rd_ltp
 msgid "Long Term Projects"
-msgstr ""
+msgstr "Долгосрочные проекты"
 
 #. module: hr
 #: model_terms:hr.job,description:hr.job_hrm
@@ -1890,6 +1917,14 @@ msgid ""
 "Lorem Ipsum passages, and more recently with desktop publishing software "
 "like Aldus PageMaker including versions of Lorem Ipsum."
 msgstr ""
+"Lorem Ipsum просто манекен текста печати и верстки промышленности. Lorem "
+"Ipsum был-стандартной текст манекен в отрасли с тех пор 1500-х годов, когда "
+"неизвестный принтер принял камбуз типа и кинулись его, чтобы сделать книгу "
+"типа образца. Он пережил не только пять веков, но и перешагнул в электронный"
+" верстки Present, оставаясь по существу неизменным. Это было в 1960-е годы "
+"популяризировал С выпуском Letraset листов, содержащих Lorem Ipsum проходы, "
+"а в последнее время с настольной издательской системы программного "
+"обеспечения, как Aldus PageMaker Включая версии Lorem Ipsum."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__message_main_attachment_id
@@ -1923,24 +1958,19 @@ msgstr "Руководитель"
 #: code:addons/hr/models/mail_activity_plan_template.py:0
 #, python-format
 msgid "Manager of employee %s is not set."
-msgstr "Менеджер сотрудника %s не задан."
-
-#. module: hr
-#: model_terms:ir.ui.view,arch_db:hr.print_employee_badge
-msgid "Marc Demo"
-msgstr ""
+msgstr "Менеджер сотрудника %s не установлен."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__marital
 #: model:ir.model.fields,field_description:hr.field_res_users__marital
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 msgid "Marital Status"
-msgstr "Семейное положение"
+msgstr "Cемейное положение"
 
 #. module: hr
 #: model:hr.job,name:hr.job_marketing
 msgid "Marketing and Community Manager"
-msgstr "Маркетинг и менеджер сообщества"
+msgstr "Менеджер по маркетингу и работе с населением"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__marital__married
@@ -1955,7 +1985,7 @@ msgstr "Мастер"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__master_department_id
 msgid "Master Department"
-msgstr ""
+msgstr "Отдел магистратуры"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1966,14 +1996,14 @@ msgstr ""
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Master demos of our software"
-msgstr "Мастер демонстрации нашего программного обеспечения"
+msgstr "Мастер-демонстрации нашего программного обеспечения"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__member_of_department
 #: model:ir.model.fields,field_description:hr.field_hr_employee_base__member_of_department
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__member_of_department
 msgid "Member of department"
-msgstr ""
+msgstr "Член департамента"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__member_ids
@@ -2008,12 +2038,12 @@ msgstr "Сообщения"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Must Have"
-msgstr "Должен иметь"
+msgstr "Должен быть"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr "Крайний срок моего действия"
+msgstr "Крайний срок моей активности"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_search
@@ -2026,7 +2056,7 @@ msgstr "Мой отдел"
 #: code:addons/hr/static/src/user_menu/my_profile.js:0
 #, python-format
 msgid "My Profile"
-msgstr "Мои данные"
+msgstr "Мой профиль"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_search
@@ -2039,12 +2069,12 @@ msgstr "Моя команда"
 #: model:ir.model.fields,field_description:hr.field_hr_employee_base__name
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__name
 msgid "Name"
-msgstr "Название"
+msgstr "Имя"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__country_id
 msgid "Nationality (Country)"
-msgstr "Национальность (Страна)"
+msgstr "Национальность"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2055,13 +2085,13 @@ msgstr "Национальность (Страна)"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Negotiate and contract"
-msgstr "Переговоры и контракт"
+msgstr "Вести переговоры и заключать контракты"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_view_graph
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_view_pivot
 msgid "New Employees Over Time"
-msgstr ""
+msgstr "Новые сотрудники с течением времени"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__newly_hired
@@ -2070,27 +2100,27 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_search
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
 msgid "Newly Hired"
-msgstr "Нанятый недавно"
+msgstr "Недавно принятые на работу"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr "Событие в календаре для следующего действия"
+msgstr "Следующее событие календаря активности"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Крайний срок следующего действия"
+msgstr "Следующий срок мероприятия"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_summary
 msgid "Next Activity Summary"
-msgstr "Краткое описание следующего действия"
+msgstr "Резюме следующего действия"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_type_id
 msgid "Next Activity Type"
-msgstr "Тип следующего действия"
+msgstr "Следующий Тип Мероприятия"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2101,12 +2131,12 @@ msgstr "Тип следующего действия"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Nice to have"
-msgstr "Хорошо иметь"
+msgstr "Приятно иметь"
 
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.open_view_categ_form
 msgid "No Tags found ! Let's create one"
-msgstr ""
+msgstr "Теги не найдены! Давайте создадим один"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2118,8 +2148,8 @@ msgstr ""
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "No dumb managers, no stupid tools to use, no rigid working hours"
 msgstr ""
-"Никаких глупых менеджеров, бестолковых инструментов, жесткого рабочего "
-"графика"
+"Никаких тупых менеджеров, никаких дурацких инструментов, которые нужно "
+"использовать, никаких жестких рабочих часов"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2132,18 +2162,18 @@ msgstr ""
 msgid ""
 "No waste of time in enterprise processes, real responsibilities and autonomy"
 msgstr ""
-"Отсутствие траты времени на корпоративные процессы, реальные обязанности и "
-"автономия"
+"Никакой потери времени на корпоративные процессы, реальная ответственность и"
+" автономия"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 msgid "Not available"
-msgstr "Недоступен"
+msgstr "Недоступно"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__note
 msgid "Note"
-msgstr "Запись журнала"
+msgstr "Заметка"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__notes
@@ -2155,53 +2185,50 @@ msgstr "Заметки"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__message_needaction_counter
 #: model:ir.model.fields,field_description:hr.field_hr_job__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Кол-во действий"
+msgstr "Число действий"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__children
 #: model:ir.model.fields,field_description:hr.field_res_users__children
 msgid "Number of Dependent Children"
-msgstr "Количество несовершеннолетних детей"
+msgstr "Количество детей на иждивении"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_job__no_of_employee
 msgid "Number of employees currently occupying this job position."
-msgstr ""
-"Количество сотрудников, в настоящее время занимающих данную должность."
+msgstr "Количество сотрудников, занимающих эту должность в настоящее время."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__message_has_error_counter
 #: model:ir.model.fields,field_description:hr.field_hr_employee__message_has_error_counter
 #: model:ir.model.fields,field_description:hr.field_hr_job__message_has_error_counter
 msgid "Number of errors"
-msgstr "Количество ошибок"
+msgstr "Число ошибок"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_job__no_of_hired_employee
 msgid ""
 "Number of hired employees for this job position during recruitment phase."
-msgstr ""
-"Количество наемных работников на эту должность в течении этапа подбора "
-"кадров."
+msgstr "Количество нанятых сотрудников на эту должность на этапе найма."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_department__message_needaction_counter
 #: model:ir.model.fields,help:hr.field_hr_employee__message_needaction_counter
 #: model:ir.model.fields,help:hr.field_hr_job__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "Количество сообщений, требующих действия"
+msgstr "Количество сообщений, требующих принятия мер"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_department__message_has_error_counter
 #: model:ir.model.fields,help:hr.field_hr_employee__message_has_error_counter
 #: model:ir.model.fields,help:hr.field_hr_job__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Количество сообщений с ошибкой доставки"
+msgstr "Количество недоставленных сообщений"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_job__no_of_recruitment
 msgid "Number of new employees you expect to recruit."
-msgstr "Планируемое к найму количество сотрудников."
+msgstr "Количество новых сотрудников, которых вы планируете нанять."
 
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.hr_department_tree_action
@@ -2210,9 +2237,9 @@ msgid ""
 "                    related to employees by departments: expenses, timesheets,\n"
 "                    leaves, recruitments, etc."
 msgstr ""
-"Структура подразделений используется для управления всеми документами\n"
-"                    связанными с сотрудниками по отделам: расходы, табели учета рабочего времени,\n"
-"                     увольнения, приемы на работу и т.д."
+"Структура отделов Odoo используется для управления всеми документами\n"
+"                    связанных с сотрудниками по отделам: расходы, табели учета рабочего времени,\n"
+"                    отпуска, прием на работу и т.д."
 
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.hr_department_kanban_action
@@ -2221,32 +2248,32 @@ msgid ""
 "                related to employees by departments: expenses, timesheets,\n"
 "                time off, recruitments, etc."
 msgstr ""
-"Структура подразделений используется для управления всеми документами\n"
-"                    связанными с сотрудниками по отделам: расходы, табели учета рабочего времени,\n"
-"                     отпуск, приемы на работу и т.д."
+"Структура отделов Odoo используется для управления всеми документами\n"
+"                связанных с сотрудниками по отделам: расходы, табели учета рабочего времени,\n"
+"                отгулы, найм и т. д."
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_work_location__location_type__office
 msgid "Office"
-msgstr ""
+msgstr "Офис"
 
 #. module: hr
 #: model:res.groups,name:hr.group_hr_user
 msgid "Officer: Manage all employees"
-msgstr ""
+msgstr "Офицер: Управление всеми сотрудниками"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.mail_activity_plan_action
 #: model:ir.ui.menu,name:hr.menu_config_plan_plan
 msgid "On/Offboarding Plans"
-msgstr ""
+msgstr "Планы включения/выключения"
 
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/core/web/thread_actions.js:0
 #, python-format
 msgid "Open Profile"
-msgstr ""
+msgstr "Открытый профиль"
 
 #. module: hr
 #. odoo-python
@@ -2271,18 +2298,18 @@ msgstr "Другое"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Our Product"
-msgstr "Наш продукт"
+msgstr "Наш товар"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__pin
 #: model:ir.model.fields,field_description:hr.field_res_users__pin
 msgid "PIN"
-msgstr "PIN"
+msgstr "ПИН"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "PIN Code"
-msgstr "Пин код"
+msgstr "ПИН-КОД"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__pin
@@ -2292,14 +2319,14 @@ msgid ""
 " enabled in Configuration) and to change the cashier in the Point of Sale "
 "application."
 msgstr ""
-"PIN-код, используемый для регистрации входа/выхода в режиме киоска "
-"приложения посещаемости (если он включен в конфигурации) и для смены кассира"
-" в кассовом приложении."
+"PIN-код, используемый для регистрации входа/выхода в режиме киоска в "
+"приложении Attendance (если он включен в конфигурации) и для смены кассира в"
+" приложении Point of Sale."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__parent_id
 msgid "Parent Department"
-msgstr "Вышестоящее подразделение"
+msgstr "Родительский отдел"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__parent_path
@@ -2309,13 +2336,13 @@ msgstr "Родительский путь"
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_part_time
 msgid "Part-Time"
-msgstr ""
+msgstr "Неполный рабочий день"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__user_partner_id
 #: model:ir.model.fields,help:hr.field_hr_employee_public__user_partner_id
 msgid "Partner-related data of the user"
-msgstr "Данные пользователя, относящиеся к партнеру"
+msgstr "Данные о партнере пользователя"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2326,18 +2353,18 @@ msgstr "Данные пользователя, относящиеся к пар�
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Passion for software products"
-msgstr "Увлечение программными продуктами"
+msgstr "Страсть к программным продуктам"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__passport_id
 #: model:ir.model.fields,field_description:hr.field_res_users__passport_id
 msgid "Passport No"
-msgstr "№ паспорта"
+msgstr "Паспорт"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Payroll"
-msgstr "Расчет зарплаты"
+msgstr "Оплаты"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2348,7 +2375,7 @@ msgstr "Расчет зарплаты"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Perfect written English"
-msgstr "Превосходный английский (письменный)"
+msgstr "Безупречный письменный английский"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2359,12 +2386,12 @@ msgstr "Превосходный английский (письменный)"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Perks"
-msgstr "Бонусы"
+msgstr "Компоненты"
 
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_permanent
 msgid "Permanent"
-msgstr "Постоянный"
+msgstr "Постоянная"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2375,14 +2402,14 @@ msgstr "Постоянный"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Personal Evolution"
-msgstr "Персональное развитие"
+msgstr "Эволюция личности"
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/res_users.py:0
 #, python-format
 msgid "Personal information update."
-msgstr ""
+msgstr "Обновление личной информации."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -2399,7 +2426,7 @@ msgstr "Место рождения"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__plan_ids
 msgid "Plan"
-msgstr "Раздел"
+msgstr "План"
 
 #. module: hr
 #. odoo-python
@@ -2409,6 +2436,8 @@ msgid ""
 "Plan %(plan_names)s cannot use a department as it is used only for employee "
 "plans."
 msgstr ""
+"План %(plan_names)s не может использовать отдел, так как он используется "
+"только для планов сотрудников."
 
 #. module: hr
 #. odoo-python
@@ -2418,6 +2447,9 @@ msgid ""
 "Plan activities %(template_names)s cannot use coach, manager or employee "
 "responsible as it is used only for employee plans."
 msgstr ""
+"Действие %(template_names)s не может использовать куратора, руководителя или"
+" сотрудника в качестве ответственного, так как оно предназначено только для "
+"планов сотрудников."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_department_form
@@ -2427,7 +2459,7 @@ msgstr "Планы"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__plans_count
 msgid "Plans Count"
-msgstr ""
+msgstr "Подсчет планов"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2438,7 +2470,7 @@ msgstr ""
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Play any sport with colleagues, <br>the bill is covered."
-msgstr "Играйте в любой вид спорта с коллегами, <br>счет оплачен."
+msgstr "Играйте в любой вид спорта с коллегами, <br>счет покрыт."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_mail_alias__alias_contact
@@ -2449,15 +2481,15 @@ msgid ""
 "- partners: only authenticated partners\n"
 "- followers: only followers of the related document or members of following channels\n"
 msgstr ""
-"Политика размещения сообщения в документе с использованием почтового шлюза:\n"
-"— все: может писать каждый\n"
-"— партнёры: только авторизованные партнёры\n"
-"— подписчики: только подписчики соответствующего документа или канала\n"
+"Политика публикации сообщения в документе с помощью mailgateway.\n"
+"- все: все могут отправлять сообщения\n"
+"- партнеры: только аутентифицированные партнеры\n"
+"- последователи: только последователи связанного документа или участники следующих каналов\n"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
 msgid "Presence Control"
-msgstr ""
+msgstr "Контроль присутствия"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
@@ -2468,7 +2500,7 @@ msgstr "Присутствие сотрудников"
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
 msgid "Presence reporting screen, email and IP address control."
 msgstr ""
-"Экран отчетов о присутствии, управление электронной почтой и IP-адресом."
+"Экран отчетов о присутствии, управление электронной почтой и IP-адресами."
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__hr_icon_display__presence_present
@@ -2478,7 +2510,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee_public__hr_icon_display__presence_present
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee_public__hr_presence_state__present
 msgid "Present"
-msgstr "Присутствует"
+msgstr "Сейчас"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__hr_icon_display__presence_absent_active
@@ -2497,12 +2529,12 @@ msgstr "Печать бейджа"
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Private Address"
-msgstr "Приватный адрес"
+msgstr "Домашний адрес"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__private_car_plate
 msgid "Private Car Plate"
-msgstr ""
+msgstr "Номерной знак частного автомобиля"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__private_city
@@ -2513,7 +2545,7 @@ msgstr "Частный город"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Private Contact"
-msgstr "Личные контакты"
+msgstr "Частный контакт"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__private_country_id
@@ -2525,7 +2557,7 @@ msgstr "Частная страна"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__private_email
 #: model:ir.model.fields,field_description:hr.field_res_users__private_email
 msgid "Private Email"
-msgstr "Частный email"
+msgstr "Ваш Email"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -2537,7 +2569,7 @@ msgstr "Личная информация"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__private_phone
 #: model:ir.model.fields,field_description:hr.field_res_users__private_phone
 msgid "Private Phone"
-msgstr "Частный телефон"
+msgstr "Личный телефон"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__private_state_id
@@ -2561,12 +2593,12 @@ msgstr "Частная улица2"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__private_zip
 #: model:ir.model.fields,field_description:hr.field_res_users__private_zip
 msgid "Private Zip"
-msgstr "Частный почтовый индекс"
+msgstr "Частная молния"
 
 #. module: hr
 #: model:hr.department,name:hr.dep_ps
 msgid "Professional Services"
-msgstr ""
+msgstr "Профессиональные Услуги"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__employee_properties
@@ -2592,7 +2624,7 @@ msgstr "Определите потребности клиента"
 #. module: hr
 #: model:hr.department,name:hr.dep_rd_be
 msgid "R&D USA"
-msgstr ""
+msgstr "R&D США"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__rating_ids
@@ -2604,7 +2636,7 @@ msgstr "Рейтинги"
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.action_hr_job
 msgid "Ready to recruit more efficiently?"
-msgstr "Готовы нанимать более эффективно?"
+msgstr "Готовы набирать персонал более эффективно?"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2615,7 +2647,7 @@ msgstr "Готовы нанимать более эффективно?"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Real responsibilities and challenges in a fast evolving company"
-msgstr "Реальные обязанности и задачи в быстро растущей компании"
+msgstr "Реальные обязанности и задачи в быстро развивающейся компании"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_departure_reason__name
@@ -2625,7 +2657,7 @@ msgstr "Причина"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_departure_reason__reason_code
 msgid "Reason Code"
-msgstr ""
+msgstr "Код причины"
 
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_config_recruitment
@@ -2639,24 +2671,24 @@ msgstr "Найм"
 #: model:ir.actions.act_window,name:hr.hr_departure_wizard_action
 #, python-format
 msgid "Register Departure"
-msgstr "Записать увольнение"
+msgstr "Регистрация Ухода"
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/res_partner.py:0 code:addons/hr/models/res_users.py:0
 #, python-format
 msgid "Related Employees"
-msgstr "Связанные сотрудники"
+msgstr "Смежные сотрудники"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Related User"
-msgstr "Относится к пользователю"
+msgstr "Связанный пользователь"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__employee_ids
 msgid "Related employee"
-msgstr "Связанный сотрудник"
+msgstr "Смежный сотрудник"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_res_partner__employee_ids
@@ -2667,18 +2699,18 @@ msgstr "Связанные сотрудники на основе их личн�
 #: model:ir.model.fields,help:hr.field_hr_employee__user_id
 #: model:ir.model.fields,help:hr.field_resource_resource__user_id
 msgid "Related user name for the resource to manage its access."
-msgstr "Пользователь, управляющий доступом к ресурсу."
+msgstr "Пользователь управляющий доступом к ресурсу."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_config_settings__module_hr_homeworking
 msgid "Remote Work"
-msgstr ""
+msgstr "Удаленная работа"
 
 #. module: hr
 #: model:ir.ui.menu,name:hr.hr_menu_hr_reports
 #: model:ir.ui.menu,name:hr.menu_hr_reporting_timesheet
 msgid "Reporting"
-msgstr "Отчетность"
+msgstr "Отчет"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_job__requirements
@@ -2688,12 +2720,12 @@ msgstr "Требования"
 #. module: hr
 #: model:hr.department,name:hr.dep_rd
 msgid "Research & Development"
-msgstr "Исследование и разработка"
+msgstr "Отдел НИОКР"
 
 #. module: hr
 #: model:hr.departure.reason,name:hr.departure_resigned
 msgid "Resigned"
-msgstr "В отставке"
+msgstr "Совершил побег"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__resource_id
@@ -2732,18 +2764,18 @@ msgstr "Ответственный пользователь"
 #. module: hr
 #: model:hr.departure.reason,name:hr.departure_retired
 msgid "Retired"
-msgstr "На пенсии"
+msgstr "В отставке"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__sinid
 msgid "SIN No"
-msgstr "СНИЛС"
+msgstr "SIN No"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__ssnid
 #: model:ir.model.fields,field_description:hr.field_res_users__ssnid
 msgid "SSN No"
-msgstr "Номер карты социальной защиты"
+msgstr "SSN Нет"
 
 #. module: hr
 #: model:hr.department,name:hr.dep_sales
@@ -2769,7 +2801,7 @@ msgstr "Школа"
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_seasonal
 msgid "Seasonal"
-msgstr ""
+msgstr "Сезон"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__coach_id
@@ -2780,8 +2812,8 @@ msgid ""
 "Select the \"Employee\" who is the coach of this employee.\n"
 "The \"Coach\" has no specific rights or responsibilities by default."
 msgstr ""
-"Выберите «Сотрудника», который является наставником этого сотрудника.\n"
-"По умолчанию «Тренер» не имеет особых прав или обязанностей."
+"Выберите «Сотрудника», который является куратором этого сотрудника. \n"
+"У «Куратора» по умолчанию нет специальных прав или обязанностей."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_contract_type__sequence
@@ -2808,19 +2840,19 @@ msgstr "Настройки"
 #: model:ir.model.fields,field_description:hr.field_hr_employee_base__show_hr_icon_display
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__show_hr_icon_display
 msgid "Show Hr Icon Display"
-msgstr ""
+msgstr "Отображение значков часов"
 
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/components/department_chart/department_chart.xml:0
 #, python-format
 msgid "Show employees"
-msgstr ""
+msgstr "Показать сотрудников"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__marital__single
 msgid "Single"
-msgstr "Холост/Не замужем"
+msgstr "Один"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_config_settings__module_hr_skills
@@ -2830,18 +2862,20 @@ msgstr "Управление навыками"
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__sinid
 msgid "Social Insurance Number"
-msgstr "Cтраховой номер индивидуального лицевого счета"
+msgstr "Номер социального страхования"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__ssnid
 #: model:ir.model.fields,help:hr.field_res_users__ssnid
 msgid "Social Security Number"
-msgstr "Номер карты социальной защиты"
+msgstr "Номер социального страхования"
 
 #. module: hr
-#: model_terms:ir.ui.view,arch_db:hr.print_employee_badge
-msgid "Software Developer"
-msgstr ""
+#. odoo-python
+#: code:addons/hr/models/hr_employee_base.py:0
+#, python-format
+msgid "Some employee already have a work contact"
+msgstr "У некоторых сотрудников уже есть рабочий контакт"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2858,13 +2892,13 @@ msgstr "Спортивная деятельность"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__spouse_birthdate
 #: model:ir.model.fields,field_description:hr.field_res_users__spouse_birthdate
 msgid "Spouse Birthdate"
-msgstr "Дата рождения супруга(и)"
+msgstr "Дата рождения супруга"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__spouse_complete_name
 #: model:ir.model.fields,field_description:hr.field_res_users__spouse_complete_name
 msgid "Spouse Complete Name"
-msgstr "Имя супруга(и)"
+msgstr "Полное имя супруга"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
@@ -2875,7 +2909,7 @@ msgstr "Дата начала"
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "State"
-msgstr "Статус"
+msgstr "Область"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -2891,10 +2925,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
-"Статус основан на плановых действиях\n"
-"Просрочено: срок исполнения истек\n"
-"Сегодня: выполнить сегодня\n"
-"Запланировано: срок в будущем."
+"Статус, основанный на мероприятии\n"
+"Просроченная: Дата, уже прошла\n"
+"Сегодня: Дата мероприятия сегодня\n"
+"Запланировано: будущая деятельность."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -2917,7 +2951,7 @@ msgstr "Улица..."
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Strong analytical skills"
-msgstr "Сильные аналитические способности"
+msgstr "Сильные аналитические навыки"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__employee_type__student
@@ -2932,7 +2966,7 @@ msgstr "Название тега"
 #. module: hr
 #: model:ir.model.constraint,message:hr.constraint_hr_employee_category_name_uniq
 msgid "Tag name already exists!"
-msgstr "Такая метка уже существует!"
+msgstr "Название тега уже существует!"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__category_ids
@@ -2962,16 +2996,17 @@ msgstr "Техническая экспертиза"
 #: model:ir.model.fields,field_description:hr.field_res_users__create_employee_id
 msgid "Technical field, bind user to this employee on create"
 msgstr ""
+"Техническое поле, привязка пользователя к этому сотруднику при создании"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__create_employee
 msgid "Technical field, whether to create an employee"
-msgstr ""
+msgstr "Техническое поле, нужно ли создавать сотрудника"
 
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_temporary
 msgid "Temporary"
-msgstr "Временный"
+msgstr "Временная"
 
 #. module: hr
 #: model:ir.model.constraint,message:hr.constraint_hr_employee_barcode_uniq
@@ -2998,20 +3033,24 @@ msgid ""
 "              He defines the products and customers portfolio according to the marketing plan.\n"
 "              This mission requires strong collaboration with Technical Service and Sales."
 msgstr ""
+"Менеджер по маркетингу определяет средне- и долгосрочную маркетинговую стратегию для своих сегментов рынка в мире.\n"
+"              Он разрабатывает и контролирует годовой бюджет в сотрудничестве с отделом продаж.\n"
+"              Он определяет портфель продуктов и клиентов в соответствии с маркетинговым планом.\n"
+"              Эта миссия требует тесного сотрудничества с технической службой и отделом продаж."
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 #, python-format
 msgid "The PIN must be a sequence of digits."
-msgstr "PIN должен быть последовательностью цифр."
+msgstr "ПИН должен быть последовательностью цифр."
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/mail_activity_plan_template.py:0
 #, python-format
 msgid "The employee %s should be linked to a user."
-msgstr ""
+msgstr "Сотрудник %s должен быть связан с пользователем."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__employee_type
@@ -3022,10 +3061,10 @@ msgid ""
 "Employee type is supposed to be under contract and will have a Contract "
 "History."
 msgstr ""
-"Тип сотрудника. Хотя может показаться, что основной целью является "
-"категоризация сотрудников, это поле также влияет на историю контрактов. "
-"Предполагается, что только тип сотрудника должен иметь контракт и иметь "
-"историю контрактов."
+"Тип сотрудника. Хотя основное назначение этого поля может показаться "
+"категоризацией сотрудников, оно также влияет на историю контрактов. Только "
+"тот тип сотрудника, с которым заключен контракт, будет иметь историю "
+"контрактов."
 
 #. module: hr
 #: model:ir.model.constraint,message:hr.constraint_hr_job_no_of_recruitment_positive
@@ -3040,38 +3079,40 @@ msgid ""
 "The fields %r you try to read is not available on the public employee "
 "profile."
 msgstr ""
+"Поля %r, которые вы пытаетесь прочитать, недоступны в публичном профиле "
+"сотрудника."
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/res_users.py:0
 #, python-format
 msgid "The following fields were modified by %s"
-msgstr ""
+msgstr "Следующие поля были изменены на %s"
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/mail_activity_plan_template.py:0
 #, python-format
 msgid "The manager of %s should be linked to a user."
-msgstr ""
+msgstr "Менеджер %s должен быть связан с пользователем."
 
 #. module: hr
 #: model:ir.model.constraint,message:hr.constraint_hr_job_name_company_uniq
 msgid "The name of the job position must be unique per department in company!"
 msgstr ""
-"Наименование должности должно быть уникальным в подразделении компании!"
+"Название должности должно быть уникальным для каждого отдела компании!"
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/mail_activity_plan_template.py:0
 #, python-format
 msgid "The user of %s's coach is not set."
-msgstr ""
+msgstr "Пользователь, являющийся куратором %s, не указан."
 
 #. module: hr
 #: model:res.groups,comment:hr.group_hr_user
 msgid "The user will be able to approve document created by employees."
-msgstr "Пользователь сможет утвердить документ, созданный сотрудниками."
+msgstr "Пользователь сможет утверждать документы, созданные сотрудниками."
 
 #. module: hr
 #: model:res.groups,comment:hr.group_hr_manager
@@ -3079,22 +3120,22 @@ msgid ""
 "The user will have access to the human resources configuration as well as "
 "statistic reports."
 msgstr ""
-"Пользователь будет иметь доступ к настройке кадров, а также статистических "
-"отчетов."
+"Пользователь будет иметь доступ к конфигурации кадровых ресурсов, а также к "
+"статистическим отчетам."
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 #, python-format
 msgid "The work permit of %(employee)s expires at %(date)s."
-msgstr "Разрешение на работу для %(employee)s истекает %(date)s."
+msgstr "Срок действия разрешения на работу %(employee)s истекает в %(date)s."
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 #, python-format
 msgid "This employee already has an user."
-msgstr ""
+msgstr "У этого сотрудника уже есть пользователь."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__tz
@@ -3104,7 +3145,7 @@ msgid ""
 "This field is used in order to define in which timezone the resources will "
 "work."
 msgstr ""
-"Это поле используется для определения того, в какой временной период будут "
+"Это поле используется для определения того, в каком часовом поясе будут "
 "работать ресурсы."
 
 #. module: hr
@@ -3112,7 +3153,7 @@ msgstr ""
 #: code:addons/hr/models/mail_activity_plan_template.py:0
 #, python-format
 msgid "Those responsible types are limited to Employee plans."
-msgstr ""
+msgstr "Эти виды ответственности ограничиваются планами для сотрудников."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__tz
@@ -3126,7 +3167,7 @@ msgstr "Часовой пояс"
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee_base__hr_presence_state__to_define
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee_public__hr_presence_state__to_define
 msgid "To Define"
-msgstr "Не определено"
+msgstr "Определить"
 
 #. module: hr
 #. odoo-python
@@ -3137,28 +3178,31 @@ msgid ""
 " leaves, ...), you should create another employee in the new company "
 "instead."
 msgstr ""
+"Чтобы избежать проблем с несколькими компаниями (потеря доступа к предыдущим"
+" контрактам, отпускам, ...), вам следует создать еще одного сотрудника в "
+"новой компании."
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__hr_icon_display__presence_to_define
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee_base__hr_icon_display__presence_to_define
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee_public__hr_icon_display__presence_to_define
 msgid "To define"
-msgstr "Не определено"
+msgstr "Чтобы определить"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
 msgid "Today Activities"
-msgstr "Действия на сегодня"
+msgstr "Сегодняшние Дела"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__total_employee
 msgid "Total Employee"
-msgstr "Итого сотрудников"
+msgstr "Всего сотрудников"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_job__expected_employees
 msgid "Total Forecasted Employees"
-msgstr "Всего предполагается сотрудников"
+msgstr "Общее количество прогнозируемых сотрудников"
 
 #. module: hr
 #: model:hr.job,name:hr.job_trainee
@@ -3175,12 +3219,12 @@ msgstr "Стажер"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Trainings"
-msgstr "Курсы"
+msgstr "Тренинги"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "Тип активности исключения в записи."
+msgstr "Тип Дела для исключения в записи."
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__hr_icon_display__presence_undetermined
@@ -3194,12 +3238,12 @@ msgstr "Не определено"
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
 #: model_terms:ir.ui.view,arch_db:hr.view_job_filter
 msgid "Unread Messages"
-msgstr "Есть непрочитанные сообщения"
+msgstr "Непрочитанные сообщения"
 
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.open_view_categ_form
 msgid "Use tags to categorize your Employees."
-msgstr ""
+msgstr "Используйте теги, чтобы распределить сотрудников по категориям."
 
 #. module: hr
 #: model:ir.model,name:hr.model_res_users
@@ -3219,13 +3263,13 @@ msgstr "Партнер пользователя"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_job_view_kanban
 msgid "Vacancies:"
-msgstr ""
+msgstr "Вакансии:"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_company__hr_presence_control_ip_list
 #: model:ir.model.fields,field_description:hr.field_res_config_settings__hr_presence_control_ip_list
 msgid "Valid IP addresses"
-msgstr "Действующий IP адрес"
+msgstr "Действительные IP-адреса"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -3236,26 +3280,26 @@ msgstr "Действующий IP адрес"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Valid work permit for Belgium"
-msgstr "Действующее разрешение на работу в Бельгии"
+msgstr "Действительное разрешение на работу в Бельгии"
 
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/components/avatar_card/avatar_card_popover_patch.xml:0
 #, python-format
 msgid "View profile"
-msgstr ""
+msgstr "Просмотреть профиль"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__visa_expire
 #: model:ir.model.fields,field_description:hr.field_res_users__visa_expire
 msgid "Visa Expiration Date"
-msgstr ""
+msgstr "Дата окончания срока действия визы"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__visa_no
 #: model:ir.model.fields,field_description:hr.field_res_users__visa_no
 msgid "Visa No"
-msgstr "Номер визы"
+msgstr "Номер банковской карты"
 
 #. module: hr
 #. odoo-python
@@ -3269,6 +3313,7 @@ msgstr "Предупреждение"
 msgid ""
 "We are currently looking for someone like that to join our Consultant team."
 msgstr ""
+"В настоящее время мы ищем такого человека в нашу команду консультантов."
 
 #. module: hr
 #: model_terms:hr.job,description:hr.job_developer
@@ -3276,6 +3321,8 @@ msgid ""
 "We are currently looking for someone like that to join our Web team.\n"
 "                Someone who can snap out of coding and perform analysis or meet clients to explain the technical possibilities that can meet their needs."
 msgstr ""
+"Сейчас мы ищем такого человека в нашу веб-команду.\n"
+"                Того, кто может оторваться от кодирования и провести анализ или встретиться с клиентами, чтобы объяснить им технические возможности, которые могут удовлетворить их потребности."
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -3286,7 +3333,7 @@ msgstr ""
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "What We Offer"
-msgstr "Что мы предлагаем"
+msgstr "Наше предложение"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -3297,7 +3344,7 @@ msgstr "Что мы предлагаем"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "What's great in the job?"
-msgstr "Что хорошего в работе?"
+msgstr "Что хорошего в этой работе?"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__member_of_department
@@ -3307,11 +3354,13 @@ msgid ""
 "Whether the employee is a member of the active user's department or one of "
 "it's child department."
 msgstr ""
+"Является ли сотрудник сотрудником отдела активного пользователя или одного "
+"из его дочерних отделов."
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__marital__widower
 msgid "Widower"
-msgstr "Вдовец/вдова"
+msgstr "Вдовец"
 
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.act_employee_from_department
@@ -3321,6 +3370,9 @@ msgid ""
 "                    can easily find all the information you need for each person;\n"
 "                    contact data, job position, availability, etc."
 msgstr ""
+"С помощью быстрого взгляда на экран сотрудников Odoo вы\n"
+"                    вы сможете легко найти всю необходимую информацию по каждому человеку;\n"
+"                    контактные данные, должность, доступность и т.д."
 
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.hr_employee_public_action
@@ -3329,9 +3381,9 @@ msgid ""
 "                can easily find all the information you need for each person;\n"
 "                contact data, job position, availability, etc."
 msgstr ""
-"Бросив лишь беглый взгляд на экран сотрудников Odoo, вы \n"
-"                сможете легко найти все необходимую информацию по каждому человеку;\n"
-"                контактные данные, должность, доступность и т.д."
+"Бросив лишь беглый взгляд на экран сотрудника Odoo, вы \n"
+"                можете легко найти все необходимую информацию по каждому человеку;\n"
+"                контактные данные, должность, доступность в офисе и т.д."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__address_id
@@ -3348,7 +3400,7 @@ msgstr "Рабочий адрес"
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__work_contact_id
 #: model:ir.model.fields,field_description:hr.field_res_users__work_contact_id
 msgid "Work Contact"
-msgstr ""
+msgstr "Рабочий контакт"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__work_email
@@ -3356,7 +3408,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__work_email
 #: model:ir.model.fields,field_description:hr.field_res_users__work_email
 msgid "Work Email"
-msgstr "Рабочий email"
+msgstr "Рабочая электронная почта"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
@@ -3375,7 +3427,7 @@ msgstr "Рабочая информация"
 #: model_terms:ir.ui.view,arch_db:hr.hr_work_location_form_view
 #: model_terms:ir.ui.view,arch_db:hr.hr_work_location_tree_view
 msgid "Work Location"
-msgstr "Рабочее место"
+msgstr "Место работы"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.hr_work_location_action
@@ -3389,7 +3441,7 @@ msgstr "Рабочие места"
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__mobile_phone
 #: model:ir.model.fields,field_description:hr.field_res_users__mobile_phone
 msgid "Work Mobile"
-msgstr "Рабочий сотовый телефон"
+msgstr "Мобильный"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
@@ -3406,18 +3458,18 @@ msgstr "Разрешение на работу"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__work_permit_expiration_date
 msgid "Work Permit Expiration Date"
-msgstr "Срок действия разрешения на работу"
+msgstr "Дата истечения срока действия разрешения на работу"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__permit_no
 #: model:ir.model.fields,field_description:hr.field_res_users__permit_no
 msgid "Work Permit No"
-msgstr "Номер разрешения на работу"
+msgstr "Разрешение на работу"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__work_permit_scheduled_activity
 msgid "Work Permit Scheduled Activity"
-msgstr "Запланированная деятельность по разрешению на работу"
+msgstr "Разрешение на работу Запланированная деятельность"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__work_phone
@@ -3425,17 +3477,17 @@ msgstr "Запланированная деятельность по разре�
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__work_phone
 #: model:ir.model.fields,field_description:hr.field_res_users__work_phone
 msgid "Work Phone"
-msgstr "Рабочий телефон"
+msgstr "Рабочий"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__resource_calendar_id
 msgid "Working Hours"
-msgstr "Рабочие часы"
+msgstr "Часы работы"
 
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_resource_calendar_view
 msgid "Working Schedules"
-msgstr ""
+msgstr "Рабочие графики"
 
 #. module: hr
 #. odoo-python
@@ -3445,8 +3497,8 @@ msgid ""
 "You are only allowed to update your preferences. Please contact a HR officer"
 " to update other information."
 msgstr ""
-"Вам разрешено только обновлять свои предпочтения. Пожалуйста, свяжитесь с "
-"сотрудником отдела кадров для обновления другой информации."
+"Вы можете обновить только свои предпочтения. Чтобы обновить другую "
+"информацию, обратитесь к сотруднику отдела кадров."
 
 #. module: hr
 #. odoo-javascript
@@ -3454,22 +3506,22 @@ msgstr ""
 #, python-format
 msgid "You can only chat with employees that have a dedicated user."
 msgstr ""
-"Вы можете общаться только с сотрудниками, для которых есть пользователь в "
-"системе."
+"Вы можете общаться только с теми сотрудниками, у которых есть выделенный "
+"пользователь."
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/hr_department.py:0
 #, python-format
 msgid "You cannot create recursive departments."
-msgstr "Вы не можете создавать рекурсивные отделы."
+msgstr "Нельзя создавать рекурсивные подразделения."
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 #, python-format
 msgid "You do not have access to this document."
-msgstr ""
+msgstr "У вас нет доступа к этому документу."
 
 #. module: hr
 #: model_terms:hr.job,description:hr.job_trainee
@@ -3487,14 +3539,25 @@ msgid ""
 "contributing to the set up of a new politic,\n"
 "being involved into satisfaction surveys in order to have a better knowledge of how the support given is seen by the customers."
 msgstr ""
+"Вы принимаете участие в обновлении наших обучающих инструментов и инструментов предпродажной подготовки после запуска новой версии Odoo. Ведь любая новая версия программного обеспечения приносит значительные улучшения в плане функциональности, эргономики и конфигурации.\n"
+"Вам придется ознакомиться с существующими инструментами (книги, учебные пособия, слайды презентации Odoo, коммерческие инструменты),\n"
+"принять участие в обновлении этих инструментов, чтобы сделать их подходящими для новой версии программы, и, конечно же,\n"
+"предлагать улучшения, чтобы охватить новые области программного обеспечения.\n"
+"Вы присоединяетесь к отделу помощи по внедрению. Эта команда из 3 человек помогает клиентам Odoo в установке программного обеспечения. Ваша роль будет заключаться в следующем\n"
+"анимация вебинаров для демонстрации различных функциональных возможностей программного обеспечения.\n"
+"участвовать в поддержке клиентов и\n"
+"отвечать на их вопросы.\n"
+"Вы помогаете менеджеру по поддержке создавать новые службы поддержки, участвуя\n"
+"участия в рассмотрении новых случаев,\n"
+"внося свой вклад в создание новой политики,\n"
+"участвуете в опросах удовлетворенности, чтобы лучше понять, как клиенты воспринимают оказываемую поддержку."
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/res_config_settings.py:0
 #, python-format
 msgid "You should select at least one Advanced Presence Control option."
-msgstr ""
-"Вы должны выбрать хотя бы один параметр расширенного контроля присутствия."
+msgstr "Вы должны выбрать хотя бы один параметр Advanced Presence Control."
 
 #. module: hr
 #: model_terms:hr.job,description:hr.job_cto
@@ -3503,12 +3566,15 @@ msgid ""
 "\n"
 "The job is located in Grand-Rosière (1367), Belgium (between Louvain-La-Neuve and Namur)."
 msgstr ""
+"Вы будете участвовать в консалтинговых услугах, которые мы предоставляем нашим партнёрам и клиентам: проектирование, анализ, разработка, тестирование, управление проектами, поддержка/коучинг. Вы будете работать самостоятельно, а также координировать и руководить небольшими распределёнными командами разработчиков по отдельным проектам. По желанию вы можете проводить обучающие сессии по Odoo для партнёров и клиентов (8–10 человек за сеанс). Вы будете подчиняться руководителю отдела профессиональных услуг и тесно взаимодействовать со всеми разработчиками и консультантами.\n"
+"\n"
+"Работа находится в Гран-Розьере (1367), Бельгия (между Лувен-ла-Нев и Намюр)."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "ZIP"
-msgstr "Почтовый индекс"
+msgstr "ИНДЕКС"
 
 #. module: hr
 #. odoo-python
@@ -3525,12 +3591,12 @@ msgstr "подразделение"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
 msgid "e.g. John Doe"
-msgstr "например, Петр Петров"
+msgstr "например, Васильев Андрей"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_hr_job_form
 msgid "e.g. Sales Manager"
-msgstr "Например: менеджер по продажам"
+msgstr "нап. Менеджер по продажам"
 
 #. module: hr
 #. odoo-python
@@ -3542,4 +3608,4 @@ msgstr "только для сотрудников"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__work_permit_name
 msgid "work_permit_name"
-msgstr ""
+msgstr "work_permit_name"

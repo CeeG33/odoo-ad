@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import datetime
 import logging
 
 from odoo.tools.float_utils import float_round
@@ -165,7 +166,7 @@ class Message(models.Model):
     @api.constrains('author', 'discussion')
     def _check_author(self):
         for message in self.with_context(active_test=False):
-            if message.discussion and message.author not in message.discussion.participants:
+            if message.discussion and message.author not in message.discussion.sudo().participants:
                 raise ValidationError(_("Author must be among the discussion participants."))
 
     @api.depends('author.name', 'discussion.name')
@@ -930,6 +931,7 @@ class ModelImage(models.Model):
     image_512 = fields.Image("Image 512", related='image', max_width=512, max_height=512, store=True, readonly=False)
     image_256 = fields.Image("Image 256", related='image', max_width=256, max_height=256, store=False, readonly=False)
     image_128 = fields.Image("Image 128", max_width=128, max_height=128)
+    image_64 = fields.Image("Image 64", related='image', max_width=64, max_height=64, store=True, attachment=False, readonly=False)
 
 
 class BinarySvg(models.Model):
@@ -939,7 +941,10 @@ class BinarySvg(models.Model):
     name = fields.Char(required=True)
     image_attachment = fields.Binary(attachment=True)
     image_wo_attachment = fields.Binary(attachment=False)
-
+    image_wo_attachment_related = fields.Binary(
+        "image wo attachment", related="image_wo_attachment",
+        store=True, attachment=False,
+    )
 
 class MonetaryBase(models.Model):
     _name = 'test_new_api.monetary_base'
@@ -1111,7 +1116,8 @@ class ModelChild(models.Model):
 
     name = fields.Char()
     company_id = fields.Many2one('res.company')
-    parent_id = fields.Many2one('test_new_api.model_parent', check_company=True)
+    parent_id = fields.Many2one('test_new_api.model_parent', string="Parent", check_company=True)
+    parent_ids = fields.Many2many('test_new_api.model_parent', string="Parents", check_company=True)
 
 
 class ModelChildNoCheck(models.Model):
@@ -1170,19 +1176,31 @@ class ModelMany2oneReference(models.Model):
 
     res_model = fields.Char('Resource Model')
     res_id = fields.Many2oneReference('Resource ID', model_field='res_model')
+    const = fields.Boolean(default=True)
 
 
 class InverseM2oRef(models.Model):
     _name = 'test_new_api.inverse_m2o_ref'
     _description = 'dummy m2oref inverse model'
 
-    model_ids = fields.One2many('test_new_api.model_many2one_reference', 'res_id', string="Models")
+    model_ids = fields.One2many(
+        'test_new_api.model_many2one_reference', 'res_id',
+        string="Models",
+    )
     model_ids_count = fields.Integer("Count", compute='_compute_model_ids_count')
+    model_computed_ids = fields.One2many(
+        'test_new_api.model_many2one_reference',
+        string="Models Computed",
+        compute='_compute_model_computed_ids',
+    )
 
     @api.depends('model_ids')
     def _compute_model_ids_count(self):
         for rec in self:
             rec.model_ids_count = len(rec.model_ids)
+
+    def _compute_model_computed_ids(self):
+        self.model_computed_ids = []
 
 
 class ModelChildM2o(models.Model):
@@ -1456,7 +1474,9 @@ class ComputeMember(models.Model):
 
 class User(models.Model):
     _name = _description = 'test_new_api.user'
+    _allow_sudo_commands = False
 
+    name = fields.Char()
     group_ids = fields.Many2many('test_new_api.group')
     group_count = fields.Integer(compute='_compute_group_count', store=True)
 
@@ -1468,7 +1488,9 @@ class User(models.Model):
 
 class Group(models.Model):
     _name = _description = 'test_new_api.group'
+    _allow_sudo_commands = False
 
+    name = fields.Char()
     user_ids = fields.Many2many('test_new_api.user')
 
 
@@ -1921,3 +1943,24 @@ class AnyTag(models.Model):
 
     name = fields.Char()
     child_ids = fields.Many2many('test_new_api.any.child')
+
+
+class ModelAutovacuumed(models.Model):
+    _name = _description = 'test_new_api.autovacuumed'
+
+    expire_at = fields.Datetime('Expires at')
+
+    @api.autovacuum
+    def _gc(self):
+        self.search([('expire_at', '<', datetime.datetime.now() - datetime.timedelta(days=1))]).unlink()
+
+
+class BinaryTest(models.Model):
+    _name = _description = "binary.test"
+
+    img = fields.Image()
+    bin1 = fields.Binary()
+    bin2 = fields.Binary(compute="_compute_bin2")
+
+    def _compute_bin2(self):
+        self.bin2 = {}

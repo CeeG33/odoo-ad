@@ -9,9 +9,11 @@
  * object for a test.
  */
 
-let sessionStorage = window.sessionStorage;
-let localStorage = window.localStorage;
+let sessionStorage;
+let localStorage;
 try {
+    sessionStorage = window.sessionStorage;
+    localStorage = window.localStorage;
     // Safari crashes in Private Browsing
     localStorage.setItem("__localStorage__", "true");
     localStorage.removeItem("__localStorage__");
@@ -22,6 +24,7 @@ try {
 
 export const browser = {
     addEventListener: window.addEventListener.bind(window),
+    dispatchEvent: window.dispatchEvent.bind(window),
     AnalyserNode: window.AnalyserNode,
     Audio: window.Audio,
     AudioBufferSourceNode: window.AudioBufferSourceNode,

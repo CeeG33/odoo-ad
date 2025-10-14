@@ -26,7 +26,7 @@
                     });
                 </script>
             </head>
-            <body t-att-class="'container' if not full_width else 'container-fluid'">
+            <body t-att-class="'container' if not full_width else 'container-fluid'" t-att-dir="env['res.lang']._lang_get(lang or env.user.lang).direction or 'ltr'">
                 <div id="wrapwrap">
                     <main>
                         <t t-out="0"/>
@@ -84,7 +84,7 @@
 
                 </style>
             </head>
-            <body t-att-class="'container' if not full_width else 'container-fluid'" style="overflow:hidden">
+            <body t-att-class="'container' if not full_width else 'container-fluid'" style="overflow:hidden" t-att-dir="env['res.lang']._lang_get(lang or env.user.lang).direction or 'ltr'">
                 <div id="wrapwrap">
                         <t t-out="0"/>
                 </div>
@@ -146,7 +146,7 @@
                                    <th name="th_description" class="text-start"><span>Description</span></th>
                                    <th name="th_quantity" class="text-end"><span>Quantity</span></th>
                                    <th name="th_priceunit" class="text-end d-md-table-cell"><span>Unit Price</span></th>
-                                   <th name="th_taxes" class="text-start d-md-table-cell"><span>Taxes</span></th>
+                                   <th name="th_taxes" class="text-end d-md-table-cell"><span>Taxes</span></th>
                                    <th name="th_subtotal" class="text-end">
                                        <span>Amount</span>
                                    </th>
@@ -162,7 +162,7 @@
                                    <td class="text-end d-md-table-cell">
                                        <span class="text-nowrap">1,500.00</span>
                                    </td>
-                                   <td class="text-start d-md-table-cell">
+                                   <td class="text-end d-md-table-cell">
                                        <span id="line_tax_ids">Tax 15%</span>
                                    </td>
                                    <td class="text-end o_price_total">
@@ -178,7 +178,7 @@
                                    <td class="text-end d-md-table-cell">
                                        <span class="text-nowrap">2,350.00</span>
                                    </td>
-                                   <td class="text-start d-md-table-cell">
+                                   <td class="text-end d-md-table-cell">
                                        <span id="line_tax_ids">Tax 15%</span>
                                    </td>
                                    <td class="text-end o_price_total">
@@ -187,17 +187,9 @@
                                </tr>
                            </tbody>
                        </table>
-                       <div class="clearfix">
-                           <div class="row">
-                               <div class="col-6">
-                                   <p name="payment_term">
-                                       <span>Payment terms: 30 Days</span>
-                                   </p>
-                                   <p>
-                                       Payment Communication: <b><span>INV/2023/00003</span></b>
-                                   </p>
-                               </div>
-                               <div id="total" class="col-6">
+                       <div id="right-elements" t-attf-class="#{'col-5' if report_type != 'html' else 'col-12 col-md-5'} ms-5 d-inline-block float-end">
+                           <div id="total" class="clearfix row">
+                               <div class="ms-auto">
                                    <table class="table table-sm table-borderless" style="page-break-inside: avoid; position:relative;">
                                        <tbody><tr class="border-black o_subtotal" style="">
                                            <td><strong>Untaxed Amount</strong></td>
@@ -222,6 +214,16 @@
                                </div>
                            </div>
                        </div>
+                       <div id="payment_term">
+                            <div class="mb-3">
+                                <p name="payment_term">
+                                    <span>Payment terms: 30 Days</span>
+                                </p>
+                                <p name="payment_communication">
+                                    Payment Communication: <b><span>INV/2023/00003</span></b>
+                                </p>
+                            </div>
+                        </div>
                    </div>
            </t>
         </t>
@@ -268,7 +270,7 @@
                     }
                 </script>
             </head>
-            <body class="container" t-att-data-report-id="report_xml_id" t-att-onload="subst and 'subst()'" style="overflow:hidden">
+            <body class="container" t-att-data-report-id="report_xml_id" t-att-onload="subst and 'subst()'" style="overflow:hidden" t-att-dir="env['res.lang']._lang_get(lang or env.user.lang).direction or 'ltr'">
                 <t t-out="body"/>
             </body>
         </html>
@@ -337,7 +339,9 @@
             </div>
         </div>
 
-        <div t-attf-class="o_company_#{company.id}_layout article o_report_layout_striped {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+        <t t-set="layout_background_url"
+            t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''" />
+        <div t-attf-class="o_company_#{company.id}_layout article o_report_layout_striped {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="{{ 'background-image: url(%s);' % layout_background_url if layout_background_url else '' }}" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <t t-call="web.address_layout"/>
             <t t-out="0"/>
         </div>
@@ -368,7 +372,9 @@
                     <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
                 </div>
                 <div class="col-6 text-end mb4">
-                    <div class="mt0 h4" t-if="company.report_header" t-field="company.report_header">Company tagline</div>
+                    <t t-if="company.report_header and company.report_header.strip() != '&lt;p&gt;&lt;br&gt;&lt;/p&gt;'">
+                        <div class="mt0 h4" t-field="company.report_header"/>
+                    </t>
                     <div name="company_address" class="float-end mb4">
                         <ul class="list-unstyled" name="company_address_list">
                             <li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'>
@@ -397,7 +403,9 @@
             </div>
         </div>
 
-        <div t-attf-class="article o_report_layout_boxed o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+        <t t-set="layout_background_url"
+            t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''" />
+        <div t-attf-class="article o_report_layout_boxed o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="{{ 'background-image: url(%s);' % layout_background_url if layout_background_url else '' }}" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <div class="pt-5">
                 <!-- This div ensures that the address is not cropped by the header. -->
                 <t t-call="web.address_layout"/>
@@ -452,7 +460,9 @@
             </div>
         </div>
 
-        <div t-attf-class="article o_report_layout_bold o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else ('/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else '') }});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+        <t t-set="layout_background_url"
+            t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''" />
+        <div t-attf-class="article o_report_layout_bold o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="{{ 'background-image: url(%s);' % layout_background_url if layout_background_url else '' }}" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <t t-call="web.address_layout"/>
             <t t-out="0"/>
         </div>
@@ -518,7 +528,9 @@
             </div>
         </div>
 
-        <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+        <t t-set="layout_background_url"
+            t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''" />
+        <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="{{ 'background-image: url(%s);' % layout_background_url if layout_background_url else '' }}" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <div class="pt-5">
                 <!-- This div ensures that the address is not cropped by the header. -->
                 <t t-call="web.address_layout"/>

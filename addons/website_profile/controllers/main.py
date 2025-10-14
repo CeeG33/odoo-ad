@@ -61,7 +61,6 @@ class WebsiteProfile(http.Controller):
             'validation_email_sent': request.session.get('validation_email_sent', False),
             'validation_email_done': request.session.get('validation_email_done', False),
         }
-        values.update(kwargs)
         return values
 
     def _prepare_user_profile_parameters(self, **post):
@@ -307,4 +306,5 @@ class WebsiteProfile(http.Controller):
     @http.route('/profile/validate_email/close', type='json', auth='public', website=True)
     def validate_email_done(self, **kwargs):
         request.session['validation_email_done'] = False
+        request.session['validation_email_sent'] = False
         return True
